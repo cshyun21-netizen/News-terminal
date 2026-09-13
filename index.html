@@ -129,7 +129,7 @@
         }
         .korean-summary-text { white-space: pre-line; color: #f0f9ff; }
 
-        /* 브라우저 내장 아코디언 (펼치기) */
+        /* 아코디언 */
         details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
         details.reader-accordion[open] { border-color: #0284c7; }
         summary.reader-summary {
@@ -143,7 +143,7 @@
         .accordion-content { padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
         .sub-box { padding: 10px; border-radius: 6px; line-height: 1.55; white-space: pre-line; }
         .sub-box-ko { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; }
-        .sub-box-en { background: #020617; border: 1px solid #1e293b; color: #94a3b8; font-family: monospace; font-size: 11px; }
+        .sub-box-en { background: #020617; border: 1px solid #1e293b; color: #94a3b8; font-family: monospace; font-size: 11px; word-break: break-all; }
 
         #sync-banner {
             background: #0369a1; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none;
@@ -253,7 +253,8 @@
                         for (var j = 0; j < data.items.length; j++) {
                             var item = data.items[j];
                             var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal).*/gi, '').trim();
-                            var descText = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
+                            var rawDesc = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
+                            var cleanDesc = rawDesc.length > 0 ? rawDesc : cleanTitle;
                             
                             var vendor = "Reuters";
                             var sourceName = "Reuters Live Wire";
@@ -277,11 +278,11 @@
                             fetchedList.push({
                                 title: cleanTitle,
                                 link: item.link,
-                                desc: descText || cleanTitle,
+                                desc: cleanDesc,
                                 vendor: vendor,
                                 source: sourceName,
                                 timeKST: formatKST(item.pubDate),
-                                summaryKo: generateAI摘要(cleanTitle, descText),
+                                summaryKo: generateAI摘要(cleanTitle, cleanDesc),
                                 timestamp: new Date(item.pubDate || Date.now()).getTime()
                             });
                         }
@@ -322,7 +323,7 @@
             });
 
             var countEl = document.getElementById("article-count-label");
-            if (countEl) countEl.innerHTML = "🟢 실시간 외신 속보 <b>" + filtered.length + "건</b> 모니터링 중";
+            if (countEl) countEl.innerHTML = "🟢 실시간 속보 <b>" + filtered.length + "건</b> 모니터링 중";
 
             if (filtered.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">선택하신 언론사의 일치하는 실시간 외신 기사가 없습니다.</div>';
@@ -358,14 +359,14 @@
                         '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
                     '</div>' +
 
-                    /* 아래로 펼쳐서 상세 내용(전문 및 영문)을 보는 아코디언 추가 */
+                    /* 상세 내용 및 영문 원문 아코디언 */
                     '<details class="reader-accordion">' +
                         '<summary class="reader-summary">📖 상세 내용 및 영문 원문 보기</summary>' +
                         '<div class="accordion-content">' +
-                            '<div class="sub-box sub-box-ko"><b>📄 기사 요약 및 시사점 상세</b>\n' + it.summaryKo + '\n\n💡 본 기사의 상세 전체 텍스트와 실시간 업데이트 내용은 위 [원문 ↗] 버튼을 통해 해당 언론사 페이지에서 확인하실 수 있습니다.</div>' +
-                            '<div class="sub-box sub-box-en"><b>🌐 영문 원문 본문 (Excerpt)</b>\n' + it.desc + '</div>' +
+                            '<div class="sub-box sub-box-ko"><b>📄 분석 및 인사이트</b>\n' + it.summaryKo + '</div>' +
+                            '<div class="sub-box sub-box-en"><b>🌐 English Original Excerpt</b>\n' + it.title + '. ' + it.desc + '</div>' +
                         '</div>' +
-                    'details>' +
+                    '</details>' +
                 '</div>';
             }
 
