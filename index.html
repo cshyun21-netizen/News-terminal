@@ -70,7 +70,6 @@
         }
         .indicator-item:active { background: #1e3a8a; }
         .indicator-name { color: #f8fafc; font-weight: bold; }
-        .indicator-tag { background: #082f49; color: #38bdf8; padding: 1px 5px; border-radius: 4px; border: 1px solid #0284c7; font-size: 10px; }
 
         /* 필터 및 검색바 */
         .toolbar { padding: 12px 14px 6px; max-width: 680px; margin: 0 auto; }
@@ -214,10 +213,12 @@
         
         <!-- 매크로 5대 지표 바 (클릭 시 퀵뷰 모달 열림) -->
         <div class="macro-indicator-bar">
-            <div class="indicator-item" onclick="openQuickView('CBOE:TNX', '🏛️ 미 국채 10년 금리지수 (TNX)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
-                <span class="indicator-name">🏛️ 미 국채 10년</span>
+            <!-- 위젯은 안 막히는 TLT로 띄우고, 전체 차트 링크는 진짜 10년물 국채(US10Y)로 연결 -->
+            <div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 (TLT 퀵뷰)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
+                <span class="indicator-name">🏛️ 미 국채 10년물</span>
             </div>
-            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/CAPITALCOM-DXY/')">
+            <!-- 위젯은 CAPITALCOM, 전체 차트는 공식 TVC 달러인덱스로 연결 -->
+            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/TVC-DXY/')">
                 <span class="indicator-name">💵 달러 인덱스</span>
             </div>
             <div class="indicator-item" onclick="openQuickView('FX_IDC:USDJPY', '💴 엔/달러 환율', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/FX_IDC-USDJPY/')">
@@ -226,7 +227,8 @@
             <div class="indicator-item" onclick="openQuickView('TVC:USOIL', '🛢️ WTI 원유', 'OIL_GEO', 'https://kr.tradingview.com/symbols/TVC-USOIL/')">
                 <span class="indicator-name">🛢️ WTI 유가</span>
             </div>
-            <div class="indicator-item" onclick="openQuickView('CBOE:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/CBOE-VIX/')">
+            <!-- 위젯은 CAPITALCOM, 전체 차트는 공식 TVC VIX 지수로 연결 -->
+            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/TVC-VIX/')">
                 <span class="indicator-name">😱 VIX 공포지수</span>
             </div>
         </div>
@@ -379,7 +381,6 @@
             // 모달 안의 버튼 기능 연결
             var btnFilter = document.getElementById('modal-btn-filter');
             btnFilter.onclick = function() {
-                // 알맞은 필터 버튼 찾아서 클릭 활성화
                 var btnId = 'btn-filter-all';
                 if(filterCat === 'FED') btnId = 'btn-filter-fed';
                 if(filterCat === 'YEN_DOLLAR') btnId = 'btn-filter-yen';
@@ -416,7 +417,7 @@
         function closeModal(e) {
             if (e && e.target !== e.currentTarget) return;
             document.getElementById('quick-view-modal').classList.remove('active');
-            document.getElementById('tv-widget-box').innerHTML = ''; // 리소스 정리
+            document.getElementById('tv-widget-box').innerHTML = ''; 
         }
 
         function formatKST(dateStr) {
@@ -431,7 +432,6 @@
             var hours = String(kstDate.getHours()).padStart(2, '0');
             var minutes = String(kstDate.getMinutes()).padStart(2, '0');
             
-            // 방금전/몇분전 계산 (현재 KST 시간과 비교)
             var nowUtcTime = Date.now() + (new Date().getTimezoneOffset() * 60000);
             var nowKstMs = nowUtcTime + (9 * 3600000);
             var diffMs = nowKstMs - kstDate.getTime();
@@ -589,7 +589,7 @@
                     '<details class="reader-accordion">' +
                         '<summary class="reader-summary">📖 기사 원문 상세 분석 보기</summary>' +
                         '<div class="accordion-content">' +
-                            '<div class="sub-box-analysis">🔍 [AI 심층 분석 및 상세 내용 요약]\n1. 배경 및 전개 상황: 본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변수로 작용하는 사안을 조명하고 있습니다.\n2. 경제적 파급 효과: 매크로 지표 변동에 따라 관련 섹터의 밸류에이션 재평가 유발 가능성이 있습니다.\n3. 대응 전략: 단기적인 가격 변동성에 흔들리기보다는 실시간 지표(금리, 환율)를 면밀히 모니터링하며 리스크 관리를 병행하세요.</div>' +
+                            '<div class="sub-box-analysis">🔍 [AI 심층 분석 및 상세 내용 요약]\n1. 배경 및 전개 상황: 본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변수로 작용하는 사안 조명 중.\n2. 경제적 파급 효과: 매크로 지표 변동에 따라 관련 섹터의 밸류에이션 재평가 유발 가능성.\n3. 대응 전략: 단기 변동성에 흔들리지 말고 실시간 지표를 모니터링하며 리스크 관리 요망.</div>' +
                             '<div class="sub-box-en"><b>🌐 [Raw English Excerpt]</b>\n' + it.titleEn + '.\n\n' + it.desc + '\n\n🔗 ' + it.link + '</div>' +
                         '</div>' +
                     '</details>' +
