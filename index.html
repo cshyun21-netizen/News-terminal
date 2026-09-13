@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>글로벌 경제·매크로 속보 AI 터미널</title>
+    <title>글로벌 경제·지정학 속보 AI 터미널</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body {
@@ -52,19 +52,11 @@
         }
         .btn-refresh:active { background: #1d4ed8; }
 
-        /* 실시간 글로벌 시세 띠 (트레이딩뷰 티커 바) */
-        .live-market-ticker-wrap {
-            background: #050b18;
-            border-bottom: 1px solid #1e293b;
-            overflow: hidden;
-            width: 100%;
-        }
-
-        /* 매크로 퀵 액션 카드 바 */
+        /* 매크로 5대 지표 바 (터치 시 트레이딩뷰 차트 새 창 열기 + 관련 속보 자동 필터링) */
         .macro-indicator-bar {
             background: #09101f;
             border-bottom: 1px solid #1e293b;
-            padding: 8px 12px;
+            padding: 10px 12px;
             display: flex;
             gap: 8px;
             overflow-x: auto;
@@ -97,13 +89,6 @@
             border-radius: 4px;
             border: 1px solid #0284c7;
             font-size: 10px;
-        }
-        .indicator-chart-link {
-            color: #f59e0b;
-            font-size: 10.5px;
-            font-weight: bold;
-            text-decoration: none;
-            padding-left: 2px;
         }
 
         /* 툴바 및 필터 */
@@ -269,31 +254,7 @@
         </div>
     </header>
 
-    <!-- 1. 실시간 트레이딩뷰 글로벌 마켓 티커 위젯 (금융 거래소 실시간 시세 연동) -->
-    <div class="live-market-ticker-wrap">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-tickers.js" async>
-            {
-                "symbols": [
-                    { "proName": "TVC:US10Y", "title": "미 국채10년" },
-                    { "proName": "CAPITALCOM:DXY", "title": "달러인덱스" },
-                    { "proName": "FX_IDC:USDJPY", "title": "엔/달러" },
-                    { "proName": "TVC:USOIL", "title": "WTI 유가" },
-                    { "proName": "CBOE:VIX", "title": "VIX 공포지수" },
-                    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-                    { "proName": "FOREXCOM:NSXUSD", "title": "나스닥100" }
-                ],
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "showSymbolLogo": false,
-                "locale": "kr"
-            }
-            </script>
-        </div>
-    </div>
-
-    <!-- 2. 매크로 퀵 액션 체크포인트 바 (지표 터치 시 차트 새 창 열기 + 관련 속보 자동 필터링) -->
+    <!-- 매크로 5대 지표 바 (터치 시 트레이딩뷰 실시간 차트 새 창 열기 + 관련 속보 자동 필터링) -->
     <div class="macro-indicator-bar">
         <div class="indicator-item" onclick="openMacroChart('treasury')">
             <span class="indicator-name">🏛️ 미 국채 10년</span>
@@ -660,10 +621,8 @@
                 'vix': 'https://kr.tradingview.com/symbols/CBOE-VIX/'
             };
             
-            // 1. 해당 매크로 관련 속보 자동 필터링
             triggerMacroIndicator(key);
             
-            // 2. 트레이딩뷰 실시간 차트 새 탭으로 바로 열기
             if (urls[key]) {
                 window.open(urls[key], '_blank');
             }
@@ -672,29 +631,31 @@
         /* 상단 매크로 체크포인트 클릭 시 실시간 연계 필터링 */
         function triggerMacroIndicator(key) {
             var searchBox = document.getElementById("search-input");
+            var radarButtons = document.querySelectorAll(".radar-btn");
             if (key === 'treasury') {
-                setMacroFilter('FED', document.querySelectorAll(".radar-btn")[1]);
+                if (radarButtons[1]) setMacroFilter('FED', radarButtons[1]);
                 if (searchBox) searchBox.value = "treasury";
                 searchCards("treasury");
             } else if (key === 'dollar') {
-                setMacroFilter('YEN_DOLLAR', document.querySelectorAll(".radar-btn")[3]);
+                if (radarButtons[3]) setMacroFilter('YEN_DOLLAR', radarButtons[3]);
                 if (searchBox) searchBox.value = "dollar";
                 searchCards("dollar");
             } else if (key === 'yen') {
-                setMacroFilter('YEN_DOLLAR', document.querySelectorAll(".radar-btn")[3]);
+                if (radarButtons[3]) setMacroFilter('YEN_DOLLAR', radarButtons[3]);
                 if (searchBox) searchBox.value = "yen";
                 searchCards("yen");
             } else if (key === 'oil') {
-                setMacroFilter('OIL_GEO', document.querySelectorAll(".radar-btn")[4]);
+                if (radarButtons[4]) setMacroFilter('OIL_GEO', radarButtons[4]);
                 if (searchBox) searchBox.value = "oil";
                 searchCards("oil");
             } else if (key === 'vix') {
-                setMacroFilter('ALL', document.querySelectorAll(".radar-btn")[0]);
+                if (radarButtons[0]) setMacroFilter('ALL', radarButtons[0]);
                 if (searchBox) searchBox.value = "market";
                 searchCards("market");
             }
         }
 
+        /* 자동 갱신 타이머 */
         setInterval(function() {
             countdown--;
             var timerEl = document.getElementById("next-timer");
