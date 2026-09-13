@@ -129,6 +129,22 @@
         }
         .korean-summary-text { white-space: pre-line; color: #f0f9ff; }
 
+        /* 브라우저 내장 아코디언 (펼치기) */
+        details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
+        details.reader-accordion[open] { border-color: #0284c7; }
+        summary.reader-summary {
+            padding: 9px 12px; font-size: 11px; font-weight: bold; color: #38bdf8;
+            cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+            background: #0f1d38; user-select: none;
+        }
+        summary.reader-summary::-webkit-details-marker { display: none; }
+        summary.reader-summary::after { content: "▼ 펼치기"; font-size: 10px; color: #94a3b8; font-weight: normal; }
+        details[open] summary.reader-summary::after { content: "▲ 접기"; color: #38bdf8; }
+        .accordion-content { padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
+        .sub-box { padding: 10px; border-radius: 6px; line-height: 1.55; white-space: pre-line; }
+        .sub-box-ko { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; }
+        .sub-box-en { background: #020617; border: 1px solid #1e293b; color: #94a3b8; font-family: monospace; font-size: 11px; }
+
         #sync-banner {
             background: #0369a1; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none;
         }
@@ -239,7 +255,6 @@
                             var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal).*/gi, '').trim();
                             var descText = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
                             
-                            // 언론사 정확히 판별하여 태그 부여
                             var vendor = "Reuters";
                             var sourceName = "Reuters Live Wire";
                             var linkLower = (item.link || "").toLowerCase();
@@ -342,6 +357,15 @@
                         '<div class="korean-summary-badge"><span>🇰🇷 AI 실시간 한글 핵심 요약 & 시사점</span></div>' +
                         '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
                     '</div>' +
+
+                    /* 아래로 펼쳐서 상세 내용(전문 및 영문)을 보는 아코디언 추가 */
+                    '<details class="reader-accordion">' +
+                        '<summary class="reader-summary">📖 상세 내용 및 영문 원문 보기</summary>' +
+                        '<div class="accordion-content">' +
+                            '<div class="sub-box sub-box-ko"><b>📄 기사 요약 및 시사점 상세</b>\n' + it.summaryKo + '\n\n💡 본 기사의 상세 전체 텍스트와 실시간 업데이트 내용은 위 [원문 ↗] 버튼을 통해 해당 언론사 페이지에서 확인하실 수 있습니다.</div>' +
+                            '<div class="sub-box sub-box-en"><b>🌐 영문 원문 본문 (Excerpt)</b>\n' + it.desc + '</div>' +
+                        '</div>' +
+                    'details>' +
                 '</div>';
             }
 
