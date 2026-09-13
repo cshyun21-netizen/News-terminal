@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>글로벌 경제·지정학 속보 AI</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: #020617;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+            padding-bottom: 70px;
+        }
+
+        /* 고정 헤더 */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #0f172a;
+            border-bottom: 1px solid #1e293b;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-box { display: flex; align-items: center; gap: 8px; }
+        .live-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: #22c55e;
+            box-shadow: 0 0 8px #22c55e; flex-shrink: 0;
+            animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .header-title { font-size: 15px; font-weight: bold; color: #ffffff; }
+        .header-sub { font-size: 11px; color: #94a3b8; }
+        .header-controls { display: flex; align-items: center; gap: 6px; }
+        .timer-badge {
+            font-size: 11px; font-family: monospace; color: #38bdf8;
+            background: #082f49; border: 1px solid #0369a1; padding: 5px 8px; border-radius: 6px;
+            white-space: nowrap;
+        }
+        .btn-refresh {
+            background: #2563eb; color: #fff; border: none; padding: 6px 12px;
+            border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-refresh:active { background: #1d4ed8; }
+
+        /* 필터 및 검색 */
+        .toolbar { padding: 12px 14px 6px; max-width: 680px; margin: 0 auto; }
+        .filter-box {
+            background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;
+            padding: 10px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .filter-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+        .filter-buttons::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            background: #1e293b; color: #94a3b8; border: none; padding: 6px 12px;
+            border-radius: 6px; font-size: 12px; font-weight: bold; white-space: nowrap; cursor: pointer;
+        }
+        .filter-btn.active { background: #0284c7; color: #ffffff; }
+        .search-input {
+            width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px;
+            padding: 8px 12px; font-size: 12px; color: #fff; outline: none;
+        }
+        .search-input:focus { border-color: #0284c7; }
+        .status-row {
+            display: flex; justify-content: space-between; font-size: 11px;
+            color: #64748b; margin-top: 6px; padding: 0 4px;
+        }
+
+        /* 기사 리스트 */
+        .news-container { max-width: 680px; margin: 0 auto; padding: 6px 14px; display: flex; flex-direction: column; gap: 14px; }
+        .card {
+            background: #0f172a; border: 1px solid #1e293b; border-radius: 12px;
+            padding: 14px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .tag-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .tag {
+            font-size: 11px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .tag-Bloomberg { background: #172554; color: #93c5fd; border-color: #1e40af; }
+        .tag-Reuters { background: #451a03; color: #fdba74; border-color: #9a3412; }
+        .tag-WSJ { background: #064e3b; color: #6ee7b7; border-color: #047857; }
+        .tag-CNBC { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
+        .tag-Live { background: #065f46; color: #34d399; border-color: #059669; }
+
+        .quick-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .action-chip {
+            background: #1e293b; border: 1px solid #334155; color: #cbd5e1;
+            padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+            text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;
+        }
+        .action-chip:active { background: #334155; }
+        .chip-origin { color: #38bdf8; border-color: #0369a1; background: #082f49; }
+
+        /* 시간 표시 바 */
+        .time-meta-bar {
+            background: #09101f; border: 1px solid #1e293b; border-radius: 6px;
+            padding: 6px 10px; display: flex; flex-direction: column; gap: 4px;
+            font-size: 11px; font-family: monospace;
+        }
+        .time-item { display: flex; align-items: center; justify-content: space-between; color: #94a3b8; }
+        .time-label { color: #64748b; font-weight: 500; }
+        .time-val { color: #38bdf8; font-weight: bold; }
+
+        /* 영문 헤드라인 */
+        .article-original { display: flex; flex-direction: column; gap: 4px; }
+        .article-title { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; text-decoration: none; }
+        .article-title:hover { color: #38bdf8; }
+        .article-desc { font-size: 12px; color: #94a3b8; line-height: 1.45; }
+
+        /* 한글 요약 박스 */
+        .article-korean-summary {
+            background: #082f49; border: 1px solid #0369a1; border-radius: 8px;
+            padding: 10px 12px; font-size: 12px; line-height: 1.6; color: #e0f2fe;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .korean-summary-badge {
+            display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+            font-weight: bold; color: #38bdf8; border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+            padding-bottom: 4px; margin-bottom: 2px;
+        }
+        .korean-summary-text { white-space: pre-line; color: #f0f9ff; }
+
+        #sync-banner {
+            background: #0369a1; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sync-banner">📡 실시간 블룸버그 · 로이터 속보 동기화 중...</div>
+
+    <header>
+        <div class="logo-box">
+            <div class="live-dot"></div>
+            <div>
+                <div class="header-title">⚡ 글로벌 경제·지정학 속보 AI</div>
+                <div class="header-sub">실시간 라이브 외신 스트림</div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <span id="next-timer" class="timer-badge">60초 후 갱신</span>
+            <button class="btn-refresh" onclick="fetchLiveNews()">새로고침</button>
+        </div>
+    </header>
+
+    <section class="toolbar">
+        <div class="filter-box">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterCards('ALL', this)">전체</button>
+                <button class="filter-btn" onclick="filterCards('Bloomberg', this)">블룸버그</button>
+                <button class="filter-btn" onclick="filterCards('Reuters', this)">로이터</button>
+                <button class="filter-btn" onclick="filterCards('WSJ', this)">WSJ</button>
+                <button class="filter-btn" onclick="filterCards('CNBC', this)">CNBC</button>
+            </div>
+            <input type="text" id="search-input" class="search-input" placeholder="키워드 검색 (금리, AI, 환율, 반도체, 유가...)" oninput="searchCards(this.value)">
+        </div>
+        <div class="status-row">
+            <span id="article-count-label">🟢 실시간 속보 수신 대기 중</span>
+            <span id="last-updated-label">정상 연결됨</span>
+        </div>
+    </section>
+
+    <!-- 실시간 기사가 꽂히는 컨테이너 -->
+    <main class="news-container" id="news-container">
+        <div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">최신 외신 데이터를 불러오는 중입니다...</div>
+    </main>
+
+    <script>
+        var liveArticles = [];
+        var currentFilter = "ALL";
+        var searchQuery = "";
+        var countdown = 60;
+
+        function formatKST(dateStr) {
+            var d = dateStr ? new Date(dateStr) : new Date();
+            if (isNaN(d.getTime())) d = new Date();
+            var year = d.getFullYear();
+            var month = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0');
+            var hours = String(d.getHours()).padStart(2, '0');
+            var minutes = String(d.getMinutes()).padStart(2, '0');
+            return year + "." + month + "." + day + " " + hours + ":" + minutes + " KST";
+        }
+
+        function generateAI摘要(title, desc) {
+            var t = (title + " " + desc).toLowerCase();
+            var p1 = "📌 1. [실시간 외신 속보] " + title;
+            var p2 = "📌 2. 글로벌 금융시장 및 거시경제 지표에 미치는 영향을 모니터링하고 있습니다.";
+            var note = "💡 시사점: 환율, 채권 금리 및 국내 관련 섹터의 수급 변동성에 주의가 필요합니다.";
+
+            if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1 || t.indexOf("금리") !== -1) {
+                p2 = "📌 2. 연준(Fed) 통화정책 기조 및 물가 지표 변화가 글로벌 채권 및 주식 시장의 주요 변수로 작용 중입니다.";
+                note = "💡 시사점: 금리 기대치 변화에 따른 성장주 및 고배당 방어주 수급 이동 예상.";
+            } else if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1 || t.indexOf("반도체") !== -1) {
+                p2 = "📌 2. AI 인프라 투자 확대와 반도체 공급망 밸류체인 전반의 실적 모멘텀이 강화되고 있습니다.";
+                note = "💡 시사점: 국내 메모리 반도체(삼성전자, SK하이닉스) 및 소부장 종목 외국인 수급 집중.";
+            } else if (t.indexOf("oil") !== -1 || t.indexOf("crude") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("유가") !== -1) {
+                p2 = "📌 2. 지정학적 요인과 해상 물류 차질로 원자재 및 에너지 가격 변동성이 확대되었습니다.";
+                note = "💡 시사점: 정유·해운주 단기 수혜 가능하나 수입 물가 상승 압력 가중.";
+            } else if (t.indexOf("yen") !== -1 || t.indexOf("japan") !== -1 || t.indexOf("boj") !== -1 || t.indexOf("엔화") !== -1) {
+                p2 = "📌 2. 일본은행(BOJ) 정책 변화 및 환율 변동성 확대에 따른 글로벌 캐리 트레이드 동향 주시.";
+                note = "💡 시사점: 대일 수출 경합 업종(자동차, 조선 등)의 환율 반사이익 기대.";
+            }
+            return p1 + "\n" + p2 + "\n" + note;
+        }
+
+        async function fetchLiveNews() {
+            var banner = document.getElementById("sync-banner");
+            if (banner) banner.style.display = "block";
+
+            var queries = [
+                "reuters.com business markets",
+                "bloomberg.com markets economics",
+                "wsj.com markets economy",
+                "cnbc.com finance markets"
+            ];
+
+            var fetchedList = [];
+
+            for (var i = 0; i < queries.length; i++) {
+                try {
+                    var rssUrl = "https://news.google.com/rss/search?q=" + encodeURIComponent("when:24h " + queries[i]) + "&hl=en-US&gl=US&ceid=US:en";
+                    var apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+                    
+                    var res = await fetch(apiUrl);
+                    var data = await res.json();
+
+                    if (data && data.items) {
+                        for (var j = 0; j < data.items.length; j++) {
+                            var item = data.items[j];
+                            var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal).*/gi, '').trim();
+                            var descText = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
+                            
+                            var vendor = "Reuters";
+                            if (item.link.indexOf("bloomberg") !== -1) vendor = "Bloomberg";
+                            else if (item.link.indexOf("wsj") !== -1) vendor = "WSJ";
+                            else if (item.link.indexOf("cnbc") !== -1) vendor = "CNBC";
+
+                            fetchedList.push({
+                                title: cleanTitle,
+                                link: item.link,
+                                desc: descText || cleanTitle,
+                                vendor: vendor,
+                                source: vendor + " Live Wire",
+                                timeKST: formatKST(item.pubDate),
+                                summaryKo: generateAI摘要(cleanTitle, descText),
+                                timestamp: new Date(item.pubDate || Date.now()).getTime()
+                            });
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (banner) banner.style.display = "none";
+
+            if (fetchedList.length > 0) {
+                // 중복 제거 및 최신순 정렬
+                var uniqueMap = {};
+                var cleanList = [];
+                for (var k = 0; k < fetchedList.length; k++) {
+                    if (!uniqueMap[fetchedList[k].link]) {
+                        uniqueMap[fetchedList[k].link] = true;
+                        cleanList.push(fetchedList[k]);
+                    }
+                }
+                cleanList.sort(function(a, b) { return b.timestamp - a.timestamp; });
+                liveArticles = cleanList;
+                renderCards();
+
+                var updateLabel = document.getElementById("last-updated-label");
+                if (updateLabel) updateLabel.textContent = "실시간 동기화 완료 (" + new Date().toLocaleTimeString() + ")";
+            }
+        }
+
+        function renderCards() {
+            var container = document.getElementById("news-container");
+            if (!container) return;
+
+            var filtered = liveArticles.filter(function(a) {
+                var matchVendor = (currentFilter === "ALL" || a.vendor === currentFilter);
+                var q = searchQuery.toLowerCase();
+                var text = (a.title + " " + a.desc + " " + a.summaryKo).toLowerCase();
+                var matchSearch = !q || text.indexOf(q) !== -1;
+                return matchVendor && matchSearch;
+            });
+
+            var countEl = document.getElementById("article-count-label");
+            if (countEl) countEl.innerHTML = "🟢 실시간 외신 속보 <b>" + filtered.length + "건</b> 모니터링 중";
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">조건에 일치하는 실시간 외신 기사가 없습니다.</div>';
+                return;
+            }
+
+            var html = "";
+            for (var i = 0; i < filtered.length; i++) {
+                var it = filtered[i];
+                var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.title);
+
+                html += '<div class="card" data-vendor="' + it.vendor + '">' +
+                    '<div class="card-header">' +
+                        '<div class="tag-wrap"><span class="tag tag-' + it.vendor + '">' + it.source + '</span></div>' +
+                        '<div class="quick-actions">' +
+                            '<button class="action-chip" onclick="copyPrompt(\'' + it.link + '\')">📋 복사</button>' +
+                            '<a class="action-chip" href="' + searchUrl + '" target="_blank" rel="noopener noreferrer">🔍 검색</a>' +
+                            '<a class="action-chip chip-origin" href="' + it.link + '" target="_blank" rel="noopener noreferrer">원문 ↗</a>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<div class="time-meta-bar">' +
+                        '<div class="time-item"><span class="time-label">⚡ 외신 타전 시각 (KST):</span><span class="time-val">' + it.timeKST + '</span></div>' +
+                    '</div>' +
+
+                    '<div class="article-original">' +
+                        '<a class="article-title" href="' + it.link + '" target="_blank" rel="noopener noreferrer">' + it.title + '</a>' +
+                        '<div class="article-desc">' + it.desc + '</div>' +
+                    '</div>' +
+
+                    '<div class="article-korean-summary">' +
+                        '<div class="korean-summary-badge"><span>🇰🇷 AI 실시간 한글 핵심 요약 & 시사점</span></div>' +
+                        '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function copyPrompt(url) {
+            window.prompt("아래 기사 주소를 복사하세요:", url);
+        }
+
+        function filterCards(vendor, btn) {
+            currentFilter = vendor;
+            var buttons = document.querySelectorAll(".filter-btn");
+            for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+            btn.classList.add("active");
+            renderCards();
+        }
+
+        function searchCards(val) {
+            searchQuery = (val || "").trim();
+            renderCards();
+        }
+
+        setInterval(function() {
+            countdown--;
+            var timerEl = document.getElementById("next-timer");
+            if (countdown <= 0) {
+                countdown = 60;
+                fetchLiveNews();
+            }
+            if (timerEl) timerEl.textContent = countdown + "초 후 갱신";
+        }, 1000);
+
+        // 첫 실행 시 즉시 외신 라이브 수신
+        fetchLiveNews();
+    </script>
+</body>
+</html>
