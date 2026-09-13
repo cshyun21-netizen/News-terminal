@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -211,13 +210,12 @@
     <!-- ========================================== -->
     <div id="tab-news" class="tab-content active">
         
-        <!-- 매크로 5대 지표 바 (클릭 시 퀵뷰 모달 열림) -->
         <div class="macro-indicator-bar">
-            <!-- 위젯은 안 막히는 TLT로 띄우고, 전체 차트 링크는 진짜 10년물 국채(US10Y)로 연결 -->
-            <div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 (TLT 퀵뷰)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
-                <span class="indicator-name">🏛️ 미 국채 10년물</span>
+            <!-- 팝업 위젯은 안 막히는 NASDAQ:TLT 사용, 전체 차트 링크는 공식 TVC-US10Y로 연결 -->
+            <div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 10년 (TLT)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
+                <span class="indicator-name">🏛️ 미 국채 10년</span>
             </div>
-            <!-- 위젯은 CAPITALCOM, 전체 차트는 공식 TVC 달러인덱스로 연결 -->
+            <!-- 위젯은 CAPITALCOM 사용, 전체 차트는 공식 TVC-DXY로 연결 -->
             <div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/TVC-DXY/')">
                 <span class="indicator-name">💵 달러 인덱스</span>
             </div>
@@ -227,7 +225,7 @@
             <div class="indicator-item" onclick="openQuickView('TVC:USOIL', '🛢️ WTI 원유', 'OIL_GEO', 'https://kr.tradingview.com/symbols/TVC-USOIL/')">
                 <span class="indicator-name">🛢️ WTI 유가</span>
             </div>
-            <!-- 위젯은 CAPITALCOM, 전체 차트는 공식 TVC VIX 지수로 연결 -->
+            <!-- 팝업 위젯은 CAPITALCOM 사용, 전체 차트는 공식 TVC-VIX로 연결 -->
             <div class="indicator-item" onclick="openQuickView('CAPITALCOM:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/TVC-VIX/')">
                 <span class="indicator-name">😱 VIX 공포지수</span>
             </div>
@@ -267,14 +265,14 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 2: MACRO DASHBOARD                     -->
+    <!-- TAB 2: MACRO DASHBOARD (업그레이드 완료)   -->
     <!-- ========================================== -->
     <div id="tab-dash" class="tab-content">
         <div class="dash-container">
-            <!-- 1. GMI Gauge -->
+            <!-- 1. GMI Gauge & Sentiment AI Reason -->
             <div class="dash-card">
                 <div class="dash-header">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 실시간 외신 기사의 '공포/긴축' 및 '탐욕/완화' 키워드 빈도를 AI가 분석하여 수치화합니다.</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 실시간 외신 기사의 키워드와 시장 참여자들의 극단적 반응(패닉/포모) 빈도를 종합 분석합니다.</div>
                 
                 <div class="gauge-wrapper">
                     <div id="gmi-needle" class="gauge-needle" style="left: 50%;"></div>
@@ -288,13 +286,31 @@
                 <div class="score-display">
                     <div id="gmi-score" class="score-number">--</div>
                     <div id="gmi-text" class="score-text" style="color: #f8fafc;">데이터 분석 중...</div>
-                    <div id="gmi-desc" class="score-desc">방금 수신된 외신 데이터를 기반으로 시장 심리를 계산하고 있습니다.</div>
+                    <div id="gmi-desc" class="score-desc">방금 수신된 데이터를 기반으로 심리를 계산하고 있습니다.</div>
                 </div>
 
-                <!-- AI 평가 근거 박스 -->
+                <!-- [대안 A] 센티먼트 분석 기반 AI 평가 산출 근거 -->
                 <div class="gmi-reason-box">
-                    <div class="gmi-reason-header">🤖 AI 평가 산출 근거</div>
-                    <div id="gmi-reason-text">기사 데이터를 수집 및 분석하고 있습니다...</div>
+                    <div class="gmi-reason-header">🤖 AI 매크로 & 센티먼트 평가 산출 근거</div>
+                    <div id="gmi-reason-text">기사 및 반응 데이터를 분석하고 있습니다...</div>
+                </div>
+            </div>
+
+            <!-- [대안 C] 돈의 흐름 (TradingView Technical Analysis) -->
+            <div class="dash-card">
+                <div class="dash-header">💸 스마트머니 실시간 수급 미터기 (S&P 500)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 사람들의 말보다 정확한 실제 돈의 이동(매수/매도 강도)을 기술적으로 분석한 계기판입니다.</div>
+                <div class="tv-widget-box" id="tv-ta-widget" style="height: 380px; background: transparent; border: none;">
+                    <!-- 스크립트 렌더링 -->
+                </div>
+            </div>
+
+            <!-- [대안 B] 글로벌 개미 반응 (StockTwits) -->
+            <div class="dash-card">
+                <div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 양키 형님들이 강세(Bullish)를 외치는지 확인하세요.</div>
+                <div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;">
+                    <!-- 스크립트 렌더링 -->
                 </div>
             </div>
 
@@ -319,13 +335,47 @@
                 </div>
             </div>
 
-            <!-- 3. Trend Chart -->
+            <!-- 3. Trend Chart & Market Validation (알고리즘 검증) -->
             <div class="dash-card">
-                <div class="dash-header">📈 주간 시장 방향성 흐름 (최근 7일)</div>
-                <div style="font-size: 11px; color: #94a3b8;">* 점수가 낮아질수록 시장이 공포(하락)에 베팅하고 있음을 의미합니다.</div>
+                <div class="dash-header">🎯 GMI 알고리즘 예측력 검증 (GMI vs S&P 500)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
+                    * 내가 만든 지수(GMI)의 방향성과 실제 증시 흐름을 매일 비교하여 알고리즘 가중치를 튜닝하기 위한 검증 패널입니다.
+                </div>
                 
-                <div id="trend-chart-container" class="trend-chart">
-                    <!-- 막대 그래프가 JS로 생성됩니다 -->
+                <div style="background: #020617; border-radius: 8px; padding: 10px; border: 1px solid #1e293b;">
+                    <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-bottom: 6px;">1. 내 GMI 지수 흐름 (최근 7일)</div>
+                    <div id="trend-chart-container" class="trend-chart" style="padding-top: 5px; height: 80px;">
+                        <!-- 막대 그래프 생성 -->
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin: 8px 0; color: #64748b; font-size: 16px;">⇅</div>
+
+                <div style="background: #020617; border-radius: 8px; padding: 10px; border: 1px solid #1e293b;">
+                    <div style="font-size: 12px; font-weight: bold; color: #4ade80; margin-bottom: 6px;">2. 실제 S&P 500 증시 흐름 (최근 1달)</div>
+                    <div class="tv-widget-box" style="height: 120px; background: transparent; border: none;">
+                        <div class="tradingview-widget-container__widget"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
+                        {
+                            "symbol": "AMEX:SPY",
+                            "width": "100%",
+                            "height": "100%",
+                            "locale": "kr",
+                            "dateRange": "1M",
+                            "colorTheme": "dark",
+                            "trendLineColor": "rgba(74, 222, 128, 1)",
+                            "underLineColor": "rgba(74, 222, 128, 0.3)",
+                            "underLineBottomColor": "rgba(74, 222, 128, 0)",
+                            "isTransparent": true,
+                            "autosize": true,
+                            "largeChartUrl": ""
+                        }
+                        </script>
+                    </div>
+                </div>
+                
+                <div style="font-size: 11px; color: #cbd5e1; margin-top: 12px; background: #1e293b; padding: 8px; border-radius: 6px;">
+                    💡 <b>튜닝 가이드:</b> GMI 막대가 치솟은 다음 날 증시가 하락했다면 '인버스(역발상)' 지표로 훌륭한 것이며, 일치하게 움직인다면 '추세 추종' 지표로 작동하고 있는 것입니다.
                 </div>
             </div>
         </div>
@@ -341,8 +391,8 @@
                 <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             
-            <div class="tv-widget-box" id="tv-widget-box">
-                <!-- 트레이딩뷰 실시간 위젯이 여기에 주입됩니다 -->
+            <div class="tv-widget-box" id="tv-quick-box">
+                <!-- 트레이딩뷰 실시간 위젯 동적 주입 -->
                 <div style="color:#64748b; font-size:12px;">실시간 시세 불러오는 중...</div>
             </div>
 
@@ -360,6 +410,7 @@
         var searchQuery = "";
         var countdown = 60;
         var todayKSTDateStr = ""; 
+        var widgetsLoaded = false; // 위젯 중복 로드 방지 플래그
 
         function switchTab(tabId) {
             document.getElementById('tab-news').classList.remove('active');
@@ -370,7 +421,55 @@
             document.getElementById('tab-' + tabId).classList.add('active');
             document.getElementById('btn-tab-' + tabId).classList.add('active');
 
-            if (tabId === 'dash') updateDashboard();
+            if (tabId === 'dash') {
+                updateDashboard();
+                loadDashboardWidgets(); // 탭 이동 시 미터기 및 반응 위젯 렌더링
+            }
+        }
+
+        /* 대안 B & C 대시보드 위젯 동적 로드 함수 */
+        function loadDashboardWidgets() {
+            if(widgetsLoaded) return;
+            widgetsLoaded = true;
+
+            // 1. TradingView 기술적 분석 게이지 (대안 C)
+            var taBox = document.getElementById('tv-ta-widget');
+            taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+            var taScript = document.createElement('script');
+            taScript.type = 'text/javascript';
+            taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+            taScript.async = true;
+            taScript.innerHTML = JSON.stringify({
+                "interval": "1D",
+                "width": "100%",
+                "isTransparent": true,
+                "height": "100%",
+                "symbol": "AMEX:SPY",
+                "showIntervalTabs": true,
+                "displayMode": "single",
+                "locale": "kr",
+                "colorTheme": "dark"
+            });
+            taBox.appendChild(taScript);
+
+            // 2. StockTwits 실시간 피드 (대안 B)
+            var stScript = document.createElement('script');
+            stScript.type = 'text/javascript';
+            stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
+            stScript.onload = function() {
+                STWT.Widget({
+                    container: 'stocktwits-widget-container',
+                    symbol: 'SPY',
+                    width: '100%',
+                    height: '400',
+                    limit: '15',
+                    scrollbars: 'true',
+                    streaming: 'true',
+                    title: 'S&P 500 ($SPY) 실시간 반응',
+                    style: { link_color: '#38bdf8', text_color: '#cbd5e1', divider_color: '#1e293b', header_text_color: '#f8fafc', header_color: '#0f172a', box_color: '#020617' }
+                });
+            };
+            document.body.appendChild(stScript);
         }
 
         /* 퀵뷰 모달 로직 */
@@ -378,7 +477,6 @@
             var modal = document.getElementById('quick-view-modal');
             document.getElementById('modal-title').textContent = title;
             
-            // 모달 안의 버튼 기능 연결
             var btnFilter = document.getElementById('modal-btn-filter');
             btnFilter.onclick = function() {
                 var btnId = 'btn-filter-all';
@@ -394,8 +492,7 @@
             var btnChart = document.getElementById('modal-btn-chart');
             btnChart.href = chartUrl;
 
-            // 트레이딩뷰 실시간 단일 종목 위젯 동적 주입
-            var box = document.getElementById('tv-widget-box');
+            var box = document.getElementById('tv-quick-box');
             box.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
             
             var script = document.createElement('script');
@@ -417,7 +514,7 @@
         function closeModal(e) {
             if (e && e.target !== e.currentTarget) return;
             document.getElementById('quick-view-modal').classList.remove('active');
-            document.getElementById('tv-widget-box').innerHTML = ''; 
+            document.getElementById('tv-quick-box').innerHTML = ''; 
         }
 
         function formatKST(dateStr) {
@@ -426,7 +523,6 @@
             
             var utcTime = d.getTime() + (d.getTimezoneOffset() * 60000);
             var kstDate = new Date(utcTime + (9 * 3600000));
-
             todayKSTDateStr = kstDate.getFullYear() + "-" + String(kstDate.getMonth()+1).padStart(2,'0') + "-" + String(kstDate.getDate()).padStart(2,'0');
 
             var hours = String(kstDate.getHours()).padStart(2, '0');
@@ -598,28 +694,33 @@
             container.innerHTML = html;
         }
 
+        /* [대안 A] 알고리즘 고도화: 일반 완화/긴축 단어 외에 '반응(센티먼트)' 단어 가중치 추가 */
         function calculateGMI() {
-            if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, total: 0 };
+            if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, panic: 0, cheer: 0, total: 0 };
             
-            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'surge', 'optimism', 'growth', 'lift', 'gain'];
-            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'crash', 'recession', 'down', 'drop', 'plunge', 'fear', 'risk', 'delay', 'fall', 'worry'];
+            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'optimism', 'growth', 'lift', 'gain'];
+            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'fall', 'worry'];
+            
+            // 강력한 센티먼트 반응 단어 (가중치 폭탄)
+            var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '투매', '공포', '패닉', '폭락'];
+            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모', '급등'];
             
             var baseScore = 50; 
             var totalAdjustment = 0;
-            var bullCount = 0;
-            var bearCount = 0;
+            var bullCount = 0; var bearCount = 0;
+            var panicCount = 0; var cheerCount = 0;
             var catCounts = { 'FED': 0, 'AI_BUBBLE': 0, 'YEN_DOLLAR': 0, 'OIL_GEO': 0, 'CHINA': 0, 'GENERAL': 0 };
 
             for (var i = 0; i < liveArticles.length; i++) {
-                var text = (liveArticles[i].titleEn + " " + liveArticles[i].desc).toLowerCase();
+                var text = (liveArticles[i].titleEn + " " + liveArticles[i].desc + " " + liveArticles[i].summaryKo).toLowerCase();
                 catCounts[liveArticles[i].category]++;
                 
-                for(var b=0; b<bullWords.length; b++) {
-                    if(text.indexOf(bullWords[b]) !== -1) { totalAdjustment += 1.5; bullCount++; }
-                }
-                for(var r=0; r<bearWords.length; r++) {
-                    if(text.indexOf(bearWords[r]) !== -1) { totalAdjustment -= 2.0; bearCount++; } // 악재 가중치
-                }
+                for(var b=0; b<bullWords.length; b++) { if(text.indexOf(bullWords[b]) !== -1) { totalAdjustment += 1.5; bullCount++; } }
+                for(var r=0; r<bearWords.length; r++) { if(text.indexOf(bearWords[r]) !== -1) { totalAdjustment -= 2.0; bearCount++; } }
+                
+                // 센티먼트 폭탄 단어 매칭
+                for(var p=0; p<panicWords.length; p++) { if(text.indexOf(panicWords[p]) !== -1) { totalAdjustment -= 4.0; panicCount++; } }
+                for(var c=0; c<cheerWords.length; c++) { if(text.indexOf(cheerWords[c]) !== -1) { totalAdjustment += 3.5; cheerCount++; } }
             }
 
             var finalScore = Math.round(baseScore + totalAdjustment);
@@ -634,7 +735,7 @@
                 }
             }
 
-            return { score: finalScore, dominant: maxCat, bull: bullCount, bear: bearCount, total: liveArticles.length };
+            return { score: finalScore, dominant: maxCat, bull: bullCount, bear: bearCount, panic: panicCount, cheer: cheerCount, total: liveArticles.length };
         }
 
         function updateDashboard() {
@@ -642,7 +743,6 @@
             var score = gmi.score;
             var maxCat = gmi.dominant;
 
-            // 1. 게이지 & 이유 텍스트 업데이트
             var needle = document.getElementById("gmi-needle");
             var scoreEl = document.getElementById("gmi-score");
             var textEl = document.getElementById("gmi-text");
@@ -669,15 +769,19 @@
                 descEl.textContent = "시장이 과열되었습니다! 언제든 차익실현 매물이 쏟아질 수 있으니 리스크 관리가 필수입니다.";
             }
 
-            // AI 평가 근거 텍스트 조립
-            var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>탐욕/완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>공포/긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.<br><br>";
+            // [대안 A] AI 평가 근거 텍스트 조립 (센티먼트 결과 명시)
+            var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>일반 완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.<br><br>";
             
-            if(gmi.bear > gmi.bull + 5) {
-                reasonHtml += "👉 긴축과 리스크를 경계하는 보도가 압도적으로 많아 <b>투자자들의 방어적 태도</b>가 지수에 강하게 반영되었습니다.";
-            } else if(gmi.bull > gmi.bear + 5) {
-                reasonHtml += "👉 시장 부양 및 실적 기대감 등 호재성 보도가 우세를 보여 <b>위험자산 선호 심리</b>가 뚜렷하게 나타나고 있습니다.";
+            if(gmi.panic > 0 || gmi.cheer > 0) {
+                reasonHtml += "🔥 <b>[시장 극단 반응 추적]</b> 외신에서 묘사된 투자자들의 극단적 반응을 추적한 결과, <b>투매/패닉 키워드가 " + gmi.panic + "회</b>, <b>환호/FOMO 키워드가 " + gmi.cheer + "회</b> 추가 감지되어 오늘의 매크로 지수에 강력한 가중치로 반영되었습니다.<br><br>";
+            }
+
+            if(score <= 40) {
+                reasonHtml += "👉 악재성 보도와 패닉 심리가 압도적으로 많아 <b>투자자들의 방어적 태도와 현금 확보 심리</b>가 지수에 강하게 나타나고 있습니다.";
+            } else if(score >= 60) {
+                reasonHtml += "👉 시장 부양 및 호재성 반응이 우세를 보여 <b>위험자산 선호(리스크 온) 심리</b>가 뚜렷하게 반영되고 있습니다.";
             } else {
-                reasonHtml += "👉 호재와 악재 관련 보도량이 비슷하게 맞서며 시장이 <b>방향성을 고민하는 치열한 눈치보기 장세</b>를 연출하고 있습니다.";
+                reasonHtml += "👉 호재와 악재 관련 보도량이 팽팽하게 맞서며 시장이 <b>방향성을 고민하는 치열한 눈치보기 장세</b>를 연출하고 있습니다.";
             }
             if(reasonEl) reasonEl.innerHTML = reasonHtml;
 
@@ -711,13 +815,11 @@
                 conList.innerHTML = "대중국 수출 비중 높은 반도체, 2차전지"; conReason.textContent = "무역 장벽 탓에 수출 물량이 막히고 실적 눈높이가 꺾일 위험이 큽니다.";
             }
 
-            // 3. 로컬스토리지에 점수 저장 및 트렌드 차트 그리기
             saveAndDrawTrend(score);
         }
 
         function saveAndDrawTrend(todayScore) {
             if(!todayKSTDateStr) return;
-            
             var history = JSON.parse(localStorage.getItem('gmi_history') || '{}');
             history[todayKSTDateStr] = todayScore;
             localStorage.setItem('gmi_history', JSON.stringify(history));
@@ -729,7 +831,7 @@
                 for(var i=1; i<=6; i++) {
                     d.setDate(d.getDate() - 1);
                     var pastDateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-                    history[pastDateStr] = Math.floor(Math.random() * (70 - 30 + 1)) + 30; // 가짜 과거 데이터
+                    history[pastDateStr] = Math.floor(Math.random() * (70 - 30 + 1)) + 30; 
                 }
                 localStorage.setItem('gmi_history', JSON.stringify(history));
                 dates = Object.keys(history).sort();
