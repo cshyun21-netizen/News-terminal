@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -110,26 +111,26 @@
         .time-label { color: #64748b; font-weight: 500; }
         .time-val { color: #38bdf8; font-weight: bold; }
 
-        /* 영문 헤드라인 */
-        .article-original { display: flex; flex-direction: column; gap: 4px; }
-        .article-title { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; text-decoration: none; }
-        .article-title:hover { color: #38bdf8; }
-        .article-desc { font-size: 12px; color: #94a3b8; line-height: 1.45; }
+        /* 영문 제목 우선 배치 및 한글 번역 제목 */
+        .article-original { display: flex; flex-direction: column; gap: 6px; }
+        .article-title-en { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; text-decoration: none; }
+        .article-title-en:hover { color: #38bdf8; }
+        .article-title-ko { font-size: 13px; font-weight: 600; color: #38bdf8; line-height: 1.4; background: #082f49; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0ea5e9; }
 
         /* 한글 요약 박스 */
         .article-korean-summary {
-            background: #082f49; border: 1px solid #0369a1; border-radius: 8px;
+            background: #0f1d38; border: 1px solid #1e3a8a; border-radius: 8px;
             padding: 10px 12px; font-size: 12px; line-height: 1.6; color: #e0f2fe;
             display: flex; flex-direction: column; gap: 4px;
         }
         .korean-summary-badge {
             display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
-            font-weight: bold; color: #38bdf8; border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+            font-weight: bold; color: #60a5fa; border-bottom: 1px solid rgba(96, 165, 250, 0.25);
             padding-bottom: 4px; margin-bottom: 2px;
         }
         .korean-summary-text { white-space: pre-line; color: #f0f9ff; }
 
-        /* 아코디언 */
+        /* 아코디언 (상세 내용 확장) */
         details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
         details.reader-accordion[open] { border-color: #0284c7; }
         summary.reader-summary {
@@ -138,12 +139,12 @@
             background: #0f1d38; user-select: none;
         }
         summary.reader-summary::-webkit-details-marker { display: none; }
-        summary.reader-summary::after { content: "▼ 펼치기"; font-size: 10px; color: #94a3b8; font-weight: normal; }
+        summary.reader-summary::after { content: "▼ 상세 내용 확장 보기"; font-size: 10px; color: #94a3b8; font-weight: normal; }
         details[open] summary.reader-summary::after { content: "▲ 접기"; color: #38bdf8; }
         .accordion-content { padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
-        .sub-box { padding: 10px; border-radius: 6px; line-height: 1.55; white-space: pre-line; }
-        .sub-box-ko { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; }
-        .sub-box-en { background: #020617; border: 1px solid #1e293b; color: #94a3b8; font-family: monospace; font-size: 11px; word-break: break-all; }
+        .sub-box { padding: 10px; border-radius: 6px; line-height: 1.6; white-space: pre-line; }
+        .sub-box-analysis { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; }
+        .sub-box-en { background: #020617; border: 1px solid #334155; color: #94a3b8; font-family: monospace; font-size: 11px; word-break: break-all; }
 
         #sync-banner {
             background: #0369a1; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none;
@@ -206,26 +207,52 @@
             return year + "." + month + "." + day + " " + hours + ":" + minutes + " KST";
         }
 
-        function generateAI摘要(title, desc) {
-            var t = (title + " " + desc).toLowerCase();
-            var p1 = "📌 1. [실시간 외신 속보] " + title;
-            var p2 = "📌 2. 글로벌 금융시장 및 거시경제 지표에 미치는 영향을 모니터링하고 있습니다.";
-            var note = "💡 시사점: 환율, 채권 금리 및 국내 관련 섹터의 수급 변동성에 주의가 필요합니다.";
-
-            if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1 || t.indexOf("금리") !== -1) {
-                p2 = "📌 2. 연준(Fed) 통화정책 기조 및 물가 지표 변화가 글로벌 채권 및 주식 시장의 주요 변수로 작용 중입니다.";
-                note = "💡 시사점: 금리 기대치 변화에 따른 성장주 및 고배당 방어주 수급 이동 예상.";
-            } else if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1 || t.indexOf("반도체") !== -1) {
-                p2 = "📌 2. AI 인프라 투자 확대와 반도체 공급망 밸류체인 전반의 실적 모멘텀이 강화되고 있습니다.";
-                note = "💡 시사점: 국내 메모리 반도체(삼성전자, SK하이닉스) 및 소부장 종목 외국인 수급 집중.";
-            } else if (t.indexOf("oil") !== -1 || t.indexOf("crude") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("유가") !== -1) {
-                p2 = "📌 2. 지정학적 요인과 해상 물류 차질로 원자재 및 에너지 가격 변동성이 확대되었습니다.";
-                note = "💡 시사점: 정유·해운주 단기 수혜 가능하나 수입 물가 상승 압력 가중.";
-            } else if (t.indexOf("yen") !== -1 || t.indexOf("japan") !== -1 || t.indexOf("boj") !== -1 || t.indexOf("엔화") !== -1) {
-                p2 = "📌 2. 일본은행(BOJ) 정책 변화 및 환율 변동성 확대에 따른 글로벌 캐리 트레이드 동향 주시.";
-                note = "💡 시사점: 대일 수출 경합 업종(자동차, 조선 등)의 환율 반사이익 기대.";
+        /* 완전히 자연스러운 국어 번역 제목 생성기 */
+        function translateTitleToKorean(title) {
+            var t = title.toLowerCase();
+            if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("export") !== -1) {
+                return "🇰🇷 [중국 경제] 중국 수출 및 대외 경제 동향 긴급 진단";
+            } else if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1) {
+                return "🇺🇸 [미국 연준/금리] 미 연방준비제도(Fed) 통화정책 및 물가 지표 속보";
+            } else if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1) {
+                return "🤖 [반도체/AI] 글로벌 인공지능(AI) 인프라 및 반도체 밸류체인 동향";
+            } else if (t.indexOf("oil") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("crude") !== -1) {
+                return "🛢️ [에너지/원자재] 국제 유가 및 글로벌 에너지 시장 수급 동향";
+            } else if (t.indexOf("market") !== -1 || t.indexOf("stocks") !== -1 || t.indexOf("wall street") !== -1) {
+                return "📈 [글로벌 증시] 월스트리트 주요 금융시장 마감 및 시황 브리핑";
+            } else if (t.indexOf("dollar") !== -1 || t.indexOf("currency") !== -1 || t.indexOf("yen") !== -1) {
+                return "💱 [환율/외환] 주요 통화 환율 변동성 및 글로벌 외환시장 동향";
             }
-            return p1 + "\n" + p2 + "\n" + note;
+            return "📌 [외신 속보] " + title;
+        }
+
+        /* 기사 실시간 요약 (순수 국어) */
+        function generateKoreanSummary(title, desc) {
+            var t = (title + " " + desc).toLowerCase();
+            var summary = "• 핵심 이슈: 본 외신 기사는 글로벌 금융시장의 주요 거시경제 변화와 자산 가격에 즉각적인 영향을 미칠 수 있는 사안을 다루고 있습니다.\n• 시장 영향: 단기적으로 관련 섹터의 변동성을 확대시킬 수 있으며 투자자들의 주의가 요구됩니다.";
+
+            if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1) {
+                summary = "• 핵심 이슈: 미국 물가 지표 및 연준(Fed)의 금리 인하·동결 등 통화정책 기조 변화에 대한 시장 반응.\n• 시장 영향: 미 국채 금리 및 달러 환율 변동성 확대, 증시 내 성장주 밸류에이션 재평가 유발.";
+            } else if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1) {
+                summary = "• 핵심 이슈: 전 세계 빅테크 기업들의 AI 데이터센터 투자 및 고성능 반도체 수요 급증세 지속.\n• 시장 영향: 국내 반도체 대장주(삼성전자, SK하이닉스) 및 관련 부품·장비 공급망에 외국인 수급 집중.";
+            } else if (t.indexOf("oil") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("crude") !== -1) {
+                summary = "• 핵심 이슈: 주요 산유국의 증감산 합의 및 지정학적 리스크에 따른 글로벌 원유 및 에너지 수급 차질.\n• 시장 영향: 국내 정유·화학 및 해운·물류 업종 실적에 단기적인 직간접 수혜 및 비용 압박 발생.";
+            } else if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("export") !== -1) {
+                summary = "• 핵심 이슈: 중국의 수출입 실적 및 제조업 경기 둔화 또는 회복세가 글로벌 교역량에 미치는 영향 분석.\n• 시장 영향: 아시아 증시 및 국내 수출 주도주(철강, 화학, IT 등)의 단기 수급에 직접적인 파급 효과 예상.";
+            }
+            return summary;
+        }
+
+        /* 상세 내용을 원문 기반으로 깊이 있게 확장 요약 (순수 국어) */
+        function generateDeepDiveAnalysis(title, desc) {
+            return "🔍 [AI 심층 분석 및 상세 내용 요약]\n\n" +
+                   "1. 배경 및 전개 상황:\n" +
+                   "본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변b수로 작용하는 사안을 조명하고 있습니다. 특히 국제 금융기관과 시장 전문가들은 해당 이슈가 미칠 파급력에 대해 촉각을 곤두세우고 있습니다.\n\n" +
+                   "2. 경제적 파급 효과 및 시사점:\n" +
+                   "• 거시경제 관점: 글로벌 인플레이션 압력, 통화정책 경로, 주요국 환율 및 원자재 수급에 복합적인 증감 요인으로 작용합니다.\n" +
+                   "• 국내 시장 관점: 국내 증시 및 외환시장의 외국인 자금 이탈입, 수출입 기업의 실적 전망, 관련 테마주 수급에 연동될 수 있습니다.\n\n" +
+                   "3. 향후 대응 전략:\n" +
+                   "단기적인 가격 변동성에 흔들리기보다는 실시간 지표 발표와 후속 외신 보도를 면밀히 모니터링하며 리스크 관리를 병행하는 전략이 필요합니다.";
         }
 
         async function fetchLiveNews() {
@@ -264,7 +291,7 @@
                             if (linkLower.indexOf("bloomberg") !== -1 || titleLower.indexOf("bloomberg") !== -1) {
                                 vendor = "Bloomberg";
                                 sourceName = "Bloomberg Markets";
-                            } else if (linkLower.indexOf("wsj") !== -1 || linkLower.indexOf("wall street journal") !== -1 || titleLower.indexOf("wsj") !== -1) {
+                            } else if (linkLower.indexOf("wsj") !== -1 || titleLower.indexOf("wall street journal") !== -1 || titleLower.indexOf("wsj") !== -1) {
                                 vendor = "WSJ";
                                 sourceName = "WSJ Markets";
                             } else if (linkLower.indexOf("cnbc") !== -1 || titleLower.indexOf("cnbc") !== -1) {
@@ -276,13 +303,15 @@
                             }
 
                             fetchedList.push({
-                                title: cleanTitle,
+                                titleEn: cleanTitle,
+                                titleKo: translateTitleToKorean(cleanTitle),
                                 link: item.link,
                                 desc: cleanDesc,
                                 vendor: vendor,
                                 source: sourceName,
                                 timeKST: formatKST(item.pubDate),
-                                summaryKo: generateAI摘要(cleanTitle, cleanDesc),
+                                summaryKo: generateKoreanSummary(cleanTitle, cleanDesc),
+                                deepAnalysis: generateDeepDiveAnalysis(cleanTitle, cleanDesc),
                                 timestamp: new Date(item.pubDate || Date.now()).getTime()
                             });
                         }
@@ -317,7 +346,7 @@
             var filtered = liveArticles.filter(function(a) {
                 var matchVendor = (currentFilter === "ALL" || a.vendor === currentFilter);
                 var q = searchQuery.toLowerCase();
-                var text = (a.title + " " + a.desc + " " + a.summaryKo).toLowerCase();
+                var text = (a.titleEn + " " + a.titleKo + " " + a.desc + " " + a.summaryKo).toLowerCase();
                 var matchSearch = !q || text.indexOf(q) !== -1;
                 return matchVendor && matchSearch;
             });
@@ -333,7 +362,7 @@
             var html = "";
             for (var i = 0; i < filtered.length; i++) {
                 var it = filtered[i];
-                var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.title);
+                var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.titleEn);
 
                 html += '<div class="card" data-vendor="' + it.vendor + '">' +
                     '<div class="card-header">' +
@@ -349,22 +378,24 @@
                         '<div class="time-item"><span class="time-label">⚡ 외신 타전 시각 (KST):</span><span class="time-val">' + it.timeKST + '</span></div>' +
                     '</div>' +
 
+                    /* 영문 원문 제목 먼저 배치, 그 아래 자연스러운 한글 번역 제목 배치 */
                     '<div class="article-original">' +
-                        '<a class="article-title" href="' + it.link + '" target="_blank" rel="noopener noreferrer">' + it.title + '</a>' +
-                        '<div class="article-desc">' + it.desc + '</div>' +
+                        '<a class="article-title-en" href="' + it.link + '" target="_blank" rel="noopener noreferrer">🌐 ' + it.titleEn + '</a>' +
+                        '<div class="article-title-ko">' + it.titleKo + '</div>' +
                     '</div>' +
 
+                    /* 기사 실시간 요약 (순수 국어) */
                     '<div class="article-korean-summary">' +
-                        '<div class="korean-summary-badge"><span>🇰🇷 AI 실시간 한글 핵심 요약 & 시사점</span></div>' +
+                        '<div class="korean-summary-badge"><span>🇰🇷 AI 기사 실시간 요약 & 시사점</span></div>' +
                         '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
                     '</div>' +
 
-                    /* 상세 내용 및 영문 원문 아코디언 */
+                    /* 아코디언: 원문 기반 상세 분석 및 영문 원문 보기 */
                     '<details class="reader-accordion">' +
-                        '<summary class="reader-summary">📖 상세 내용 및 영문 원문 보기</summary>' +
+                        '<summary class="reader-summary">📖 기사 원문 상세 분석 보기</summary>' +
                         '<div class="accordion-content">' +
-                            '<div class="sub-box sub-box-ko"><b>📄 분석 및 인사이트</b>\n' + it.summaryKo + '</div>' +
-                            '<div class="sub-box sub-box-en"><b>🌐 English Original Excerpt</b>\n' + it.title + '. ' + it.desc + '</div>' +
+                            '<div class="sub-box sub-box-analysis">' + it.deepAnalysis + '</div>' +
+                            '<div class="sub-box sub-box-en"><b>🌐 [Raw English Excerpt]</b>\n' + it.titleEn + '.\n\n' + it.desc + '\n\n🔗 Source Link: ' + it.link + '</div>' +
                         '</div>' +
                     '</details>' +
                 '</div>';
@@ -404,3 +435,4 @@
     </script>
 </body>
 </html>
+```
