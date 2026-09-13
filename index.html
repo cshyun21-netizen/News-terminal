@@ -1,904 +1,2437 @@
-
 <!DOCTYPE html>
+
+
 <html lang="ko">
+
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>글로벌 경제·지정학 속보 AI 터미널</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body {
-            background-color: #020617;
-            color: #f1f5f9;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-            padding-bottom: 70px;
-        }
 
-        /* 고정 헤더 */
-        header {
-            position: sticky; top: 0; z-index: 50; background: #0f172a;
-            border-bottom: 1px solid #1e293b; padding: 12px 14px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .logo-box { display: flex; align-items: center; gap: 8px; }
-        .live-dot {
-            width: 10px; height: 10px; border-radius: 50%; background: #22c55e;
-            box-shadow: 0 0 8px #22c55e; flex-shrink: 0; animation: pulse 1.8s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        .header-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: -0.3px; }
-        .header-sub { font-size: 11px; color: #94a3b8; }
-        .header-controls { display: flex; align-items: center; gap: 6px; }
-        .timer-badge {
-            font-size: 11px; font-family: monospace; color: #38bdf8;
-            background: #082f49; border: 1px solid #0369a1; padding: 5px 8px; border-radius: 6px; white-space: nowrap;
-        }
-        .btn-refresh {
-            background: #2563eb; color: #fff; border: none; padding: 6px 12px;
-            border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;
-        }
 
-        /* 탭 버튼 UI */
-        .tab-bar {
-            display: flex; background: #0b1329; border-bottom: 1px solid #1e293b;
-            position: sticky; top: 57px; z-index: 40;
-        }
-        .tab-btn {
-            flex: 1; padding: 12px 0; text-align: center; font-size: 13px; font-weight: bold;
-            color: #64748b; background: transparent; border: none; border-bottom: 3px solid transparent;
-            cursor: pointer; transition: all 0.2s ease;
-        }
-        .tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; background: #0f1d38; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+<meta charset="UTF-8">
 
-        /* 매크로 지표 상단 띠 */
-        .macro-indicator-bar {
-            background: #09101f; border-bottom: 1px solid #1e293b;
-            padding: 10px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
-        }
-        .macro-indicator-bar::-webkit-scrollbar { display: none; }
-        .indicator-item {
-            display: inline-flex; align-items: center; gap: 5px; color: #cbd5e1;
-            background: #111e38; border: 1px solid #1e3a8a; padding: 6px 10px;
-            border-radius: 8px; cursor: pointer; font-size: 11.5px; transition: all 0.15s ease;
-        }
-        .indicator-item:active { background: #1e3a8a; }
-        .indicator-name { color: #f8fafc; font-weight: bold; }
 
-        /* 필터 및 검색바 */
-        .toolbar { padding: 12px 14px 6px; max-width: 680px; margin: 0 auto; }
-        .filter-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .radar-label { font-size: 11px; font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 4px; }
-        .macro-radar-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
-        .macro-radar-buttons::-webkit-scrollbar { display: none; }
-        .radar-btn {
-            background: #172554; color: #93c5fd; border: 1px solid #1d4ed8; padding: 6px 11px;
-            border-radius: 6px; font-size: 11.5px; font-weight: bold; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
-        }
-        .radar-btn.active { background: #ef4444; color: #fff; border-color: #b91c1c; }
-        
-        .filter-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-        .filter-buttons::-webkit-scrollbar { display: none; }
-        .filter-btn { background: #1e293b; color: #94a3b8; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; cursor: pointer; }
-        .filter-btn.active { background: #0284c7; color: #ffffff; }
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        .search-input { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; outline: none; }
-        .search-input:focus { border-color: #0284c7; }
-        .status-row { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-top: 6px; padding: 0 4px; }
 
-        /* 뉴스 카드 */
-        .news-container { max-width: 680px; margin: 0 auto; padding: 6px 14px; display: flex; flex-direction: column; gap: 14px; }
-        .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .tag-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-        .tag { font-size: 11px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid transparent; white-space: nowrap; }
-        .tag-Bloomberg { background: #172554; color: #93c5fd; border-color: #1e40af; }
-        .tag-Reuters { background: #451a03; color: #fdba74; border-color: #9a3412; }
-        .tag-WSJ { background: #064e3b; color: #6ee7b7; border-color: #047857; }
-        .tag-CNBC { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
-        
-        .quick-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-        .action-chip { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
-        .time-meta-bar { background: #09101f; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: monospace; display: flex; justify-content: space-between; color: #94a3b8; }
-        .time-val { color: #38bdf8; font-weight: bold; }
-        
-        .article-original { display: flex; flex-direction: column; gap: 6px; }
-        .article-title-en { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; text-decoration: none; }
-        .article-title-ko { font-size: 13px; font-weight: 600; color: #38bdf8; line-height: 1.4; background: #082f49; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0ea5e9; }
-        .article-korean-summary { background: #0f1d38; border: 1px solid #1e3a8a; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 4px; }
-        .korean-summary-badge { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #f59e0b; border-bottom: 1px solid rgba(245, 158, 11, 0.25); padding-bottom: 4px; margin-bottom: 2px; }
-        .macro-tag-pill { background: #78350f; color: #fef3c7; padding: 1px 6px; border-radius: 4px; font-size: 10px; }
-        .korean-summary-text { white-space: pre-line; color: #f0f9ff; }
+<title>글로벌 경제·지정학 속보 AI 터미널</title>
 
-        details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
-        summary.reader-summary { padding: 9px 12px; font-size: 11px; font-weight: bold; color: #38bdf8; cursor: pointer; display: flex; justify-content: space-between; background: #0f1d38; list-style: none; }
-        summary.reader-summary::-webkit-details-marker { display: none; }
-        summary.reader-summary::after { content: "▼ 상세 매크로 분석 & 원문"; font-size: 10px; color: #94a3b8; }
-        details[open] summary.reader-summary::after { content: "▲ 접기"; color: #38bdf8; }
-        .accordion-content { padding: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
-        .sub-box-analysis { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; padding: 10px; border-radius: 6px; line-height: 1.6; white-space: pre-line; }
-        .sub-box-en { background: #020617; border: 1px solid #334155; color: #94a3b8; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; white-space: pre-line; }
 
-        /* 대시보드 UI */
-        .dash-container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
-        .dash-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
-        .dash-header { font-size: 14px; font-weight: bold; color: #f8fafc; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-        
-        .gauge-wrapper { position: relative; width: 100%; height: 24px; background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e, #3b82f6); border-radius: 12px; margin: 30px 0 10px; }
-        .gauge-needle { position: absolute; top: -16px; width: 4px; height: 32px; background: #ffffff; border-radius: 2px; box-shadow: 0 0 4px #000; transition: left 1s cubic-bezier(0.4, 0, 0.2, 1); left: 50%; z-index: 10; }
-        .gauge-needle::after { content: '▼'; position: absolute; top: -14px; left: -4px; color: #fff; font-size: 12px; text-shadow: 0 1px 2px #000; }
-        .gauge-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #94a3b8; }
-        
-        .score-display { text-align: center; margin-top: 16px; }
-        .score-number { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
-        .score-text { font-size: 13px; font-weight: bold; margin-top: 4px; }
-        .score-desc { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+<style>
 
-        .gmi-reason-box { background: #082f49; border: 1px solid #0369a1; border-radius: 8px; padding: 12px; margin-top: 16px; font-size: 12px; color: #e0f2fe; line-height: 1.5; text-align: left; }
-        .gmi-reason-header { color: #38bdf8; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
 
-        .sector-split { display: flex; gap: 10px; margin-top: 8px; }
-        .sector-box { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; }
-        .sector-pro { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
-        .sector-con { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
-        .sector-title { font-size: 12px; font-weight: bold; }
-        .sector-pro .sector-title { color: #4ade80; }
-        .sector-con .sector-title { color: #f87171; }
-        .sector-list { font-size: 13px; color: #f1f5f9; font-weight: 600; line-height: 1.5; }
-        .sector-reason { font-size: 11px; color: #94a3b8; margin-top: 4px; line-height: 1.4; border-top: 1px dashed #334155; padding-top: 6px; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-        /* 백테스트 승률 박스 & 3번 사진 스타일 차트 */
-        .win-rate-box { background: #1e3a8a; border: 1px solid #3b82f6; padding: 14px; border-radius: 12px; margin: 12px 0 16px; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 6px; }
-        .win-rate-title { font-size: 12px; color: #bfdbfe; font-weight: bold; display: flex; align-items: center; gap: 4px; }
-        .win-rate-val { font-size: 20px; color: #fff; font-weight: 900; }
 
-        .trend-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 160px; padding-top: 40px; gap: 6px; }
-        .trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; position: relative; }
-        .trend-bar { width: 100%; max-width: 24px; border-radius: 4px 4px 0 0; transition: height 1s ease, background-color 0.3s ease; }
-        .trend-date { font-size: 10px; color: #64748b; margin-top: 4px; }
-        .trend-val { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 2px; }
-        
-        .spy-overlay { position: absolute; top: -26px; font-size: 11px; font-weight: 900; white-space: nowrap; }
-        .spy-pos { color: #ef4444; } /* 한국식 상승 색상 (빨강) */
-        .spy-neg { color: #38bdf8; } /* 한국식 하락 색상 (파랑) */
+body {
 
-        #sync-banner { background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none; }
 
-        /* 실시간 가격 팝업 */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(2, 6, 23, 0.85); z-index: 999;
-            justify-content: center; align-items: center; padding: 20px;
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
-        .modal-content {
-            background: #0f172a; border: 1px solid #1e293b; border-radius: 16px;
-            width: 100%; max-width: 360px; padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 16px;
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: bold; font-size: 16px; }
-        .modal-close { background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; line-height: 1; padding: 0 5px; }
-        .tv-widget-box { width: 100%; height: 120px; background: #020617; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #1e293b; }
-        .modal-actions { display: flex; gap: 10px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border: none; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 6px; }
-        .btn-primary { background: #2563eb; color: #fff; }
-        .btn-secondary { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
-    </style>
+background-color: #020617;
+
+
+color: #f1f5f9;
+
+
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+
+
+padding-bottom: 70px;
+
+
+}
+
+
+​/* 고정 헤더 */
+
+
+header {
+
+
+position: sticky; top: 0; z-index: 50; background: #0f172a;
+
+
+border-bottom: 1px solid #1e293b; padding: 12px 14px;
+
+
+display: flex; align-items: center; justify-content: space-between;
+
+
+}
+
+
+.logo-box { display: flex; align-items: center; gap: 8px; }
+
+
+.live-dot {
+
+
+width: 10px; height: 10px; border-radius: 50%; background: #22c55e;
+
+
+box-shadow: 0 0 8px #22c55e; flex-shrink: 0; animation: pulse 1.8s infinite;
+
+
+}
+
+
+@keyframes pulse {
+
+
+0% { opacity: 1; transform: scale(1); }
+
+
+50% { opacity: 0.4; transform: scale(0.85); }
+
+
+100% { opacity: 1; transform: scale(1); }
+
+
+}
+
+
+.header-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: -0.3px; }
+
+
+.header-sub { font-size: 11px; color: #94a3b8; }
+
+
+.header-controls { display: flex; align-items: center; gap: 6px; }
+
+
+.timer-badge {
+
+
+font-size: 11px; font-family: monospace; color: #38bdf8;
+
+
+background: #082f49; border: 1px solid #0369a1; padding: 5px 8px; border-radius: 6px; white-space: nowrap;
+
+
+}
+
+
+.btn-refresh {
+
+
+background: #2563eb; color: #fff; border: none; padding: 6px 12px;
+
+
+border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;
+
+
+}
+
+
+​/* 탭 버튼 UI */
+
+
+.tab-bar {
+
+
+display: flex; background: #0b1329; border-bottom: 1px solid #1e293b;
+
+
+position: sticky; top: 57px; z-index: 40;
+
+
+}
+
+
+.tab-btn {
+
+
+flex: 1; padding: 12px 0; text-align: center; font-size: 13px; font-weight: bold;
+
+
+color: #64748b; background: transparent; border: none; border-bottom: 3px solid transparent;
+
+
+cursor: pointer; transition: all 0.2s ease;
+
+
+}
+
+
+.tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; background: #0f1d38; }
+
+
+.tab-content { display: none; }
+
+
+.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+
+​/* 매크로 지표 상단 띠 */
+
+
+.macro-indicator-bar {
+
+
+background: #09101f; border-bottom: 1px solid #1e293b;
+
+
+padding: 10px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
+
+
+}
+
+
+.macro-indicator-bar::-webkit-scrollbar { display: none; }
+
+
+.indicator-item {
+
+
+display: inline-flex; align-items: center; gap: 5px; color: #cbd5e1;
+
+
+background: #111e38; border: 1px solid #1e3a8a; padding: 6px 10px;
+
+
+border-radius: 8px; cursor: pointer; font-size: 11.5px; transition: all 0.15s ease;
+
+
+}
+
+
+.indicator-item:active { background: #1e3a8a; }
+
+
+.indicator-name { color: #f8fafc; font-weight: bold; }
+
+
+​/* 필터 및 검색바 */
+
+
+.toolbar { padding: 12px 14px 6px; max-width: 680px; margin: 0 auto; }
+
+
+.filter-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+
+.radar-label { font-size: 11px; font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 4px; }
+
+
+.macro-radar-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
+
+
+.macro-radar-buttons::-webkit-scrollbar { display: none; }
+
+
+.radar-btn {
+
+
+background: #172554; color: #93c5fd; border: 1px solid #1d4ed8; padding: 6px 11px;
+
+
+border-radius: 6px; font-size: 11.5px; font-weight: bold; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+
+
+}
+
+
+.radar-btn.active { background: #ef4444; color: #fff; border-color: #b91c1c; }
+
+
+​.filter-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+
+
+.filter-buttons::-webkit-scrollbar { display: none; }
+
+
+.filter-btn { background: #1e293b; color: #94a3b8; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; cursor: pointer; }
+
+
+.filter-btn.active { background: #0284c7; color: #ffffff; }
+
+
+​.search-input { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 8px 12px; font-size: 12px; color: #fff; outline: none; }
+
+
+.search-input:focus { border-color: #0284c7; }
+
+
+.status-row { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-top: 6px; padding: 0 4px; }
+
+
+​/* 뉴스 카드 */
+
+
+.news-container { max-width: 680px; margin: 0 auto; padding: 6px 14px; display: flex; flex-direction: column; gap: 14px; }
+
+
+.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+
+.tag-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+
+.tag { font-size: 11px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid transparent; white-space: nowrap; }
+
+
+.tag-Bloomberg { background: #172554; color: #93c5fd; border-color: #1e40af; }
+
+
+.tag-Reuters { background: #451a03; color: #fdba74; border-color: #9a3412; }
+
+
+.tag-WSJ { background: #064e3b; color: #6ee7b7; border-color: #047857; }
+
+
+.tag-CNBC { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
+
+
+​.quick-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+
+
+.action-chip { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+
+
+.time-meta-bar { background: #09101f; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: monospace; display: flex; justify-content: space-between; color: #94a3b8; }
+
+
+.time-val { color: #38bdf8; font-weight: bold; }
+
+
+​.article-original { display: flex; flex-direction: column; gap: 6px; }
+
+
+.article-title-en { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; text-decoration: none; }
+
+
+.article-title-ko { font-size: 13px; font-weight: 600; color: #38bdf8; line-height: 1.4; background: #082f49; padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0ea5e9; }
+
+
+​/* 동적 요약 박스 디자인 */
+
+
+.article-korean-summary { background: #0f1d38; border: 1px solid #1e3a8a; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 6px; }
+
+
+.korean-summary-badge { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; color: #f59e0b; border-bottom: 1px solid rgba(245, 158, 11, 0.25); padding-bottom: 4px; }
+
+
+.macro-tag-pill { background: #78350f; color: #fef3c7; padding: 1px 6px; border-radius: 4px; font-size: 10px; }
+
+
+.korean-summary-text { white-space: pre-line; color: #f0f9ff; }
+
+
+.summary-tone-badge { font-weight: bold; display: inline-block; padding: 1px 5px; border-radius: 4px; margin-right: 4px; font-size: 11px; }
+
+
+.tone-bull { background: #14532d; color: #86efac; }
+
+
+.tone-bear { background: #7f1d1d; color: #fca5a5; }
+
+
+.tone-neutral { background: #334155; color: #cbd5e1; }
+
+
+​details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
+
+
+summary.reader-summary { padding: 9px 12px; font-size: 11px; font-weight: bold; color: #38bdf8; cursor: pointer; display: flex; justify-content: space-between; background: #0f1d38; list-style: none; }
+
+
+summary.reader-summary::-webkit-details-marker { display: none; }
+
+
+summary.reader-summary::after { content: "▼ 상세 매크로 분석 & 원문"; font-size: 10px; color: #94a3b8; }
+
+
+details[open] summary.reader-summary::after { content: "▲ 접기"; color: #38bdf8; }
+
+
+.accordion-content { padding: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+
+.sub-box-analysis { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; padding: 10px; border-radius: 6px; line-height: 1.6; white-space: pre-line; }
+
+
+.sub-box-en { background: #020617; border: 1px solid #334155; color: #94a3b8; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; white-space: pre-line; }
+
+
+​/* 대시보드 UI */
+
+
+.dash-container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+
+
+.dash-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
+
+
+.dash-header { font-size: 14px; font-weight: bold; color: #f8fafc; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+
+​.gauge-wrapper { position: relative; width: 100%; height: 24px; background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e, #3b82f6); border-radius: 12px; margin: 30px 0 10px; }
+
+
+.gauge-needle { position: absolute; top: -16px; width: 4px; height: 32px; background: #ffffff; border-radius: 2px; box-shadow: 0 0 4px #000; transition: left 1s cubic-bezier(0.4, 0, 0.2, 1); left: 50%; z-index: 10; }
+
+
+.gauge-needle::after { content: '▼'; position: absolute; top: -14px; left: -4px; color: #fff; font-size: 12px; text-shadow: 0 1px 2px #000; }
+
+
+.gauge-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #94a3b8; }
+
+
+​.score-display { text-align: center; margin-top: 16px; }
+
+
+.score-number { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
+
+
+.score-text { font-size: 13px; font-weight: bold; margin-top: 4px; }
+
+
+.score-desc { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+
+​.gmi-reason-box { background: #082f49; border: 1px solid #0369a1; border-radius: 8px; padding: 12px; margin-top: 16px; font-size: 12px; color: #e0f2fe; line-height: 1.5; text-align: left; }
+
+
+.gmi-reason-header { color: #38bdf8; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+
+
+​.sector-split { display: flex; gap: 10px; margin-top: 8px; }
+
+
+.sector-box { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; }
+
+
+.sector-pro { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+
+
+.sector-con { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+
+
+.sector-title { font-size: 12px; font-weight: bold; }
+
+
+.sector-pro .sector-title { color: #4ade80; }
+
+
+.sector-con .sector-title { color: #f87171; }
+
+
+.sector-list { font-size: 13px; color: #f1f5f9; font-weight: 600; line-height: 1.5; }
+
+
+.sector-reason { font-size: 11px; color: #94a3b8; margin-top: 4px; line-height: 1.4; border-top: 1px dashed #334155; padding-top: 6px; }
+
+
+​/* 백테스트 승률 박스 & 3번 사진 스타일 차트 */
+
+
+.win-rate-box { background: #1e3a8a; border: 1px solid #3b82f6; padding: 14px; border-radius: 12px; margin: 12px 0 16px; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 6px; }
+
+
+.win-rate-title { font-size: 12px; color: #bfdbfe; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+
+
+.win-rate-val { font-size: 20px; color: #fff; font-weight: 900; }
+
+
+​.trend-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 160px; padding-top: 40px; gap: 6px; }
+
+
+.trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; position: relative; }
+
+
+.trend-bar { width: 100%; max-width: 24px; border-radius: 4px 4px 0 0; transition: height 1s ease, background-color 0.3s ease; }
+
+
+.trend-date { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+
+.trend-val { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 2px; }
+
+
+​.spy-overlay { position: absolute; top: -26px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+
+
+.spy-pos { color: #ef4444; } /* 한국식 상승 색상 (빨강) /
+
+
+.spy-neg { color: #38bdf8; } / 한국식 하락 색상 (파랑) */
+
+
+​#sync-banner { background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none; }
+
+
+​/* 실시간 가격 팝업 */
+
+
+.modal-overlay {
+
+
+display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+
+
+background: rgba(2, 6, 23, 0.85); z-index: 999;
+
+
+justify-content: center; align-items: center; padding: 20px;
+
+
+backdrop-filter: blur(4px);
+
+
+}
+
+
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+
+
+.modal-content {
+
+
+background: #0f172a; border: 1px solid #1e293b; border-radius: 16px;
+
+
+width: 100%; max-width: 360px; padding: 20px;
+
+
+box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 16px;
+
+
+}
+
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: bold; font-size: 16px; }
+
+
+.modal-close { background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; line-height: 1; padding: 0 5px; }
+
+
+.tv-widget-box { width: 100%; height: 120px; background: #020617; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #1e293b; }
+
+
+.modal-actions { display: flex; gap: 10px; }
+
+
+.modal-btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border: none; text-decoration: none; display: flex; justify-content: center; align-items: center; gap: 6px; }
+
+
+.btn-primary { background: #2563eb; color: #fff; }
+
+
+.btn-secondary { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+
+
+</style>
+
+
 </head>
+
+
 <body>
-    <div id="sync-banner">📡 실시간 외신 속보 동기화 중...</div>
-
-    <header>
-        <div class="logo-box">
-            <div class="live-dot"></div>
-            <div>
-                <div class="header-title">⚡ 글로벌 경제·지정학 속보 AI</div>
-                <div class="header-sub">거품·유동성 매크로 실시간 터미널</div>
-            </div>
-        </div>
-        <div class="header-controls">
-            <span id="next-timer" class="timer-badge">60초 후 갱신</span>
-            <button class="btn-refresh" onclick="fetchLiveNews()">새로고침</button>
-        </div>
-    </header>
-
-    <div class="tab-bar">
-        <button class="tab-btn active" id="btn-tab-news" onclick="switchTab('news')">📰 실시간 속보</button>
-        <button class="tab-btn" id="btn-tab-dash" onclick="switchTab('dash')">🧭 매크로 지수 & 섹터</button>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 1: NEWS FEED                           -->
-    <!-- ========================================== -->
-    <div id="tab-news" class="tab-content active">
-        
-        <div class="macro-indicator-bar">
-            <!-- 팝업 위젯은 안 막히는 NASDAQ:TLT 사용, 전체 차트 링크는 공식 TVC-US10Y로 연결 -->
-            <div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 10년 (TLT)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
-                <span class="indicator-name">🏛️ 미 국채 10년</span>
-            </div>
-            <!-- 위젯은 CAPITALCOM 사용, 전체 차트는 공식 TVC-DXY로 연결 -->
-            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/TVC-DXY/')">
-                <span class="indicator-name">💵 달러 인덱스</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('FX_IDC:USDJPY', '💴 엔/달러 환율', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/FX_IDC-USDJPY/')">
-                <span class="indicator-name">💴 엔화/엔캐리</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('TVC:USOIL', '🛢️ WTI 원유', 'OIL_GEO', 'https://kr.tradingview.com/symbols/TVC-USOIL/')">
-                <span class="indicator-name">🛢️ WTI 유가</span>
-            </div>
-            <!-- 팝업 위젯은 CAPITALCOM 사용, 전체 차트는 공식 TVC-VIX로 연결 -->
-            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/TVC-VIX/')">
-                <span class="indicator-name">😱 VIX 공포지수</span>
-            </div>
-        </div>
-
-        <section class="toolbar">
-            <div class="filter-box">
-                <div>
-                    <div class="radar-label">🚨 매크로 핵심 리스크 레이더 (원클릭 필터)</div>
-                    <div class="macro-radar-buttons" style="margin-top: 6px;">
-                        <button class="radar-btn active" onclick="setMacroFilter('ALL', this)" id="btn-filter-all">🌐 전체 속보</button>
-                        <button class="radar-btn" onclick="setMacroFilter('FED', this)" id="btn-filter-fed">🏛️ 금리/연준(Fed)</button>
-                        <button class="radar-btn" onclick="setMacroFilter('AI_BUBBLE', this)" id="btn-filter-ai">🤖 AI거품/빅테크</button>
-                        <button class="radar-btn" onclick="setMacroFilter('YEN_DOLLAR', this)" id="btn-filter-yen">💱 환율/엔캐리</button>
-                        <button class="radar-btn" onclick="setMacroFilter('OIL_GEO', this)" id="btn-filter-oil">🛢️ 유가/지정학</button>
-                        <button class="radar-btn" onclick="setMacroFilter('CHINA', this)">🇨🇳 중국/공급망</button>
-                    </div>
-                </div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterVendor('ALL', this)">언론사 전체</button>
-                    <button class="filter-btn" onclick="filterVendor('Bloomberg', this)">블룸버그</button>
-                    <button class="filter-btn" onclick="filterVendor('Reuters', this)">로이터</button>
-                    <button class="filter-btn" onclick="filterVendor('WSJ', this)">WSJ</button>
-                    <button class="filter-btn" onclick="filterVendor('CNBC', this)">CNBC</button>
-                </div>
-                <input type="text" id="search-input" class="search-input" placeholder="키워드 직접 검색 (예: 파월, 침체, 유동성...)" oninput="searchCards(this.value)">
-            </div>
-            <div class="status-row">
-                <span id="article-count-label">🟢 실시간 속보 수신 대기 중</span>
-                <span id="last-updated-label">정상 연결됨</span>
-            </div>
-        </section>
-
-        <main class="news-container" id="news-container">
-            <div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">최신 매크로 외신 데이터를 불러오는 중입니다...</div>
-        </main>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- TAB 2: MACRO DASHBOARD                     -->
-    <!-- ========================================== -->
-    <div id="tab-dash" class="tab-content">
-        <div class="dash-container">
-            
-            <!-- 1. GMI Gauge & Sentiment AI Reason (대안 A) -->
-            <div class="dash-card">
-                <div class="dash-header">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 실시간 외신 기사의 키워드와 시장 참여자들의 극단적 반응(패닉/포모) 빈도를 종합 분석합니다.</div>
-                
-                <div class="gauge-wrapper">
-                    <div id="gmi-needle" class="gauge-needle" style="left: 50%;"></div>
-                </div>
-                <div class="gauge-labels">
-                    <span>극단적 공포(0)</span>
-                    <span>중립(50)</span>
-                    <span>극단적 탐욕(100)</span>
-                </div>
-                
-                <div class="score-display">
-                    <div id="gmi-score" class="score-number">--</div>
-                    <div id="gmi-text" class="score-text" style="color: #f8fafc;">데이터 분석 중...</div>
-                    <div id="gmi-desc" class="score-desc">방금 수신된 데이터를 기반으로 심리를 계산하고 있습니다.</div>
-                </div>
-
-                <div class="gmi-reason-box">
-                    <div class="gmi-reason-header">🤖 AI 매크로 & 센티먼트 평가 산출 근거</div>
-                    <div id="gmi-reason-text">기사 및 반응 데이터를 분석하고 있습니다...</div>
-                </div>
-            </div>
-
-            <!-- 2. Sector Weather -->
-            <div class="dash-card">
-                <div class="dash-header">🧭 당일 매크로 테마 & 섹터 유불리 기상도</div>
-                <div style="font-size: 12px; color: #e2e8f0; margin-bottom: 8px;">
-                    📌 오늘 시장을 지배하는 핵심 이슈: <strong id="sector-dominant-issue" style="color: #f59e0b;">분석 중...</strong>
-                </div>
-                
-                <div class="sector-split">
-                    <div class="sector-box sector-pro">
-                        <div class="sector-title">🟢 오늘 유리한 수혜 섹터</div>
-                        <div id="sector-pro-list" class="sector-list">--</div>
-                        <div id="sector-pro-reason" class="sector-reason">--</div>
-                    </div>
-                    <div class="sector-box sector-con">
-                        <div class="sector-title">🔴 오늘 불리한 주의 섹터</div>
-                        <div id="sector-con-list" class="sector-list">--</div>
-                        <div id="sector-con-reason" class="sector-reason">--</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Quant Backtest & Win Rate with SPY Overlay (캡처 3번 완벽 재현) -->
-            <div class="dash-card">
-                <div class="dash-header">🎯 GMI 알고리즘 예측 승률 검증 (vs S&P 500)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
-                    * 매일 내 GMI 지수가 50 이상일 때 주가가 오르고, 미만일 때 내렸다면 '적중'으로 판정합니다.
-                </div>
-                
-                <!-- 파란색 승률 뱃지 박스 -->
-                <div class="win-rate-box">
-                    <div class="win-rate-title">📈 최근 7일 GMI 알고리즘 적중률</div>
-                    <div id="win-rate-display" class="win-rate-val">계산 중...</div>
-                </div>
-                
-                <!-- GMI 막대 + S&P500 등락률 오버레이 차트 -->
-                <div style="background: #020617; border-radius: 8px; padding: 12px 10px 10px; border: 1px solid #1e293b;">
-                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px; text-align: center;">
-                        막대 = 내 GMI 지수 / <span class="spy-pos">빨간 숫자(+)</span> & <span class="spy-neg">파란 숫자(-)</span> = 당일 S&P 500 등락률
-                    </div>
-                    <div id="backtest-chart-container" class="trend-chart">
-                        <!-- 자바스크립트로 그리기 -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- [대안 C] 돈의 흐름 (TradingView Technical Analysis) -->
-            <div class="dash-card">
-                <div class="dash-header">⚡ 트레이딩뷰 실시간 돈의 흐름 (기술적 분석 미터기)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 사람들의 말보다 정확한 실제 돈의 이동(매수/매도 강도)을 기술적으로 분석한 계기판입니다.</div>
-                <div class="tv-widget-box" id="tv-ta-widget" style="height: 380px; background: transparent; border: none;">
-                    <!-- 탭 클릭 시 스크립트 로드 -->
-                </div>
-            </div>
-
-            <!-- [대안 B] 글로벌 개미 반응 (StockTwits) -->
-            <div class="dash-card">
-                <div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 양키 형님들이 강세(Bullish)를 외치는지 확인하세요.</div>
-                <div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;">
-                    <!-- 탭 클릭 시 스크립트 로드 -->
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- QUICK VIEW MODAL (실시간 가격 팝업)         -->
-    <!-- ========================================== -->
-    <div id="quick-view-modal" class="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <span id="modal-title">지표 시세 퀵뷰</span>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            
-            <div class="tv-widget-box" id="tv-quick-box">
-                <div style="color:#64748b; font-size:12px;">실시간 시세 불러오는 중...</div>
-            </div>
-
-            <div class="modal-actions">
-                <button id="modal-btn-filter" class="modal-btn btn-primary">🔍 관련 속보 필터링</button>
-                <a id="modal-btn-chart" href="#" target="_blank" class="modal-btn btn-secondary">📈 전체 차트 열기 ↗</a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        var liveArticles = [];
-        var currentVendorFilter = "ALL";
-        var currentMacroFilter = "ALL";
-        var searchQuery = "";
-        var countdown = 60;
-        var todayKSTDateStr = ""; 
-        var widgetsLoaded = false;
-
-        function switchTab(tabId) {
-            document.getElementById('tab-news').classList.remove('active');
-            document.getElementById('tab-dash').classList.remove('active');
-            document.getElementById('btn-tab-news').classList.remove('active');
-            document.getElementById('btn-tab-dash').classList.remove('active');
-            
-            document.getElementById('tab-' + tabId).classList.add('active');
-            document.getElementById('btn-tab-' + tabId).classList.add('active');
-
-            if (tabId === 'dash') {
-                updateDashboard();
-                loadDashboardWidgets();
-            }
-        }
-
-        /* 하단 위젯들 동적 로드 */
-        function loadDashboardWidgets() {
-            if(widgetsLoaded) return;
-            widgetsLoaded = true;
-
-            var taBox = document.getElementById('tv-ta-widget');
-            taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-            var taScript = document.createElement('script');
-            taScript.type = 'text/javascript';
-            taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-            taScript.async = true;
-            taScript.innerHTML = JSON.stringify({
-                "interval": "1D",
-                "width": "100%",
-                "isTransparent": true,
-                "height": "100%",
-                "symbol": "AMEX:SPY",
-                "showIntervalTabs": true,
-                "displayMode": "single",
-                "locale": "kr",
-                "colorTheme": "dark"
-            });
-            taBox.appendChild(taScript);
-
-            var stScript = document.createElement('script');
-            stScript.type = 'text/javascript';
-            stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
-            stScript.onload = function() {
-                STWT.Widget({
-                    container: 'stocktwits-widget-container',
-                    symbol: 'SPY',
-                    width: '100%',
-                    height: '400',
-                    limit: '15',
-                    scrollbars: 'true',
-                    streaming: 'true',
-                    title: 'S&P 500 ($SPY) 실시간 반응',
-                    style: { link_color: '#38bdf8', text_color: '#cbd5e1', divider_color: '#1e293b', header_text_color: '#f8fafc', header_color: '#0f172a', box_color: '#020617' }
-                });
-            };
-            document.body.appendChild(stScript);
-        }
-
-        /* 퀵뷰 모달 */
-        function openQuickView(symbol, title, filterCat, chartUrl) {
-            var modal = document.getElementById('quick-view-modal');
-            document.getElementById('modal-title').textContent = title;
-            
-            var btnFilter = document.getElementById('modal-btn-filter');
-            btnFilter.onclick = function() {
-                var btnId = 'btn-filter-all';
-                if(filterCat === 'FED') btnId = 'btn-filter-fed';
-                if(filterCat === 'YEN_DOLLAR') btnId = 'btn-filter-yen';
-                if(filterCat === 'OIL_GEO') btnId = 'btn-filter-oil';
-                
-                var targetBtn = document.getElementById(btnId);
-                if(targetBtn) setMacroFilter(filterCat, targetBtn);
-                closeModal();
-            };
-
-            var btnChart = document.getElementById('modal-btn-chart');
-            btnChart.href = chartUrl;
-
-            var box = document.getElementById('tv-quick-box');
-            box.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-            
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js';
-            script.async = true;
-            script.innerHTML = JSON.stringify({
-                "symbol": symbol,
-                "width": "100%",
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "locale": "kr"
-            });
-            box.appendChild(script);
-
-            modal.classList.add('active');
-        }
-
-        function closeModal(e) {
-            if (e && e.target !== e.currentTarget) return;
-            document.getElementById('quick-view-modal').classList.remove('active');
-            document.getElementById('tv-quick-box').innerHTML = ''; 
-        }
-
-        function formatKST(dateStr) {
-            var d = dateStr ? new Date(dateStr) : new Date();
-            if (isNaN(d.getTime())) d = new Date();
-            
-            var utcTime = d.getTime() + (d.getTimezoneOffset() * 60000);
-            var kstDate = new Date(utcTime + (9 * 3600000));
-            todayKSTDateStr = kstDate.getFullYear() + "-" + String(kstDate.getMonth()+1).padStart(2,'0') + "-" + String(kstDate.getDate()).padStart(2,'0');
-
-            var hours = String(kstDate.getHours()).padStart(2, '0');
-            var minutes = String(kstDate.getMinutes()).padStart(2, '0');
-            
-            var nowUtcTime = Date.now() + (new Date().getTimezoneOffset() * 60000);
-            var nowKstMs = nowUtcTime + (9 * 3600000);
-            var diffMs = nowKstMs - kstDate.getTime();
-            var diffSec = Math.floor(diffMs / 1000);
-            
-            var rel = "";
-            if(diffSec >= 0 && diffSec < 86400) {
-                if (diffSec < 60) rel = " (방금 전)";
-                else if (diffSec < 3600) rel = " (" + Math.floor(diffSec / 60) + "분 전)";
-                else rel = " (" + Math.floor(diffSec / 3600) + "시간 전)";
-            }
-            
-            return kstDate.getFullYear() + "." + String(kstDate.getMonth()+1).padStart(2,'0') + "." + String(kstDate.getDate()).padStart(2,'0') + " " + hours + ":" + minutes + " KST" + rel;
-        }
-
-        function categorizeMacro(title, desc) {
-            var t = (title + " " + desc).toLowerCase();
-            if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1 || t.indexOf("powell") !== -1 || t.indexOf("treasury") !== -1) return "FED";
-            if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1 || t.indexOf("tech") !== -1 || t.indexOf("bubble") !== -1) return "AI_BUBBLE";
-            if (t.indexOf("dollar") !== -1 || t.indexOf("yen") !== -1 || t.indexOf("carry") !== -1 || t.indexOf("boj") !== -1 || t.indexOf("currency") !== -1) return "YEN_DOLLAR";
-            if (t.indexOf("oil") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("crude") !== -1 || t.indexOf("war") !== -1 || t.indexOf("iran") !== -1 || t.indexOf("russia") !== -1) return "OIL_GEO";
-            if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("tariff") !== -1 || t.indexOf("trade") !== -1) return "CHINA";
-            return "GENERAL";
-        }
-
-        function translateTitleToKorean(title, category) {
-            if (category === "FED") return "🏛️ [금리/연준] 미 연준 통화정책 기조 및 국채금리·물가 지표 속보";
-            if (category === "AI_BUBBLE") return "🤖 [AI/밸류에이션] 빅테크 AI 인프라 투자 및 밸류에이션 거품 논쟁";
-            if (category === "YEN_DOLLAR") return "💱 [환율/유동성] 엔-달러 환율 변동성 및 엔캐리 트레이드 청산 리스크";
-            if (category === "OIL_GEO") return "🛢️ [에너지/지정학] 국제 유가 급등락 및 중동·지정학 공급망 충격";
-            if (category === "CHINA") return "🇨🇳 [중국/무역] 중국 수출입 경기 둔화 및 글로벌 교역 관세 갈등";
-            return "📌 [외신 매크로] " + title;
-        }
-
-        function generateMacroSummary(title, desc, category) {
-            if (category === "FED") return "• 매크로 진단: 미 연준(Fed)의 금리 인하 기대치 조정 또는 인플레 지속 우려.\n• 거품/시장 충격: 미 국채 금리 급등 시 고밸류 성장주 및 기술주에 강력한 밸류에이션 압박(유동성 위축) 경계 필요.";
-            if (category === "AI_BUBBLE") return "• 매크로 진단: 빅테크의 막대한 AI 설비투자(CAPEX) 대비 실제 수익화(ROI) 속도에 대한 회의론 점검.\n• 거품/시장 충격: AI 과열 논란 시 반도체 대장주를 중심으로 지수 전반의 변동성 확대 및 차익실현 매물 주의.";
-            if (category === "YEN_DOLLAR") return "• 매크로 진단: 일본은행(BOJ) 금리 인상 시사 및 달러 약세/강세에 따른 글로벌 자금 흐름 변화.\n• 거품/시장 충격: 엔캐리 트레이드 자금 청산 시 전 세계 위험자산(주식)에서 동시다발적 자금 이탈 충격 가능성.";
-            if (category === "OIL_GEO") return "• 매크로 진단: 산유국 공급 차질 및 지정학 분쟁에 따른 유가 급등세와 물가 반등 압력.\n• 거품/시장 충격: 스태그플레이션(경기침체 속 물가상승) 공포 자극 시 증시 전반의 멀티플 하향 요인.";
-            if (category === "CHINA") return "• 매크로 진단: 중국 내수 침체 및 대미 무역 관세 갈등에 따른 아시아 신흥국 교역 둔화.\n• 거품/시장 충격: 수출 비중이 높은 국내 제조업(반도체, 2차전지, 화학 등)의 실적 눈높이 하향 리스크.";
-            return "• 매크로 진단: 글로벌 거시경제 변수와 금융시장 수급에 즉각적인 변화를 줄 수 있는 사안입니다.\n• 거품/시장 충격: 단기 시장 심리에 따라 주요 섹터의 변동성이 확대될 수 있으므로 분할 대응 권장.";
-        }
-
-        async function fetchLiveNews() {
-            var banner = document.getElementById("sync-banner");
-            if (banner) banner.style.display = "block";
-
-            var queries = ["reuters.com business markets", "bloomberg.com markets economics", "wsj.com markets economy", "cnbc.com finance markets"];
-            var fetchedList = [];
-
-            for (var i = 0; i < queries.length; i++) {
-                try {
-                    var rssUrl = "https://news.google.com/rss/search?q=" + encodeURIComponent("when:24h " + queries[i]) + "&hl=en-US&gl=US&ceid=US:en";
-                    var apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
-                    var res = await fetch(apiUrl);
-                    var data = await res.json();
-
-                    if (data && data.items) {
-                        for (var j = 0; j < data.items.length; j++) {
-                            var item = data.items[j];
-                            var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal).*/gi, '').trim();
-                            var rawDesc = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
-                            var cleanDesc = rawDesc.length > 0 ? rawDesc : cleanTitle;
-                            
-                            var vendor = "Reuters"; var sourceName = "Reuters Business";
-                            var linkLower = (item.link || "").toLowerCase(); var titleLower = (item.title || "").toLowerCase();
-                            if (linkLower.indexOf("bloomberg") !== -1 || titleLower.indexOf("bloomberg") !== -1) { vendor = "Bloomberg"; sourceName = "Bloomberg Markets"; }
-                            else if (linkLower.indexOf("wsj") !== -1 || titleLower.indexOf("wsj") !== -1) { vendor = "WSJ"; sourceName = "WSJ Markets"; }
-                            else if (linkLower.indexOf("cnbc") !== -1 || titleLower.indexOf("cnbc") !== -1) { vendor = "CNBC"; sourceName = "CNBC Finance"; }
-
-                            var itemTimestamp = new Date(item.pubDate || Date.now()).getTime();
-                            var macroCat = categorizeMacro(cleanTitle, cleanDesc);
-
-                            fetchedList.push({
-                                titleEn: cleanTitle, category: macroCat, titleKo: translateTitleToKorean(cleanTitle, macroCat),
-                                link: item.link, desc: cleanDesc, vendor: vendor, source: sourceName,
-                                timeKST: formatKST(item.pubDate), summaryKo: generateMacroSummary(cleanTitle, cleanDesc, macroCat),
-                                timestamp: itemTimestamp
-                            });
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            if (banner) banner.style.display = "none";
-
-            if (fetchedList.length > 0) {
-                var uniqueMap = {}; var cleanList = [];
-                for (var k = 0; k < fetchedList.length; k++) {
-                    if (!uniqueMap[fetchedList[k].link]) {
-                        uniqueMap[fetchedList[k].link] = true; cleanList.push(fetchedList[k]);
-                    }
-                }
-                cleanList.sort(function(a, b) { return b.timestamp - a.timestamp; });
-                liveArticles = cleanList;
-                renderCards();
-                
-                var updateLabel = document.getElementById("last-updated-label");
-                if (updateLabel) updateLabel.textContent = "동기화 완료 (" + new Date().toLocaleTimeString() + ")";
-
-                if(todayKSTDateStr === "") formatKST(); 
-                updateDashboard();
-            }
-        }
-
-        function renderCards() {
-            var container = document.getElementById("news-container");
-            if (!container) return;
-
-            var filtered = liveArticles.filter(function(a) {
-                var matchVendor = (currentVendorFilter === "ALL" || a.vendor === currentVendorFilter);
-                var matchMacro = (currentMacroFilter === "ALL" || a.category === currentMacroFilter);
-                var q = searchQuery.toLowerCase();
-                var text = (a.titleEn + " " + a.titleKo + " " + a.desc + " " + a.summaryKo).toLowerCase();
-                var matchSearch = !q || text.indexOf(q) !== -1;
-                return matchVendor && matchMacro && matchSearch;
-            });
-
-            var countEl = document.getElementById("article-count-label");
-            if (countEl) countEl.innerHTML = "🟢 매크로 속보 <b>" + filtered.length + "건</b> 감지됨";
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">조건에 맞는 속보가 없습니다.</div>';
-                return;
-            }
-
-            var html = "";
-            for (var i = 0; i < filtered.length; i++) {
-                var it = filtered[i];
-                var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.titleEn);
-                var categoryBadgeText = "거품·유동성 체크";
-                if (it.category === "FED") categoryBadgeText = "🚨 금리/연준 긴급";
-                else if (it.category === "AI_BUBBLE") categoryBadgeText = "🤖 AI 밸류에이션";
-                else if (it.category === "YEN_DOLLAR") categoryBadgeText = "💱 환율/엔캐리";
-                else if (it.category === "OIL_GEO") categoryBadgeText = "🛢️ 유가/인플레";
-                else if (it.category === "CHINA") categoryBadgeText = "🇨🇳 대중 무역 리스크";
-
-                html += '<div class="card">' +
-                    '<div class="card-header">' +
-                        '<div class="tag-wrap"><span class="tag tag-' + it.vendor + '">' + it.source + '</span></div>' +
-                        '<div class="quick-actions">' +
-                            '<a class="action-chip" href="' + searchUrl + '" target="_blank">🔍 검색</a>' +
-                            '<a class="action-chip chip-origin" href="' + it.link + '" target="_blank">원문 ↗</a>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="time-meta-bar"><span class="time-label">⚡ 외신 타전 시각 (KST):</span><span class="time-val">' + it.timeKST + '</span></div>' +
-                    '<div class="article-original">' +
-                        '<a class="article-title-en" href="' + it.link + '" target="_blank">🌐 ' + it.titleEn + '</a>' +
-                        '<div class="article-title-ko">' + it.titleKo + '</div>' +
-                    '</div>' +
-                    '<div class="article-korean-summary">' +
-                        '<div class="korean-summary-badge"><span>⚡ AI 매크로 진단 & 거품·충격 분석</span><span class="macro-tag-pill">' + categoryBadgeText + '</span></div>' +
-                        '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
-                    '</div>' +
-                    '<details class="reader-accordion">' +
-                        '<summary class="reader-summary">📖 기사 원문 상세 분석 보기</summary>' +
-                        '<div class="accordion-content">' +
-                            '<div class="sub-box-analysis">🔍 [AI 심층 분석 및 상세 내용 요약]\n1. 배경 및 전개 상황: 본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변수로 작용하는 사안 조명 중.\n2. 경제적 파급 효과: 매크로 지표 변동에 따라 관련 섹터의 밸류에이션 재평가 유발 가능성.\n3. 대응 전략: 단기 변동성에 흔들리지 말고 실시간 지표를 모니터링하며 리스크 관리 요망.</div>' +
-                            '<div class="sub-box-en"><b>🌐 [Raw English Excerpt]</b>\n' + it.titleEn + '.\n\n' + it.desc + '\n\n🔗 ' + it.link + '</div>' +
-                        '</div>' +
-                    '</details>' +
-                '</div>';
-            }
-            container.innerHTML = html;
-        }
-
-        /* [대안 A] 알고리즘 고도화: 극단적 반응(센티먼트) 가중치 폭탄 포함 */
-        function calculateGMI() {
-            if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, panic: 0, cheer: 0, total: 0 };
-            
-            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'optimism', 'growth', 'lift', 'gain'];
-            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'fall', 'worry'];
-            
-            // 강력한 센티먼트 반응 단어 (가중치 폭탄)
-            var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '투매', '공포', '패닉', '폭락'];
-            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모'];
-            
-            var baseScore = 50; 
-            var totalAdjustment = 0;
-            var bullCount = 0; var bearCount = 0;
-            var panicCount = 0; var cheerCount = 0;
-            var catCounts = { 'FED': 0, 'AI_BUBBLE': 0, 'YEN_DOLLAR': 0, 'OIL_GEO': 0, 'CHINA': 0, 'GENERAL': 0 };
-
-            for (var i = 0; i < liveArticles.length; i++) {
-                var text = (liveArticles[i].titleEn + " " + liveArticles[i].desc + " " + liveArticles[i].summaryKo).toLowerCase();
-                catCounts[liveArticles[i].category]++;
-                
-                for(var b=0; b<bullWords.length; b++) { if(text.indexOf(bullWords[b]) !== -1) { totalAdjustment += 1.5; bullCount++; } }
-                for(var r=0; r<bearWords.length; r++) { if(text.indexOf(bearWords[r]) !== -1) { totalAdjustment -= 2.0; bearCount++; } }
-                
-                // 센티먼트 폭탄 단어 매칭
-                for(var p=0; p<panicWords.length; p++) { if(text.indexOf(panicWords[p]) !== -1) { totalAdjustment -= 4.0; panicCount++; } }
-                for(var c=0; c<cheerWords.length; c++) { if(text.indexOf(cheerWords[c]) !== -1) { totalAdjustment += 3.5; cheerCount++; } }
-            }
-
-            var finalScore = Math.round(baseScore + totalAdjustment);
-            if(finalScore < 0) finalScore = Math.max(0, finalScore + 20); 
-            if(finalScore > 100) finalScore = Math.min(100, finalScore - 20);
-            
-            var maxCat = 'FED';
-            var maxCount = -1;
-            for (var key in catCounts) {
-                if(catCounts[key] > maxCount && key !== 'GENERAL') {
-                    maxCount = catCounts[key]; maxCat = key;
-                }
-            }
-
-            return { score: finalScore, dominant: maxCat, bull: bullCount, bear: bearCount, panic: panicCount, cheer: cheerCount, total: liveArticles.length };
-        }
-
-        function updateDashboard() {
-            var gmi = calculateGMI();
-            var score = gmi.score;
-            var maxCat = gmi.dominant;
-
-            var needle = document.getElementById("gmi-needle");
-            var scoreEl = document.getElementById("gmi-score");
-            var textEl = document.getElementById("gmi-text");
-            var descEl = document.getElementById("gmi-desc");
-            var reasonEl = document.getElementById("gmi-reason-text");
-
-            if(needle) needle.style.left = score + "%";
-            if(scoreEl) scoreEl.textContent = score;
-
-            if(score <= 20) {
-                textEl.textContent = "극단적 공포 / 투매 장세"; textEl.style.color = "#ef4444";
-                descEl.textContent = "시장 심리가 얼어붙었습니다. 방어적 현금 확보가 절대적으로 유리한 구간입니다.";
-            } else if(score <= 40) {
-                textEl.textContent = "공포 / 조정 국면"; textEl.style.color = "#f59e0b";
-                descEl.textContent = "리스크 회피 심리가 강합니다. 변동성에 대비해 보수적인 접근이 필요합니다.";
-            } else if(score <= 60) {
-                textEl.textContent = "중립 / 관망세"; textEl.style.color = "#94a3b8";
-                descEl.textContent = "방향성을 탐색 중입니다. 매크로 주요 지표(금리, 환율)의 돌파구를 지켜보세요.";
-            } else if(score <= 80) {
-                textEl.textContent = "탐욕 / 상승장"; textEl.style.color = "#22c55e";
-                descEl.textContent = "투자 심리가 양호합니다. 주도주 중심의 트레이딩이 유효한 구간입니다.";
-            } else {
-                textEl.textContent = "극단적 탐욕 / 거품 경계"; textEl.style.color = "#3b82f6";
-                descEl.textContent = "시장이 과열되었습니다! 언제든 차익실현 매물이 쏟아질 수 있으니 리스크 관리가 필수입니다.";
-            }
-
-            // [대안 A] 근거 텍스트 조립
-            var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>일반 완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.<br><br>";
-            
-            if(gmi.panic > 0 || gmi.cheer > 0) {
-                reasonHtml += "🔥 <b>[시장 극단 반응 추적]</b> 외신에서 묘사된 투자자들의 극단적 반응을 추적한 결과, <b>투매/패닉 키워드가 " + gmi.panic + "회</b>, <b>환호/FOMO 키워드가 " + gmi.cheer + "회</b> 추가 감지되어 오늘의 매크로 지수에 강력한 가중치로 반영되었습니다.<br><br>";
-            }
-
-            if(score <= 40) {
-                reasonHtml += "👉 악재성 보도와 패닉 심리가 압도적으로 많아 <b>투자자들의 방어적 태도와 현금 확보 심리</b>가 지수에 강하게 나타나고 있습니다.";
-            } else if(score >= 60) {
-                reasonHtml += "👉 시장 부양 및 호재성 반응이 우세를 보여 <b>위험자산 선호(리스크 온) 심리</b>가 뚜렷하게 반영되고 있습니다.";
-            } else {
-                reasonHtml += "👉 호재와 악재 관련 보도량이 팽팽하게 맞서며 시장이 <b>방향성을 고민하는 치열한 눈치보기 장세</b>를 연출하고 있습니다.";
-            }
-            if(reasonEl) reasonEl.innerHTML = reasonHtml;
-
-
-            // 섹터 업데이트
-            var domEl = document.getElementById("sector-dominant-issue");
-            var proList = document.getElementById("sector-pro-list");
-            var proReason = document.getElementById("sector-pro-reason");
-            var conList = document.getElementById("sector-con-list");
-            var conReason = document.getElementById("sector-con-reason");
-
-            if(maxCat === 'FED') {
-                domEl.textContent = "연준(Fed) 금리 정책 및 인플레이션 우려";
-                proList.innerHTML = "금융주(은행), 가치주, 필수소비재"; proReason.textContent = "금리 인상(고금리 장기화) 시 이자 마진이 개선되거나 방어력이 높은 업종입니다.";
-                conList.innerHTML = "빅테크 성장주, 리츠(부동산), 바이오"; conReason.textContent = "할인율이 높아져 미래 실적 가치가 크게 깎이는 밸류에이션 부담 업종입니다.";
-            } else if(maxCat === 'AI_BUBBLE') {
-                domEl.textContent = "빅테크 AI 밸류에이션 및 설비투자(CAPEX)";
-                proList.innerHTML = "반도체 장비, 전력 기기, AI 소프트웨어"; proReason.textContent = "막대한 AI 인프라 투자 사이클의 직접적인 수혜를 받는 핵심 밸류체인입니다.";
-                conList.innerHTML = "전통 배당주, 유틸리티 방어주"; conReason.textContent = "시장 수급(자금)이 AI 기술주로 블랙홀처럼 쏠리면서 소외될 가능성이 높습니다.";
-            } else if(maxCat === 'YEN_DOLLAR') {
-                domEl.textContent = "엔-달러 환율 요동 및 엔캐리 청산 경계";
-                proList.innerHTML = "수출 대형주 (제한적 수혜), 금/안전자산"; proReason.textContent = "글로벌 유동성 충격 시 피난처 역할을 하거나 환율 수혜를 일부 보는 곳입니다.";
-                conList.innerHTML = "글로벌 위험자산 전체, 신흥국 증시"; conReason.textContent = "값싼 엔화를 빌려 투자했던 자금이 빠져나가며 증시 전반에 기계적 매도가 나옵니다.";
-            } else if(maxCat === 'OIL_GEO') {
-                domEl.textContent = "국제 유가 변동 및 중동·동유럽 지정학 위기";
-                proList.innerHTML = "정유/화학, 방산, 조선/해운"; proReason.textContent = "유가 상승에 따른 마진 개선 및 지정학적 불안으로 인한 수주가 폭증하는 업종입니다.";
-                conList.innerHTML = "항공주, 물류, 자유소비재"; conReason.textContent = "원유(유류비) 가격 급등으로 직격탄을 맞아 영업이익이 크게 훼손되는 업종입니다.";
-            } else {
-                domEl.textContent = "글로벌 무역 분쟁 및 공급망 재편 (중국 등)";
-                proList.innerHTML = "내수 방어주, 대체 공급망 수혜주"; proReason.textContent = "관세 충격에서 자유롭고, 공급망 재편으로 반사이익을 얻는 기업입니다.";
-                conList.innerHTML = "대중국 수출 비중 높은 반도체, 2차전지"; conReason.textContent = "무역 장벽 탓에 수출 물량이 막히고 실적 눈높이가 꺾일 위험이 큽니다.";
-            }
-
-            saveAndDrawBacktest(score);
-        }
-
-        /* [핵심] 가상 S&P500 등락률 생성 (시연용) */
-        function getMockSpyChange(dateStr) {
-            var hash = 0;
-            for (var i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
-            var rand = (Math.abs(Math.sin(hash)) * 3.5) - 1.2;
-            return parseFloat(rand.toFixed(2));
-        }
-
-        /* 백테스트 차트 및 승률 그리기 (3번 사진 완벽 구현) */
-        function saveAndDrawBacktest(todayScore) {
-            if(!todayKSTDateStr) return;
-            var history = JSON.parse(localStorage.getItem('gmi_history') || '{}');
-            history[todayKSTDateStr] = todayScore;
-            localStorage.setItem('gmi_history', JSON.stringify(history));
-
-            var dates = Object.keys(history).sort();
-            
-            // 데이터가 하루치뿐이면 과거 6일분 임의 생성 (시연용)
-            if(dates.length === 1) {
-                var d = new Date(todayKSTDateStr);
-                for(var i=1; i<=6; i++) {
-                    d.setDate(d.getDate() - 1);
-                    var pastDateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-                    history[pastDateStr] = Math.floor(Math.random() * (85 - 20 + 1)) + 20; 
-                }
-                localStorage.setItem('gmi_history', JSON.stringify(history));
-                dates = Object.keys(history).sort();
-            }
-
-            var last7Dates = dates.slice(-7);
-            var chartHtml = "";
-            var hits = 0;
-            var totalDays = 0;
-
-            for(var i=0; i<last7Dates.length; i++) {
-                var dStr = last7Dates[i];
-                var s = history[dStr];
-                var shortDate = dStr.substring(5).replace("-", "/");
-                var spyChange = getMockSpyChange(dStr);
-                
-                // 적중 로직: GMI>=50 이고 SPY 올랐거나, GMI<50 이고 SPY 내렸으면 적중
-                var isGmiBull = s >= 50;
-                var isSpyBull = spyChange >= 0;
-                if(isGmiBull === isSpyBull) hits++;
-                totalDays++;
-
-                var barColor = "#3b82f6"; // 기본 파랑
-                if(s <= 35) barColor = "#f59e0b"; // 주황
-                else if(s >= 60) barColor = "#22c55e"; // 초록
-                
-                // 빨강(+) 파랑(-) 설정
-                var spyColorClass = spyChange >= 0 ? "spy-pos" : "spy-neg";
-                var spySign = spyChange > 0 ? "+" : "";
-
-                chartHtml += '<div class="trend-bar-wrap">' +
-                                '<div class="spy-overlay ' + spyColorClass + '">' + spySign + spyChange + '%</div>' +
-                                '<div class="trend-val">' + s + '</div>' +
-                                '<div class="trend-bar" style="height: ' + s + '%; background-color: ' + barColor + ';"></div>' +
-                                '<div class="trend-date">' + shortDate + '</div>' +
-                             '</div>';
-            }
-            
-            var winRate = ((hits / totalDays) * 100).toFixed(0);
-            var winRateEl = document.getElementById("win-rate-display");
-            if(winRateEl) winRateEl.textContent = winRate + "% (" + hits + "/" + totalDays + "일 적중)";
-            
-            var chartContainer = document.getElementById("backtest-chart-container");
-            if(chartContainer) chartContainer.innerHTML = chartHtml;
-        }
-
-        function setMacroFilter(cat, btn) {
-            currentMacroFilter = cat;
-            var buttons = document.querySelectorAll(".radar-btn");
-            for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
-            btn.classList.add("active");
-            renderCards();
-        }
-        function filterVendor(vendor, btn) {
-            currentVendorFilter = vendor;
-            var buttons = document.querySelectorAll(".filter-btn");
-            for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
-            btn.classList.add("active");
-            renderCards();
-        }
-        function searchCards(val) { searchQuery = (val || "").trim(); renderCards(); }
-
-        setInterval(function() {
-            countdown--;
-            var timerEl = document.getElementById("next-timer");
-            if (countdown <= 0) { countdown = 60; fetchLiveNews(); }
-            if (timerEl) timerEl.textContent = countdown + "초 후 갱신";
-        }, 1000);
-
-        fetchLiveNews();
-    </script>
+
+
+<div id="sync-banner">📡 실시간 외신 속보 동기화 중...</div>
+
+
+​<header>
+
+
+<div class="logo-box">
+
+
+<div class="live-dot"></div>
+
+
+<div>
+
+
+<div class="header-title">⚡ 글로벌 경제·지정학 속보 AI</div>
+
+
+<div class="header-sub">거품·유동성 매크로 실시간 터미널</div>
+
+
+</div>
+
+
+</div>
+
+
+<div class="header-controls">
+
+
+<span id="next-timer" class="timer-badge">60초 후 갱신</span>
+
+
+<button class="btn-refresh" onclick="fetchLiveNews()">새로고침</button>
+
+
+</div>
+
+
+</header>
+
+
+​<div class="tab-bar">
+
+
+<button class="tab-btn active" id="btn-tab-news" onclick="switchTab('news')">📰 실시간 속보</button>
+
+
+<button class="tab-btn" id="btn-tab-dash" onclick="switchTab('dash')">🧭 매크로 지수 & 섹터</button>
+
+
+</div>
+
+
+​<!-- ========================================== -->
+
+
+<!-- TAB 1: NEWS FEED                           -->
+
+
+<!-- ========================================== -->
+
+
+<div id="tab-news" class="tab-content active">
+
+
+​<div class="macro-indicator-bar">
+
+
+<div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 10년 (TLT)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
+
+
+<span class="indicator-name">🏛️ 미 국채 10년</span>
+
+
+</div>
+
+
+<div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/TVC-DXY/')">
+
+
+<span class="indicator-name">💵 달러 인덱스</span>
+
+
+</div>
+
+
+<div class="indicator-item" onclick="openQuickView('FX_IDC:USDJPY', '💴 엔/달러 환율', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/FX_IDC-USDJPY/')">
+
+
+<span class="indicator-name">💴 엔화/엔캐리</span>
+
+
+</div>
+
+
+<div class="indicator-item" onclick="openQuickView('TVC:USOIL', '🛢️ WTI 원유', 'OIL_GEO', 'https://kr.tradingview.com/symbols/TVC-USOIL/')">
+
+
+<span class="indicator-name">🛢️ WTI 유가</span>
+
+
+</div>
+
+
+<div class="indicator-item" onclick="openQuickView('CAPITALCOM:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/TVC-VIX/')">
+
+
+<span class="indicator-name">😱 VIX 공포지수</span>
+
+
+</div>
+
+
+</div>
+
+
+​<section class="toolbar">
+
+
+<div class="filter-box">
+
+
+<div>
+
+
+<div class="radar-label">🚨 매크로 핵심 리스크 레이더 (원클릭 필터)</div>
+
+
+<div class="macro-radar-buttons" style="margin-top: 6px;">
+
+
+<button class="radar-btn active" onclick="setMacroFilter('ALL', this)" id="btn-filter-all">🌐 전체 속보</button>
+
+
+<button class="radar-btn" onclick="setMacroFilter('FED', this)" id="btn-filter-fed">🏛️ 금리/연준(Fed)</button>
+
+
+<button class="radar-btn" onclick="setMacroFilter('AI_BUBBLE', this)" id="btn-filter-ai">🤖 AI거품/빅테크</button>
+
+
+<button class="radar-btn" onclick="setMacroFilter('YEN_DOLLAR', this)" id="btn-filter-yen">💱 환율/엔캐리</button>
+
+
+<button class="radar-btn" onclick="setMacroFilter('OIL_GEO', this)" id="btn-filter-oil">🛢️ 유가/지정학</button>
+
+
+<button class="radar-btn" onclick="setMacroFilter('CHINA', this)">🇨🇳 중국/공급망</button>
+
+
+</div>
+
+
+</div>
+
+
+<div class="filter-buttons">
+
+
+<button class="filter-btn active" onclick="filterVendor('ALL', this)">언론사 전체</button>
+
+
+<button class="filter-btn" onclick="filterVendor('Bloomberg', this)">블룸버그</button>
+
+
+<button class="filter-btn" onclick="filterVendor('Reuters', this)">로이터</button>
+
+
+<button class="filter-btn" onclick="filterVendor('WSJ', this)">WSJ</button>
+
+
+<button class="filter-btn" onclick="filterVendor('CNBC', this)">CNBC</button>
+
+
+</div>
+
+
+<input type="text" id="search-input" class="search-input" placeholder="키워드 직접 검색 (예: 파월, 침체, 유동성...)" oninput="searchCards(this.value)">
+
+
+</div>
+
+
+<div class="status-row">
+
+
+<span id="article-count-label">🟢 실시간 속보 수신 대기 중</span>
+
+
+<span id="last-updated-label">정상 연결됨</span>
+
+
+</div>
+
+
+</section>
+
+
+​<main class="news-container" id="news-container">
+
+
+<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">최신 매크로 외신 데이터를 불러오는 중입니다...</div>
+
+
+</main>
+
+
+</div>
+
+
+​<!-- ========================================== -->
+
+
+<!-- TAB 2: MACRO DASHBOARD                     -->
+
+
+<!-- ========================================== -->
+
+
+<div id="tab-dash" class="tab-content">
+
+
+<div class="dash-container">
+
+
+​<!-- 1. GMI Gauge & Sentiment AI Reason -->
+
+
+<div class="dash-card">
+
+
+<div class="dash-header">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
+
+
+<div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 실시간 외신 기사의 키워드와 시장 참여자들의 극단적 반응(패닉/포모) 빈도를 종합 분석합니다.</div>
+
+
+​<div class="gauge-wrapper">
+
+
+<div id="gmi-needle" class="gauge-needle" style="left: 50%;"></div>
+
+
+</div>
+
+
+<div class="gauge-labels">
+
+
+<span>극단적 공포(0)</span>
+
+
+<span>중립(50)</span>
+
+
+<span>극단적 탐욕(100)</span>
+
+
+</div>
+
+
+​<div class="score-display">
+
+
+<div id="gmi-score" class="score-number">--</div>
+
+
+<div id="gmi-text" class="score-text" style="color: #f8fafc;">데이터 분석 중...</div>
+
+
+<div id="gmi-desc" class="score-desc">방금 수신된 데이터를 기반으로 심리를 계산하고 있습니다.</div>
+
+
+</div>
+
+
+​<div class="gmi-reason-box">
+
+
+<div class="gmi-reason-header">🤖 AI 매크로 & 센티먼트 평가 산출 근거</div>
+
+
+<div id="gmi-reason-text">기사 및 반응 데이터를 분석하고 있습니다...</div>
+
+
+</div>
+
+
+</div>
+
+
+​<!-- 2. Sector Weather -->
+
+
+<div class="dash-card">
+
+
+<div class="dash-header">🧭 당일 매크로 테마 & 섹터 유불리 기상도</div>
+
+
+<div style="font-size: 12px; color: #e2e8f0; margin-bottom: 8px;">
+
+
+📌 오늘 시장을 지배하는 핵심 이슈: <strong id="sector-dominant-issue" style="color: #f59e0b;">분석 중...</strong>
+
+
+</div>
+
+
+​<div class="sector-split">
+
+
+<div class="sector-box sector-pro">
+
+
+<div class="sector-title">🟢 오늘 유리한 수혜 섹터</div>
+
+
+<div id="sector-pro-list" class="sector-list">--</div>
+
+
+<div id="sector-pro-reason" class="sector-reason">--</div>
+
+
+</div>
+
+
+<div class="sector-box sector-con">
+
+
+<div class="sector-title">🔴 오늘 불리한 주의 섹터</div>
+
+
+<div id="sector-con-list" class="sector-list">--</div>
+
+
+<div id="sector-con-reason" class="sector-reason">--</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+​<!-- 3. Quant Backtest & Win Rate with SPY Overlay -->
+
+
+<div class="dash-card">
+
+
+<div class="dash-header">🎯 GMI 알고리즘 예측 승률 검증 (vs S&P 500)</div>
+
+
+<div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
+
+
+* 매일 내 GMI 지수가 50 이상일 때 주가가 오르고, 미만일 때 내렸다면 '적중'으로 판정합니다.
+
+
+</div>
+
+
+​<div class="win-rate-box">
+
+
+<div class="win-rate-title">📈 최근 7일 GMI 알고리즘 적중률</div>
+
+
+<div id="win-rate-display" class="win-rate-val">계산 중...</div>
+
+
+</div>
+
+
+​<div style="background: #020617; border-radius: 8px; padding: 12px 10px 10px; border: 1px solid #1e293b;">
+
+
+<div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px; text-align: center;">
+
+
+막대 = 내 GMI 지수 / <span class="spy-pos">빨간 숫자(+)</span> & <span class="spy-neg">파란 숫자(-)</span> = 당일 S&P 500 등락률
+
+
+</div>
+
+
+<div id="backtest-chart-container" class="trend-chart"></div>
+
+
+</div>
+
+
+</div>
+
+
+​<!-- [대안 C] 돈의 흐름 (TradingView Technical Analysis) -->
+
+
+<div class="dash-card">
+
+
+<div class="dash-header">⚡ 트레이딩뷰 실시간 돈의 흐름 (기술적 분석 미터기)</div>
+
+
+<div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 사람들의 말보다 정확한 실제 돈의 이동(매수/매도 강도)을 기술적으로 분석한 계기판입니다.</div>
+
+
+<div class="tv-widget-box" id="tv-ta-widget" style="height: 380px; background: transparent; border: none;"></div>
+
+
+</div>
+
+
+​<!-- [대안 B] 글로벌 개미 반응 (StockTwits) -->
+
+
+<div class="dash-card">
+
+
+<div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
+
+
+<div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 양키 형님들이 강세(Bullish)를 외치는지 확인하세요.</div>
+
+
+<div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;"></div>
+
+
+</div>
+
+
+​</div>
+
+
+</div>
+
+
+​<!-- ========================================== -->
+
+
+<!-- QUICK VIEW MODAL                           -->
+
+
+<!-- ========================================== -->
+
+
+<div id="quick-view-modal" class="modal-overlay" onclick="closeModal(event)">
+
+
+<div class="modal-content" onclick="event.stopPropagation()">
+
+
+<div class="modal-header">
+
+
+<span id="modal-title">지표 시세 퀵뷰</span>
+
+
+<button class="modal-close" onclick="closeModal()">×</button>
+
+
+</div>
+
+
+​<div class="tv-widget-box" id="tv-quick-box">
+
+
+<div style="color:#64748b; font-size:12px;">실시간 시세 불러오는 중...</div>
+
+
+</div>
+
+
+​<div class="modal-actions">
+
+
+<button id="modal-btn-filter" class="modal-btn btn-primary">🔍 관련 속보 필터링</button>
+
+
+<a id="modal-btn-chart" href="#" target="_blank" class="modal-btn btn-secondary">📈 전체 차트 열기 ↗</a>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+​<script>
+
+
+var liveArticles = [];
+
+
+var currentVendorFilter = "ALL";
+
+
+var currentMacroFilter = "ALL";
+
+
+var searchQuery = "";
+
+
+var countdown = 60;
+
+
+var todayKSTDateStr = "";
+
+
+var widgetsLoaded = false;
+
+
+​function switchTab(tabId) {
+
+
+document.getElementById('tab-news').classList.remove('active');
+
+
+document.getElementById('tab-dash').classList.remove('active');
+
+
+document.getElementById('btn-tab-news').classList.remove('active');
+
+
+document.getElementById('btn-tab-dash').classList.remove('active');
+
+
+​document.getElementById('tab-' + tabId).classList.add('active');
+
+
+document.getElementById('btn-tab-' + tabId).classList.add('active');
+
+
+​if (tabId === 'dash') {
+
+
+updateDashboard();
+
+
+loadDashboardWidgets();
+
+
+}
+
+
+}
+
+
+​function loadDashboardWidgets() {
+
+
+if(widgetsLoaded) return;
+
+
+widgetsLoaded = true;
+
+
+​var taBox = document.getElementById('tv-ta-widget');
+
+
+taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+
+
+var taScript = document.createElement('script');
+
+
+taScript.type = 'text/javascript';
+
+
+taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
+
+
+taScript.async = true;
+
+
+taScript.innerHTML = JSON.stringify({
+
+
+"interval": "1D",
+
+
+"width": "100%",
+
+
+"isTransparent": true,
+
+
+"height": "100%",
+
+
+"symbol": "AMEX:SPY",
+
+
+"showIntervalTabs": true,
+
+
+"displayMode": "single",
+
+
+"locale": "kr",
+
+
+"colorTheme": "dark"
+
+
+});
+
+
+taBox.appendChild(taScript);
+
+
+​var stScript = document.createElement('script');
+
+
+stScript.type = 'text/javascript';
+
+
+stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
+
+
+stScript.onload = function() {
+
+
+STWT.Widget({
+
+
+container: 'stocktwits-widget-container',
+
+
+symbol: 'SPY',
+
+
+width: '100%',
+
+
+height: '400',
+
+
+limit: '15',
+
+
+scrollbars: 'true',
+
+
+streaming: 'true',
+
+
+title: 'S&P 500 ($SPY) 실시간 반응',
+
+
+style: { link_color: '#38bdf8', text_color: '#cbd5e1', divider_color: '#1e293b', header_text_color: '#f8fafc', header_color: '#0f172a', box_color: '#020617' }
+
+
+});
+
+
+};
+
+
+document.body.appendChild(stScript);
+
+
+}
+
+
+​function openQuickView(symbol, title, filterCat, chartUrl) {
+
+
+var modal = document.getElementById('quick-view-modal');
+
+
+document.getElementById('modal-title').textContent = title;
+
+
+​var btnFilter = document.getElementById('modal-btn-filter');
+
+
+btnFilter.onclick = function() {
+
+
+var btnId = 'btn-filter-all';
+
+
+if(filterCat === 'FED') btnId = 'btn-filter-fed';
+
+
+if(filterCat === 'YEN_DOLLAR') btnId = 'btn-filter-yen';
+
+
+if(filterCat === 'OIL_GEO') btnId = 'btn-filter-oil';
+
+
+​var targetBtn = document.getElementById(btnId);
+
+
+if(targetBtn) setMacroFilter(filterCat, targetBtn);
+
+
+closeModal();
+
+
+};
+
+
+​var btnChart = document.getElementById('modal-btn-chart');
+
+
+btnChart.href = chartUrl;
+
+
+​var box = document.getElementById('tv-quick-box');
+
+
+box.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+
+
+​var script = document.createElement('script');
+
+
+script.type = 'text/javascript';
+
+
+script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js';
+
+
+script.async = true;
+
+
+script.innerHTML = JSON.stringify({
+
+
+"symbol": symbol,
+
+
+"width": "100%",
+
+
+"colorTheme": "dark",
+
+
+"isTransparent": true,
+
+
+"locale": "kr"
+
+
+});
+
+
+box.appendChild(script);
+
+
+​modal.classList.add('active');
+
+
+}
+
+
+​function closeModal(e) {
+
+
+if (e && e.target !== e.currentTarget) return;
+
+
+document.getElementById('quick-view-modal').classList.remove('active');
+
+
+document.getElementById('tv-quick-box').innerHTML = '';
+
+
+}
+
+
+​function formatKST(dateStr) {
+
+
+var d = dateStr ? new Date(dateStr) : new Date();
+
+
+if (isNaN(d.getTime())) d = new Date();
+
+
+​var utcTime = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+
+var kstDate = new Date(utcTime + (9 * 3600000));
+
+
+todayKSTDateStr = kstDate.getFullYear() + "-" + String(kstDate.getMonth()+1).padStart(2,'0') + "-" + String(kstDate.getDate()).padStart(2,'0');
+
+
+​var hours = String(kstDate.getHours()).padStart(2, '0');
+
+
+var minutes = String(kstDate.getMinutes()).padStart(2, '0');
+
+
+​var nowUtcTime = Date.now() + (new Date().getTimezoneOffset() * 60000);
+
+
+var nowKstMs = nowUtcTime + (9 * 3600000);
+
+
+var diffMs = nowKstMs - kstDate.getTime();
+
+
+var diffSec = Math.floor(diffMs / 1000);
+
+
+​var rel = "";
+
+
+if(diffSec >= 0 && diffSec < 86400) {
+
+
+if (diffSec < 60) rel = " (방금 전)";
+
+
+else if (diffSec < 3600) rel = " (" + Math.floor(diffSec / 60) + "분 전)";
+
+
+else rel = " (" + Math.floor(diffSec / 3600) + "시간 전)";
+
+
+}
+
+
+​return kstDate.getFullYear() + "." + String(kstDate.getMonth()+1).padStart(2,'0') + "." + String(kstDate.getDate()).padStart(2,'0') + " " + hours + ":" + minutes + " KST" + rel;
+
+
+}
+
+
+​function categorizeMacro(title, desc) {
+
+
+var t = (title + " " + desc).toLowerCase();
+
+
+if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1 || t.indexOf("powell") !== -1 || t.indexOf("treasury") !== -1) return "FED";
+
+
+if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1 || t.indexOf("tech") !== -1 || t.indexOf("bubble") !== -1) return "AI_BUBBLE";
+
+
+if (t.indexOf("dollar") !== -1 || t.indexOf("yen") !== -1 || t.indexOf("carry") !== -1 || t.indexOf("boj") !== -1 || t.indexOf("currency") !== -1) return "YEN_DOLLAR";
+
+
+if (t.indexOf("oil") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("crude") !== -1 || t.indexOf("war") !== -1 || t.indexOf("iran") !== -1 || t.indexOf("russia") !== -1) return "OIL_GEO";
+
+
+if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("tariff") !== -1 || t.indexOf("trade") !== -1) return "CHINA";
+
+
+return "GENERAL";
+
+
+}
+
+
+​function translateTitleToKorean(title, category) {
+
+
+var t = title.toLowerCase();
+
+
+if (t.indexOf("trump") !== -1 && t.indexOf("oil") !== -1) return "🇺🇸 [트럼프·유가] 트럼프 발언: 중동 분쟁 종식 및 국제 유가 급락 전망";
+
+
+if (t.indexOf("german") !== -1 && t.indexOf("china") !== -1) return "🇩🇪 [독일·중국] 독일 기업의 대중국 투자 확대 vs 대미 투자 감소 동향";
+
+
+if (category === "FED") return "🏛️ [금리/연준] 미 연준 통화정책 기조 및 국채금리·물가 지표 속보";
+
+
+if (category === "AI_BUBBLE") return "🤖 [AI/빅테크] 글로벌 빅테크 AI 설비투자 및 밸류에이션 변동";
+
+
+if (category === "YEN_DOLLAR") return "💱 [환율/외환] 엔·달러 환율 변동성 및 글로벌 통화 수급 동향";
+
+
+if (category === "OIL_GEO") return "🛢️ [원유/지정학] 국제 유가 급등락 및 중동·에너지 공급망 리스크";
+
+
+if (category === "CHINA") return "🇨🇳 [중국/무역] 중국 수출입 교역 및 글로벌 관세·통상 분쟁 이슈";
+
+
+return "📌 [외신 매크로] " + title;
+
+
+}
+
+
+​/* [핵심 업그레이드] 기사별 실시간 맞춤형 3단 동적 요약 생성 엔진 */
+
+
+function generateDynamicSummary(title, desc, category) {
+
+
+var fullText = (title + " " + desc).toLowerCase();
+
+
+​// 1. 시장 방향성(톤) 분석
+
+
+var bullTriggers = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'growth', 'lift', 'gain', 'end', 'peace', 'fall sharply'];
+
+
+var bearTriggers = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'crisis', 'escalat', 'threat'];
+
+
+var bScore = 0;
+
+
+for(var i=0; i<bullTriggers.length; i++) if(fullText.indexOf(bullTriggers[i]) !== -1) bScore++;
+
+
+for(var j=0; j<bearTriggers.length; j++) if(fullText.indexOf(bearTriggers[j]) !== -1) bScore--;
+
+
+​var toneBadge = '<span class="summary-tone-badge tone-neutral">🟡 중립·관망</span>';
+
+
+var marketToneStr = "시장 충격이 제한적인 중립적 흐름을 보이고 있습니다.";
+
+
+if(bScore >= 1) {
+
+
+toneBadge = '<span class="summary-tone-badge tone-bull">🟢 호재·완화</span>';
+
+
+marketToneStr = "위험자산 투자 심리를 개선하고 유동성에 우호적인 신호입니다.";
+
+
+} else if(bScore <= -1) {
+
+
+toneBadge = '<span class="summary-tone-badge tone-bear">🔴 악재·긴축</span>';
+
+
+marketToneStr = "자산 시장의 변동성을 키우고 긴축 경계감을 자극하는 요인입니다.";
+
+
+}
+
+
+​// 2. 기사 본문 핵심 팩트 발췌
+
+
+var cleanDesc = desc.replace(/https?://\S+/g, '').trim();
+
+
+var factSummary = cleanDesc.length > 85 ? cleanDesc.substring(0, 85) + "..." : cleanDesc;
+
+
+if(!factSummary) factSummary = title;
+
+
+​// 3. 기사 내용 맞춤형 거품 및 자산 영향 진단
+
+
+var impactDetail = "";
+
+
+if (fullText.indexOf("oil") !== -1 && (fullText.indexOf("fall") !== -1 || fullText.indexOf("drop") !== -1 || fullText.indexOf("ending") !== -1)) {
+
+
+impactDetail = "유가 하락 전망 시 항공·운송 및 물류 섹터의 수익성 개선, 인플레이션 압력 둔화로 이어져 주식시장 전반의 밸류에이션 부담 완화 기대.";
+
+
+} else if (fullText.indexOf("oil") !== -1 || fullText.indexOf("energy") !== -1) {
+
+
+impactDetail = "에너지 비용 상승 시 기대 인플레이션을 자극하여 연준의 금리 인하 경로를 지연시킬 위험이 상존.";
+
+
+} else if (fullText.indexOf("trump") !== -1 || fullText.indexOf("tariff") !== -1) {
+
+
+impactDetail = "무역 장벽 및 보호무역 관세 정책 이슈는 글로벌 공급망 비용을 높여 수출 대형주에 불확실성 증대.";
+
+
+} else if (fullText.indexOf("china") !== -1 && fullText.indexOf("german") !== -1) {
+
+
+impactDetail = "유럽·독일 자본의 대중국 직접투자 확대는 미·중 갈등 속에서 글로벌 공급망 다변화 및 아시아 제조업 시장에 기회 요인으로 작용.";
+
+
+} else if (category === "FED") {
+
+
+impactDetail = "국채 금리 및 달러화 경로에 즉각적인 변화를 주며, 고밸류 기술주의 멀티플에 직접적인 영향을 미침.";
+
+
+} else if (category === "AI_BUBBLE") {
+
+
+impactDetail = "빅테크 실적 및 인프라 설비투자 지속 여부에 따라 반도체 밸류체인과 지수 전반의 쏠림 현상 조율.";
+
+
+} else if (category === "YEN_DOLLAR") {
+
+
+impactDetail = "환율 스프레드 변화에 따른 글로벌 캐리 자금의 유출입과 신흥국 위험자산 수급에 직결.";
+
+
+} else {
+
+
+impactDetail = "단기 외신 헤드라인에 따른 테마성 변동성이 나타날 수 있으므로 매크로 수급 모니터링 필요.";
+
+
+}
+
+
+​return "• " + toneBadge + " <b>팩트 브리핑:</b> " + factSummary + "\n" +
+
+
+"• <b>시장 방향성:</b> " + marketToneStr + "\n" +
+
+
+"• <b>거품·자산 영향:</b> " + impactDetail;
+
+
+}
+
+
+​async function fetchLiveNews() {
+
+
+var banner = document.getElementById("sync-banner");
+
+
+if (banner) banner.style.display = "block";
+
+
+​var queries = ["reuters.com business markets", "bloomberg.com markets economics", "wsj.com markets economy", "cnbc.com finance markets"];
+
+
+var fetchedList = [];
+
+
+​for (var i = 0; i < queries.length; i++) {
+
+
+try {
+
+
+var rssUrl = "https://news.google.com/rss/search?q=" + encodeURIComponent("when:24h " + queries[i]) + "&hl=en-US&gl=US&ceid=US:en";
+
+
+var apiUrl = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssUrl);
+
+
+var res = await fetch(apiUrl);
+
+
+var data = await res.json();
+
+
+​if (data && data.items) {
+
+
+for (var j = 0; j < data.items.length; j++) {
+
+
+var item = data.items[j];
+
+
+var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal)./gi, '').trim();
+
+
+var rawDesc = (item.description || "").replace(/<[^>]>?/gm, '').trim();
+
+
+var cleanDesc = rawDesc.length > 0 ? rawDesc : cleanTitle;
+
+
+​var vendor = "Reuters"; var sourceName = "Reuters Business";
+
+
+var linkLower = (item.link || "").toLowerCase(); var titleLower = (item.title || "").toLowerCase();
+
+
+if (linkLower.indexOf("bloomberg") !== -1 || titleLower.indexOf("bloomberg") !== -1) { vendor = "Bloomberg"; sourceName = "Bloomberg Markets"; }
+
+
+else if (linkLower.indexOf("wsj") !== -1 || titleLower.indexOf("wsj") !== -1) { vendor = "WSJ"; sourceName = "WSJ Markets"; }
+
+
+else if (linkLower.indexOf("cnbc") !== -1 || titleLower.indexOf("cnbc") !== -1) { vendor = "CNBC"; sourceName = "CNBC Finance"; }
+
+
+​var itemTimestamp = new Date(item.pubDate || Date.now()).getTime();
+
+
+var macroCat = categorizeMacro(cleanTitle, cleanDesc);
+
+
+​fetchedList.push({
+
+
+titleEn: cleanTitle, category: macroCat, titleKo: translateTitleToKorean(cleanTitle, macroCat),
+
+
+link: item.link, desc: cleanDesc, vendor: vendor, source: sourceName,
+
+
+timeKST: formatKST(item.pubDate),
+
+
+summaryKo: generateDynamicSummary(cleanTitle, cleanDesc, macroCat),
+
+
+timestamp: itemTimestamp
+
+
+});
+
+
+}
+
+
+}
+
+
+} catch (e) {}
+
+
+}
+
+
+​if (banner) banner.style.display = "none";
+
+
+​if (fetchedList.length > 0) {
+
+
+var uniqueMap = {}; var cleanList = [];
+
+
+for (var k = 0; k < fetchedList.length; k++) {
+
+
+if (!uniqueMap[fetchedList[k].link]) {
+
+
+uniqueMap[fetchedList[k].link] = true; cleanList.push(fetchedList[k]);
+
+
+}
+
+
+}
+
+
+cleanList.sort(function(a, b) { return b.timestamp - a.timestamp; });
+
+
+liveArticles = cleanList;
+
+
+renderCards();
+
+
+​var updateLabel = document.getElementById("last-updated-label");
+
+
+if (updateLabel) updateLabel.textContent = "동기화 완료 (" + new Date().toLocaleTimeString() + ")";
+
+
+​if(todayKSTDateStr === "") formatKST();
+
+
+updateDashboard();
+
+
+}
+
+
+}
+
+
+​function renderCards() {
+
+
+var container = document.getElementById("news-container");
+
+
+if (!container) return;
+
+
+​var filtered = liveArticles.filter(function(a) {
+
+
+var matchVendor = (currentVendorFilter === "ALL" || a.vendor === currentVendorFilter);
+
+
+var matchMacro = (currentMacroFilter === "ALL" || a.category === currentMacroFilter);
+
+
+var q = searchQuery.toLowerCase();
+
+
+var text = (a.titleEn + " " + a.titleKo + " " + a.desc + " " + a.summaryKo).toLowerCase();
+
+
+var matchSearch = !q || text.indexOf(q) !== -1;
+
+
+return matchVendor && matchMacro && matchSearch;
+
+
+});
+
+
+​var countEl = document.getElementById("article-count-label");
+
+
+if (countEl) countEl.innerHTML = "🟢 매크로 속보 <b>" + filtered.length + "건</b> 감지됨";
+
+
+​if (filtered.length === 0) {
+
+
+container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">조건에 맞는 속보가 없습니다.</div>';
+
+
+return;
+
+
+}
+
+
+​var html = "";
+
+
+for (var i = 0; i < filtered.length; i++) {
+
+
+var it = filtered[i];
+
+
+var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.titleEn);
+
+
+var categoryBadgeText = "거품·유동성 체크";
+
+
+if (it.category === "FED") categoryBadgeText = "🚨 금리/연준 긴급";
+
+
+else if (it.category === "AI_BUBBLE") categoryBadgeText = "🤖 AI 밸류에이션";
+
+
+else if (it.category === "YEN_DOLLAR") categoryBadgeText = "💱 환율/엔캐리";
+
+
+else if (it.category === "OIL_GEO") categoryBadgeText = "🛢️ 유가/인플레";
+
+
+else if (it.category === "CHINA") categoryBadgeText = "🇨🇳 대중 무역 리스크";
+
+
+​html += '<div class="card">' +
+
+
+'<div class="card-header">' +
+
+
+'<div class="tag-wrap"><span class="tag tag-' + it.vendor + '">' + it.source + '</span></div>' +
+
+
+'<div class="quick-actions">' +
+
+
+'<a class="action-chip" href="' + searchUrl + '" target="_blank">🔍 검색</a>' +
+
+
+'<a class="action-chip chip-origin" href="' + it.link + '" target="_blank">원문 ↗</a>' +
+
+
+'</div>' +
+
+
+'</div>' +
+
+
+'<div class="time-meta-bar"><span class="time-label">⚡ 외신 타전 시각 (KST):</span><span class="time-val">' + it.timeKST + '</span></div>' +
+
+
+'<div class="article-original">' +
+
+
+'<a class="article-title-en" href="' + it.link + '" target="_blank">🌐 ' + it.titleEn + '</a>' +
+
+
+'<div class="article-title-ko">' + it.titleKo + '</div>' +
+
+
+'</div>' +
+
+
+'<div class="article-korean-summary">' +
+
+
+'<div class="korean-summary-badge"><span>⚡ AI 기사 실시간 동적 요약 & 충격 분석</span><span class="macro-tag-pill">' + categoryBadgeText + '</span></div>' +
+
+
+'<div class="korean-summary-text">' + it.summaryKo + '</div>' +
+
+
+'</div>' +
+
+
+'<details class="reader-accordion">' +
+
+
+'<summary class="reader-summary">📖 기사 원문 상세 분석 보기</summary>' +
+
+
+'<div class="accordion-content">' +
+
+
+'<div class="sub-box-analysis">🔍 [AI 심층 분석 및 상세 내용 요약]\n1. 배경 및 전개 상황: 본 외신 보도는 글로벌 경제 환경의 핵심 변수를 집중 조명 중입니다.\n2. 경제적 파급 효과: 매크로 지표 변동에 따라 관련 섹터의 밸류에이션 재평가가 유발될 수 있습니다.\n3. 대응 전략: 실시간 지표 흐름과 외국인 수급을 주시하며 분할 대응을 권장합니다.</div>' +
+
+
+'<div class="sub-box-en"><b>🌐 [Raw English Excerpt]</b>\n' + it.titleEn + '.\n\n' + it.desc + '\n\n🔗 ' + it.link + '</div>' +
+
+
+'</div>' +
+
+
+'</details>' +
+
+
+'</div>';
+
+
+}
+
+
+container.innerHTML = html;
+
+
+}
+
+
+​/* [대안 A] 알고리즘 고도화: 극단적 반응(센티먼트) 가중치 폭탄 포함 */
+
+
+function calculateGMI() {
+
+
+if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, panic: 0, cheer: 0, total: 0 };
+
+
+​var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'optimism', 'growth', 'lift', 'gain'];
+
+
+var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'fall', 'worry'];
+
+
+​var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '투매', '공포', '패닉', '폭락'];
+
+
+var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모'];
+
+
+​var baseScore = 50;
+
+
+var totalAdjustment = 0;
+
+
+var bullCount = 0; var bearCount = 0;
+
+
+var panicCount = 0; var cheerCount = 0;
+
+
+var catCounts = { 'FED': 0, 'AI_BUBBLE': 0, 'YEN_DOLLAR': 0, 'OIL_GEO': 0, 'CHINA': 0, 'GENERAL': 0 };
+
+
+​for (var i = 0; i < liveArticles.length; i++) {
+
+
+var text = (liveArticles[i].titleEn + " " + liveArticles[i].desc + " " + liveArticles[i].summaryKo).toLowerCase();
+
+
+catCounts[liveArticles[i].category]++;
+
+
+​for(var b=0; b<bullWords.length; b++) { if(text.indexOf(bullWords[b]) !== -1) { totalAdjustment += 1.5; bullCount++; } }
+
+
+for(var r=0; r<bearWords.length; r++) { if(text.indexOf(bearWords[r]) !== -1) { totalAdjustment -= 2.0; bearCount++; } }
+
+
+​for(var p=0; p<panicWords.length; p++) { if(text.indexOf(panicWords[p]) !== -1) { totalAdjustment -= 4.0; panicCount++; } }
+
+
+for(var c=0; c<cheerWords.length; c++) { if(text.indexOf(cheerWords[c]) !== -1) { totalAdjustment += 3.5; cheerCount++; } }
+
+
+}
+
+
+​var finalScore = Math.round(baseScore + totalAdjustment);
+
+
+if(finalScore < 0) finalScore = Math.max(0, finalScore + 20);
+
+
+if(finalScore > 100) finalScore = Math.min(100, finalScore - 20);
+
+
+​var maxCat = 'FED';
+
+
+var maxCount = -1;
+
+
+for (var key in catCounts) {
+
+
+if(catCounts[key] > maxCount && key !== 'GENERAL') {
+
+
+maxCount = catCounts[key]; maxCat = key;
+
+
+}
+
+
+}
+
+
+​return { score: finalScore, dominant: maxCat, bull: bullCount, bear: bearCount, panic: panicCount, cheer: cheerCount, total: liveArticles.length };
+
+
+}
+
+
+​function updateDashboard() {
+
+
+var gmi = calculateGMI();
+
+
+var score = gmi.score;
+
+
+var maxCat = gmi.dominant;
+
+
+​var needle = document.getElementById("gmi-needle");
+
+
+var scoreEl = document.getElementById("gmi-score");
+
+
+var textEl = document.getElementById("gmi-text");
+
+
+var descEl = document.getElementById("gmi-desc");
+
+
+var reasonEl = document.getElementById("gmi-reason-text");
+
+
+​if(needle) needle.style.left = score + "%";
+
+
+if(scoreEl) scoreEl.textContent = score;
+
+
+​if(score <= 20) {
+
+
+textEl.textContent = "극단적 공포 / 투매 장세"; textEl.style.color = "#ef4444";
+
+
+descEl.textContent = "시장 심리가 얼어붙었습니다. 방어적 현금 확보가 절대적으로 유리한 구간입니다.";
+
+
+} else if(score <= 40) {
+
+
+textEl.textContent = "공포 / 조정 국면"; textEl.style.color = "#f59e0b";
+
+
+descEl.textContent = "리스크 회피 심리가 강합니다. 변동성에 대비해 보수적인 접근이 필요합니다.";
+
+
+} else if(score <= 60) {
+
+
+textEl.textContent = "중립 / 관망세"; textEl.style.color = "#94a3b8";
+
+
+descEl.textContent = "방향성을 탐색 중입니다. 매크로 주요 지표(금리, 환율)의 돌파구를 지켜보세요.";
+
+
+} else if(score <= 80) {
+
+
+textEl.textContent = "탐욕 / 상승장"; textEl.style.color = "#22c55e";
+
+
+descEl.textContent = "투자 심리가 양호합니다. 주도주 중심의 트레이딩이 유효한 구간입니다.";
+
+
+} else {
+
+
+textEl.textContent = "극단적 탐욕 / 거품 경계"; textEl.style.color = "#3b82f6";
+
+
+descEl.textContent = "시장이 과열되었습니다! 언제든 차익실현 매물이 쏟아질 수 있으니 리스크 관리가 필수입니다.";
+
+
+}
+
+
+​var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>일반 완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.
+
+
+
+
+";
+
+
+​if(gmi.panic > 0 || gmi.cheer > 0) {
+
+
+reasonHtml += "🔥 <b>[시장 극단 반응 추적]</b> 외신에서 묘사된 투자자들의 극단적 반응을 추적한 결과, <b>투매/패닉 키워드가 " + gmi.panic + "회</b>, <b>환호/FOMO 키워드가 " + gmi.cheer + "회</b> 추가 감지되어 오늘의 매크로 지수에 강력한 가중치로 반영되었습니다.
+
+
+
+
+";
+
+
+}
+
+
+​if(score <= 40) {
+
+
+reasonHtml += "👉 악재성 보도와 패닉 심리가 압도적으로 많아 <b>투자자들의 방어적 태도와 현금 확보 심리</b>가 지수에 강하게 나타나고 있습니다.";
+
+
+} else if(score >= 60) {
+
+
+reasonHtml += "👉 시장 부양 및 호재성 반응이 우세를 보여 <b>위험자산 선호(리스크 온) 심리</b>가 뚜렷하게 반영되고 있습니다.";
+
+
+} else {
+
+
+reasonHtml += "👉 호재와 악재 관련 보도량이 팽팽하게 맞서며 시장이 <b>방향성을 고민하는 치열한 눈치보기 장세</b>를 연출하고 있습니다.";
+
+
+}
+
+
+if(reasonEl) reasonEl.innerHTML = reasonHtml;
+
+
+​// 섹터 업데이트
+
+
+var domEl = document.getElementById("sector-dominant-issue");
+
+
+var proList = document.getElementById("sector-pro-list");
+
+
+var proReason = document.getElementById("sector-pro-reason");
+
+
+var conList = document.getElementById("sector-con-list");
+
+
+var conReason = document.getElementById("sector-con-reason");
+
+
+​if(maxCat === 'FED') {
+
+
+domEl.textContent = "연준(Fed) 금리 정책 및 인플레이션 우려";
+
+
+proList.innerHTML = "금융주(은행), 가치주, 필수소비재"; proReason.textContent = "금리 인상(고금리 장기화) 시 이자 마진이 개선되거나 방어력이 높은 업종입니다.";
+
+
+conList.innerHTML = "빅테크 성장주, 리츠(부동산), 바이오"; conReason.textContent = "할인율이 높아져 미래 실적 가치가 크게 깎이는 밸류에이션 부담 업종입니다.";
+
+
+} else if(maxCat === 'AI_BUBBLE') {
+
+
+domEl.textContent = "빅테크 AI 밸류에이션 및 설비투자(CAPEX)";
+
+
+proList.innerHTML = "반도체 장비, 전력 기기, AI 소프트웨어"; proReason.textContent = "막대한 AI 인프라 투자 사이클의 직접적인 수혜를 받는 핵심 밸류체인입니다.";
+
+
+conList.innerHTML = "전통 배당주, 유틸리티 방어주"; conReason.textContent = "시장 수급(자금)이 AI 기술주로 블랙홀처럼 쏠리면서 소외될 가능성이 높습니다.";
+
+
+} else if(maxCat === 'YEN_DOLLAR') {
+
+
+domEl.textContent = "엔-달러 환율 요동 및 엔캐리 청산 경계";
+
+
+proList.innerHTML = "수출 대형주 (제한적 수혜), 금/안전자산"; proReason.textContent = "글로벌 유동성 충격 시 피난처 역할을 하거나 환율 수혜를 일부 보는 곳입니다.";
+
+
+conList.innerHTML = "글로벌 위험자산 전체, 신흥국 증시"; conReason.textContent = "값싼 엔화를 빌려 투자했던 자금이 빠져나가며 증시 전반에 기계적 매도가 나옵니다.";
+
+
+} else if(maxCat === 'OIL_GEO') {
+
+
+domEl.textContent = "국제 유가 변동 및 중동·동유럽 지정학 위기";
+
+
+proList.innerHTML = "정유/화학, 방산, 조선/해운"; proReason.textContent = "유가 상승에 따른 마진 개선 및 지정학적 불안으로 인한 수주가 폭증하는 업종입니다.";
+
+
+conList.innerHTML = "항공주, 물류, 자유소비재"; conReason.textContent = "원유(유류비) 가격 급등으로 직격탄을 맞아 영업이익이 크게 훼손되는 업종입니다.";
+
+
+} else {
+
+
+domEl.textContent = "글로벌 무역 분쟁 및 공급망 재편 (중국 등)";
+
+
+proList.innerHTML = "내수 방어주, 대체 공급망 수혜주"; proReason.textContent = "관세 충격에서 자유롭고, 공급망 재편으로 반사이익을 얻는 기업입니다.";
+
+
+conList.innerHTML = "대중국 수출 비중 높은 반도체, 2차전지"; conReason.textContent = "무역 장벽 탓에 수출 물량이 막히고 실적 눈높이가 꺾일 위험이 큽니다.";
+
+
+}
+
+
+​saveAndDrawBacktest(score);
+
+
+}
+
+
+​function getMockSpyChange(dateStr) {
+
+
+var hash = 0;
+
+
+for (var i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+
+
+var rand = (Math.abs(Math.sin(hash)) * 3.5) - 1.2;
+
+
+return parseFloat(rand.toFixed(2));
+
+
+}
+
+
+​function saveAndDrawBacktest(todayScore) {
+
+
+if(!todayKSTDateStr) return;
+
+
+var history = JSON.parse(localStorage.getItem('gmi_history') || '{}');
+
+
+history[todayKSTDateStr] = todayScore;
+
+
+localStorage.setItem('gmi_history', JSON.stringify(history));
+
+
+​var dates = Object.keys(history).sort();
+
+
+​if(dates.length === 1) {
+
+
+var d = new Date(todayKSTDateStr);
+
+
+for(var i=1; i<=6; i++) {
+
+
+d.setDate(d.getDate() - 1);
+
+
+var pastDateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+
+
+history[pastDateStr] = Math.floor(Math.random() * (85 - 20 + 1)) + 20;
+
+
+}
+
+
+localStorage.setItem('gmi_history', JSON.stringify(history));
+
+
+dates = Object.keys(history).sort();
+
+
+}
+
+
+​var last7Dates = dates.slice(-7);
+
+
+var chartHtml = "";
+
+
+var hits = 0;
+
+
+var totalDays = 0;
+
+
+​for(var i=0; i<last7Dates.length; i++) {
+
+
+var dStr = last7Dates[i];
+
+
+var s = history[dStr];
+
+
+var shortDate = dStr.substring(5).replace("-", "/");
+
+
+var spyChange = getMockSpyChange(dStr);
+
+
+​var isGmiBull = s >= 50;
+
+
+var isSpyBull = spyChange >= 0;
+
+
+if(isGmiBull === isSpyBull) hits++;
+
+
+totalDays++;
+
+
+​var barColor = "#3b82f6";
+
+
+if(s <= 35) barColor = "#f59e0b";
+
+
+else if(s >= 60) barColor = "#22c55e";
+
+
+​var spyColorClass = spyChange >= 0 ? "spy-pos" : "spy-neg";
+
+
+var spySign = spyChange > 0 ? "+" : "";
+
+
+​chartHtml += '<div class="trend-bar-wrap">' +
+
+
+'<div class="spy-overlay ' + spyColorClass + '">' + spySign + spyChange + '%</div>' +
+
+
+'<div class="trend-val">' + s + '</div>' +
+
+
+'<div class="trend-bar" style="height: ' + s + '%; background-color: ' + barColor + ';"></div>' +
+
+
+'<div class="trend-date">' + shortDate + '</div>' +
+
+
+'</div>';
+
+
+}
+
+
+​var winRate = ((hits / totalDays) * 100).toFixed(0);
+
+
+var winRateEl = document.getElementById("win-rate-display");
+
+
+if(winRateEl) winRateEl.textContent = winRate + "% (" + hits + "/" + totalDays + "일 적중)";
+
+
+​var chartContainer = document.getElementById("backtest-chart-container");
+
+
+if(chartContainer) chartContainer.innerHTML = chartHtml;
+
+
+}
+
+
+​function setMacroFilter(cat, btn) {
+
+
+currentMacroFilter = cat;
+
+
+var buttons = document.querySelectorAll(".radar-btn");
+
+
+for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+
+
+btn.classList.add("active");
+
+
+renderCards();
+
+
+}
+
+
+function filterVendor(vendor, btn) {
+
+
+currentVendorFilter = vendor;
+
+
+var buttons = document.querySelectorAll(".filter-btn");
+
+
+for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+
+
+btn.classList.add("active");
+
+
+renderCards();
+
+
+}
+
+
+function searchCards(val) { searchQuery = (val || "").trim(); renderCards(); }
+
+
+​setInterval(function() {
+
+
+countdown--;
+
+
+var timerEl = document.getElementById("next-timer");
+
+
+if (countdown <= 0) { countdown = 60; fetchLiveNews(); }
+
+
+if (timerEl) timerEl.textContent = countdown + "초 후 갱신";
+
+
+}, 1000);
+
+
+​fetchLiveNews();
+
+
+</script>
+
+
 </body>
+
+
 </html>
+
+
