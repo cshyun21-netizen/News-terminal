@@ -90,7 +90,6 @@
         .tag-Reuters { background: #451a03; color: #fdba74; border-color: #9a3412; }
         .tag-WSJ { background: #064e3b; color: #6ee7b7; border-color: #047857; }
         .tag-CNBC { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
-        .tag-Live { background: #065f46; color: #34d399; border-color: #059669; }
 
         .quick-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
         .action-chip {
@@ -137,7 +136,7 @@
 </head>
 <body>
 
-    <div id="sync-banner">📡 실시간 블룸버그 · 로이터 속보 동기화 중...</div>
+    <div id="sync-banner">📡 실시간 외신 속보 동기화 중...</div>
 
     <header>
         <div class="logo-box">
@@ -170,7 +169,6 @@
         </div>
     </section>
 
-    <!-- 실시간 기사가 꽂히는 컨테이너 -->
     <main class="news-container" id="news-container">
         <div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">최신 외신 데이터를 불러오는 중입니다...</div>
     </main>
@@ -241,17 +239,32 @@
                             var cleanTitle = item.title.replace(/ - (Reuters|Bloomberg|WSJ|CNBC|The Wall Street Journal).*/gi, '').trim();
                             var descText = (item.description || "").replace(/<[^>]*>?/gm, '').trim();
                             
+                            // 언론사 정확히 판별하여 태그 부여
                             var vendor = "Reuters";
-                            if (item.link.indexOf("bloomberg") !== -1) vendor = "Bloomberg";
-                            else if (item.link.indexOf("wsj") !== -1) vendor = "WSJ";
-                            else if (item.link.indexOf("cnbc") !== -1) vendor = "CNBC";
+                            var sourceName = "Reuters Live Wire";
+                            var linkLower = (item.link || "").toLowerCase();
+                            var titleLower = (item.title || "").toLowerCase();
+
+                            if (linkLower.indexOf("bloomberg") !== -1 || titleLower.indexOf("bloomberg") !== -1) {
+                                vendor = "Bloomberg";
+                                sourceName = "Bloomberg Markets";
+                            } else if (linkLower.indexOf("wsj") !== -1 || linkLower.indexOf("wall street journal") !== -1 || titleLower.indexOf("wsj") !== -1) {
+                                vendor = "WSJ";
+                                sourceName = "WSJ Markets";
+                            } else if (linkLower.indexOf("cnbc") !== -1 || titleLower.indexOf("cnbc") !== -1) {
+                                vendor = "CNBC";
+                                sourceName = "CNBC Finance";
+                            } else if (linkLower.indexOf("reuters") !== -1 || titleLower.indexOf("reuters") !== -1) {
+                                vendor = "Reuters";
+                                sourceName = "Reuters Business";
+                            }
 
                             fetchedList.push({
                                 title: cleanTitle,
                                 link: item.link,
                                 desc: descText || cleanTitle,
                                 vendor: vendor,
-                                source: vendor + " Live Wire",
+                                source: sourceName,
                                 timeKST: formatKST(item.pubDate),
                                 summaryKo: generateAI摘要(cleanTitle, descText),
                                 timestamp: new Date(item.pubDate || Date.now()).getTime()
@@ -264,7 +277,6 @@
             if (banner) banner.style.display = "none";
 
             if (fetchedList.length > 0) {
-                // 중복 제거 및 최신순 정렬
                 var uniqueMap = {};
                 var cleanList = [];
                 for (var k = 0; k < fetchedList.length; k++) {
@@ -298,7 +310,7 @@
             if (countEl) countEl.innerHTML = "🟢 실시간 외신 속보 <b>" + filtered.length + "건</b> 모니터링 중";
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">조건에 일치하는 실시간 외신 기사가 없습니다.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">선택하신 언론사의 일치하는 실시간 외신 기사가 없습니다.</div>';
                 return;
             }
 
@@ -363,7 +375,6 @@
             if (timerEl) timerEl.textContent = countdown + "초 후 갱신";
         }, 1000);
 
-        // 첫 실행 시 즉시 외신 라이브 수신
         fetchLiveNews();
     </script>
 </body>
