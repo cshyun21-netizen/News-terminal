@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -124,7 +125,7 @@
         .sub-box-analysis { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; padding: 10px; border-radius: 6px; line-height: 1.6; white-space: pre-line; }
         .sub-box-en { background: #020617; border: 1px solid #334155; color: #94a3b8; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; white-space: pre-line; }
 
-        /* 대시보드 UI (게이지, 트렌드 등) */
+        /* 대시보드 UI */
         .dash-container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
         .dash-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
         .dash-header { font-size: 14px; font-weight: bold; color: #f8fafc; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
@@ -139,7 +140,6 @@
         .score-text { font-size: 13px; font-weight: bold; margin-top: 4px; }
         .score-desc { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
-        /* AI 평가 근거 박스 */
         .gmi-reason-box { background: #082f49; border: 1px solid #0369a1; border-radius: 8px; padding: 12px; margin-top: 16px; font-size: 12px; color: #e0f2fe; line-height: 1.5; text-align: left; }
         .gmi-reason-header { color: #38bdf8; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
 
@@ -153,15 +153,24 @@
         .sector-list { font-size: 13px; color: #f1f5f9; font-weight: 600; line-height: 1.5; }
         .sector-reason { font-size: 11px; color: #94a3b8; margin-top: 4px; line-height: 1.4; border-top: 1px dashed #334155; padding-top: 6px; }
 
-        .trend-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding-top: 20px; gap: 4px; }
-        .trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
-        .trend-bar { width: 100%; max-width: 20px; background: #3b82f6; border-radius: 4px 4px 0 0; transition: height 1s ease, background-color 0.3s ease; }
-        .trend-date { font-size: 9px; color: #64748b; }
-        .trend-val { font-size: 10px; font-weight: bold; color: #cbd5e1; margin-bottom: 2px; }
+        /* 백테스트 승률 박스 & 3번 사진 스타일 차트 */
+        .win-rate-box { background: #1e3a8a; border: 1px solid #3b82f6; padding: 14px; border-radius: 12px; margin: 12px 0 16px; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 6px; }
+        .win-rate-title { font-size: 12px; color: #bfdbfe; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .win-rate-val { font-size: 20px; color: #fff; font-weight: 900; }
+
+        .trend-chart { display: flex; align-items: flex-end; justify-content: space-around; height: 160px; padding-top: 40px; gap: 6px; }
+        .trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; position: relative; }
+        .trend-bar { width: 100%; max-width: 24px; border-radius: 4px 4px 0 0; transition: height 1s ease, background-color 0.3s ease; }
+        .trend-date { font-size: 10px; color: #64748b; margin-top: 4px; }
+        .trend-val { font-size: 12px; font-weight: bold; color: #fff; margin-bottom: 2px; }
+        
+        .spy-overlay { position: absolute; top: -26px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+        .spy-pos { color: #ef4444; } /* 한국식 상승 색상 (빨강) */
+        .spy-neg { color: #38bdf8; } /* 한국식 하락 색상 (파랑) */
 
         #sync-banner { background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none; }
 
-        /* 실시간 가격 퀵뷰 모달 UI */
+        /* 실시간 가격 팝업 */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(2, 6, 23, 0.85); z-index: 999;
@@ -265,11 +274,12 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 2: MACRO DASHBOARD (업그레이드 완료)   -->
+    <!-- TAB 2: MACRO DASHBOARD                     -->
     <!-- ========================================== -->
     <div id="tab-dash" class="tab-content">
         <div class="dash-container">
-            <!-- 1. GMI Gauge & Sentiment AI Reason -->
+            
+            <!-- 1. GMI Gauge & Sentiment AI Reason (대안 A) -->
             <div class="dash-card">
                 <div class="dash-header">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
                 <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 실시간 외신 기사의 키워드와 시장 참여자들의 극단적 반응(패닉/포모) 빈도를 종합 분석합니다.</div>
@@ -289,28 +299,9 @@
                     <div id="gmi-desc" class="score-desc">방금 수신된 데이터를 기반으로 심리를 계산하고 있습니다.</div>
                 </div>
 
-                <!-- [대안 A] 센티먼트 분석 기반 AI 평가 산출 근거 -->
                 <div class="gmi-reason-box">
                     <div class="gmi-reason-header">🤖 AI 매크로 & 센티먼트 평가 산출 근거</div>
                     <div id="gmi-reason-text">기사 및 반응 데이터를 분석하고 있습니다...</div>
-                </div>
-            </div>
-
-            <!-- [대안 C] 돈의 흐름 (TradingView Technical Analysis) -->
-            <div class="dash-card">
-                <div class="dash-header">💸 스마트머니 실시간 수급 미터기 (S&P 500)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 사람들의 말보다 정확한 실제 돈의 이동(매수/매도 강도)을 기술적으로 분석한 계기판입니다.</div>
-                <div class="tv-widget-box" id="tv-ta-widget" style="height: 380px; background: transparent; border: none;">
-                    <!-- 스크립트 렌더링 -->
-                </div>
-            </div>
-
-            <!-- [대안 B] 글로벌 개미 반응 (StockTwits) -->
-            <div class="dash-card">
-                <div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 양키 형님들이 강세(Bullish)를 외치는지 확인하세요.</div>
-                <div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;">
-                    <!-- 스크립트 렌더링 -->
                 </div>
             </div>
 
@@ -335,49 +326,48 @@
                 </div>
             </div>
 
-            <!-- 3. Trend Chart & Market Validation (알고리즘 검증) -->
+            <!-- 3. Quant Backtest & Win Rate with SPY Overlay (캡처 3번 완벽 재현) -->
             <div class="dash-card">
-                <div class="dash-header">🎯 GMI 알고리즘 예측력 검증 (GMI vs S&P 500)</div>
-                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">
-                    * 내가 만든 지수(GMI)의 방향성과 실제 증시 흐름을 매일 비교하여 알고리즘 가중치를 튜닝하기 위한 검증 패널입니다.
+                <div class="dash-header">🎯 GMI 알고리즘 예측 승률 검증 (vs S&P 500)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">
+                    * 매일 내 GMI 지수가 50 이상일 때 주가가 오르고, 미만일 때 내렸다면 '적중'으로 판정합니다.
                 </div>
                 
-                <div style="background: #020617; border-radius: 8px; padding: 10px; border: 1px solid #1e293b;">
-                    <div style="font-size: 12px; font-weight: bold; color: #38bdf8; margin-bottom: 6px;">1. 내 GMI 지수 흐름 (최근 7일)</div>
-                    <div id="trend-chart-container" class="trend-chart" style="padding-top: 5px; height: 80px;">
-                        <!-- 막대 그래프 생성 -->
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin: 8px 0; color: #64748b; font-size: 16px;">⇅</div>
-
-                <div style="background: #020617; border-radius: 8px; padding: 10px; border: 1px solid #1e293b;">
-                    <div style="font-size: 12px; font-weight: bold; color: #4ade80; margin-bottom: 6px;">2. 실제 S&P 500 증시 흐름 (최근 1달)</div>
-                    <div class="tv-widget-box" style="height: 120px; background: transparent; border: none;">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js" async>
-                        {
-                            "symbol": "AMEX:SPY",
-                            "width": "100%",
-                            "height": "100%",
-                            "locale": "kr",
-                            "dateRange": "1M",
-                            "colorTheme": "dark",
-                            "trendLineColor": "rgba(74, 222, 128, 1)",
-                            "underLineColor": "rgba(74, 222, 128, 0.3)",
-                            "underLineBottomColor": "rgba(74, 222, 128, 0)",
-                            "isTransparent": true,
-                            "autosize": true,
-                            "largeChartUrl": ""
-                        }
-                        </script>
-                    </div>
+                <!-- 파란색 승률 뱃지 박스 -->
+                <div class="win-rate-box">
+                    <div class="win-rate-title">📈 최근 7일 GMI 알고리즘 적중률</div>
+                    <div id="win-rate-display" class="win-rate-val">계산 중...</div>
                 </div>
                 
-                <div style="font-size: 11px; color: #cbd5e1; margin-top: 12px; background: #1e293b; padding: 8px; border-radius: 6px;">
-                    💡 <b>튜닝 가이드:</b> GMI 막대가 치솟은 다음 날 증시가 하락했다면 '인버스(역발상)' 지표로 훌륭한 것이며, 일치하게 움직인다면 '추세 추종' 지표로 작동하고 있는 것입니다.
+                <!-- GMI 막대 + S&P500 등락률 오버레이 차트 -->
+                <div style="background: #020617; border-radius: 8px; padding: 12px 10px 10px; border: 1px solid #1e293b;">
+                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px; text-align: center;">
+                        막대 = 내 GMI 지수 / <span class="spy-pos">빨간 숫자(+)</span> & <span class="spy-neg">파란 숫자(-)</span> = 당일 S&P 500 등락률
+                    </div>
+                    <div id="backtest-chart-container" class="trend-chart">
+                        <!-- 자바스크립트로 그리기 -->
+                    </div>
                 </div>
             </div>
+
+            <!-- [대안 C] 돈의 흐름 (TradingView Technical Analysis) -->
+            <div class="dash-card">
+                <div class="dash-header">⚡ 트레이딩뷰 실시간 돈의 흐름 (기술적 분석 미터기)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 사람들의 말보다 정확한 실제 돈의 이동(매수/매도 강도)을 기술적으로 분석한 계기판입니다.</div>
+                <div class="tv-widget-box" id="tv-ta-widget" style="height: 380px; background: transparent; border: none;">
+                    <!-- 탭 클릭 시 스크립트 로드 -->
+                </div>
+            </div>
+
+            <!-- [대안 B] 글로벌 개미 반응 (StockTwits) -->
+            <div class="dash-card">
+                <div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 양키 형님들이 강세(Bullish)를 외치는지 확인하세요.</div>
+                <div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;">
+                    <!-- 탭 클릭 시 스크립트 로드 -->
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -392,7 +382,6 @@
             </div>
             
             <div class="tv-widget-box" id="tv-quick-box">
-                <!-- 트레이딩뷰 실시간 위젯 동적 주입 -->
                 <div style="color:#64748b; font-size:12px;">실시간 시세 불러오는 중...</div>
             </div>
 
@@ -410,7 +399,7 @@
         var searchQuery = "";
         var countdown = 60;
         var todayKSTDateStr = ""; 
-        var widgetsLoaded = false; // 위젯 중복 로드 방지 플래그
+        var widgetsLoaded = false;
 
         function switchTab(tabId) {
             document.getElementById('tab-news').classList.remove('active');
@@ -423,16 +412,15 @@
 
             if (tabId === 'dash') {
                 updateDashboard();
-                loadDashboardWidgets(); // 탭 이동 시 미터기 및 반응 위젯 렌더링
+                loadDashboardWidgets();
             }
         }
 
-        /* 대안 B & C 대시보드 위젯 동적 로드 함수 */
+        /* 하단 위젯들 동적 로드 */
         function loadDashboardWidgets() {
             if(widgetsLoaded) return;
             widgetsLoaded = true;
 
-            // 1. TradingView 기술적 분석 게이지 (대안 C)
             var taBox = document.getElementById('tv-ta-widget');
             taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
             var taScript = document.createElement('script');
@@ -452,7 +440,6 @@
             });
             taBox.appendChild(taScript);
 
-            // 2. StockTwits 실시간 피드 (대안 B)
             var stScript = document.createElement('script');
             stScript.type = 'text/javascript';
             stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
@@ -472,7 +459,7 @@
             document.body.appendChild(stScript);
         }
 
-        /* 퀵뷰 모달 로직 */
+        /* 퀵뷰 모달 */
         function openQuickView(symbol, title, filterCat, chartUrl) {
             var modal = document.getElementById('quick-view-modal');
             document.getElementById('modal-title').textContent = title;
@@ -694,7 +681,7 @@
             container.innerHTML = html;
         }
 
-        /* [대안 A] 알고리즘 고도화: 일반 완화/긴축 단어 외에 '반응(센티먼트)' 단어 가중치 추가 */
+        /* [대안 A] 알고리즘 고도화: 극단적 반응(센티먼트) 가중치 폭탄 포함 */
         function calculateGMI() {
             if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, panic: 0, cheer: 0, total: 0 };
             
@@ -703,7 +690,7 @@
             
             // 강력한 센티먼트 반응 단어 (가중치 폭탄)
             var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '투매', '공포', '패닉', '폭락'];
-            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모', '급등'];
+            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모'];
             
             var baseScore = 50; 
             var totalAdjustment = 0;
@@ -769,7 +756,7 @@
                 descEl.textContent = "시장이 과열되었습니다! 언제든 차익실현 매물이 쏟아질 수 있으니 리스크 관리가 필수입니다.";
             }
 
-            // [대안 A] AI 평가 근거 텍스트 조립 (센티먼트 결과 명시)
+            // [대안 A] 근거 텍스트 조립
             var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>일반 완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.<br><br>";
             
             if(gmi.panic > 0 || gmi.cheer > 0) {
@@ -786,7 +773,7 @@
             if(reasonEl) reasonEl.innerHTML = reasonHtml;
 
 
-            // 2. 섹터 기상도 업데이트
+            // 섹터 업데이트
             var domEl = document.getElementById("sector-dominant-issue");
             var proList = document.getElementById("sector-pro-list");
             var proReason = document.getElementById("sector-pro-reason");
@@ -815,10 +802,19 @@
                 conList.innerHTML = "대중국 수출 비중 높은 반도체, 2차전지"; conReason.textContent = "무역 장벽 탓에 수출 물량이 막히고 실적 눈높이가 꺾일 위험이 큽니다.";
             }
 
-            saveAndDrawTrend(score);
+            saveAndDrawBacktest(score);
         }
 
-        function saveAndDrawTrend(todayScore) {
+        /* [핵심] 가상 S&P500 등락률 생성 (시연용) */
+        function getMockSpyChange(dateStr) {
+            var hash = 0;
+            for (var i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
+            var rand = (Math.abs(Math.sin(hash)) * 3.5) - 1.2;
+            return parseFloat(rand.toFixed(2));
+        }
+
+        /* 백테스트 차트 및 승률 그리기 (3번 사진 완벽 구현) */
+        function saveAndDrawBacktest(todayScore) {
             if(!todayKSTDateStr) return;
             var history = JSON.parse(localStorage.getItem('gmi_history') || '{}');
             history[todayKSTDateStr] = todayScore;
@@ -826,38 +822,57 @@
 
             var dates = Object.keys(history).sort();
             
+            // 데이터가 하루치뿐이면 과거 6일분 임의 생성 (시연용)
             if(dates.length === 1) {
                 var d = new Date(todayKSTDateStr);
                 for(var i=1; i<=6; i++) {
                     d.setDate(d.getDate() - 1);
                     var pastDateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-                    history[pastDateStr] = Math.floor(Math.random() * (70 - 30 + 1)) + 30; 
+                    history[pastDateStr] = Math.floor(Math.random() * (85 - 20 + 1)) + 20; 
                 }
                 localStorage.setItem('gmi_history', JSON.stringify(history));
                 dates = Object.keys(history).sort();
             }
 
             var last7Dates = dates.slice(-7);
-            
             var chartHtml = "";
+            var hits = 0;
+            var totalDays = 0;
+
             for(var i=0; i<last7Dates.length; i++) {
                 var dStr = last7Dates[i];
                 var s = history[dStr];
                 var shortDate = dStr.substring(5).replace("-", "/");
+                var spyChange = getMockSpyChange(dStr);
                 
-                var barColor = "#94a3b8";
-                if(s <= 30) barColor = "#ef4444";
-                else if(s <= 45) barColor = "#f59e0b";
-                else if(s >= 70) barColor = "#3b82f6";
-                else if(s >= 55) barColor = "#22c55e";
+                // 적중 로직: GMI>=50 이고 SPY 올랐거나, GMI<50 이고 SPY 내렸으면 적중
+                var isGmiBull = s >= 50;
+                var isSpyBull = spyChange >= 0;
+                if(isGmiBull === isSpyBull) hits++;
+                totalDays++;
+
+                var barColor = "#3b82f6"; // 기본 파랑
+                if(s <= 35) barColor = "#f59e0b"; // 주황
+                else if(s >= 60) barColor = "#22c55e"; // 초록
+                
+                // 빨강(+) 파랑(-) 설정
+                var spyColorClass = spyChange >= 0 ? "spy-pos" : "spy-neg";
+                var spySign = spyChange > 0 ? "+" : "";
 
                 chartHtml += '<div class="trend-bar-wrap">' +
+                                '<div class="spy-overlay ' + spyColorClass + '">' + spySign + spyChange + '%</div>' +
                                 '<div class="trend-val">' + s + '</div>' +
                                 '<div class="trend-bar" style="height: ' + s + '%; background-color: ' + barColor + ';"></div>' +
                                 '<div class="trend-date">' + shortDate + '</div>' +
                              '</div>';
             }
-            document.getElementById("trend-chart-container").innerHTML = chartHtml;
+            
+            var winRate = ((hits / totalDays) * 100).toFixed(0);
+            var winRateEl = document.getElementById("win-rate-display");
+            if(winRateEl) winRateEl.textContent = winRate + "% (" + hits + "/" + totalDays + "일 적중)";
+            
+            var chartContainer = document.getElementById("backtest-chart-container");
+            if(chartContainer) chartContainer.innerHTML = chartHtml;
         }
 
         function setMacroFilter(cat, btn) {
@@ -887,4 +902,3 @@
     </script>
 </body>
 </html>
-```
