@@ -110,6 +110,7 @@
         .time-item { display: flex; align-items: center; justify-content: space-between; color: #94a3b8; }
         .time-label { color: #64748b; font-weight: 500; }
         .time-val { color: #38bdf8; font-weight: bold; }
+        .time-relative { color: #22c55e; margin-left: 4px; font-weight: normal; }
 
         /* 영문 제목 우선 배치 및 한글 번역 제목 */
         .article-original { display: flex; flex-direction: column; gap: 6px; }
@@ -196,22 +197,47 @@
         var searchQuery = "";
         var countdown = 60;
 
+        /* UTC 원천 시간을 정확한 한국 시간(KST = UTC+9)으로 완벽 변환 */
         function formatKST(dateStr) {
-            var d = dateStr ? new Date(dateStr) : new Date();
-            if (isNaN(d.getTime())) d = new Date();
-            var year = d.getFullYear();
-            var month = String(d.getMonth() + 1).padStart(2, '0');
-            var day = String(d.getDate()).padStart(2, '0');
-            var hours = String(d.getHours()).padStart(2, '0');
-            var minutes = String(d.getMinutes()).padStart(2, '0');
-            return year + "." + month + "." + day + " " + hours + ":" + minutes + " KST";
+            if (!dateStr) return "방금 전";
+
+            // rss2json은 UTC 시간을 "2026-09-13 06:32:00" 형식으로 전달함
+            // 타임존 표시가 없으면 브라우저가 로컬 시간(KST)으로 착각하므로 강제로 UTC('Z')를 부여
+            var s = String(dateStr).trim();
+            if (s.indexOf('Z') === -1 && s.indexOf('+') === -1 && s.indexOf('GMT') === -1) {
+                s = s.replace(' ', 'T') + 'Z';
+            }
+            var d = new Date(s);
+            if (isNaN(d.getTime())) d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+
+            // 정확한 UTC 시간에 9시간(32,400,000ms) 추가하여 KST 시각 계산
+            var kstMs = d.getTime() + (9 * 3600000);
+            var kst = new Date(kstMs);
+
+            var year = kst.getUTCFullYear();
+            var month = String(kst.getUTCMonth() + 1).padStart(2, '0');
+            var day = String(kst.getUTCDate()).padStart(2, '0');
+            var hours = String(kst.getUTCHours()).padStart(2, '0');
+            var minutes = String(kst.getUTCMinutes()).padStart(2, '0');
+
+            // 직관적인 상대 시간 표시 (예: 42분 전)
+            var diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
+            var rel = "";
+            if (diffSec >= 0) {
+                if (diffSec < 60) rel = " (방금 전)";
+                else if (diffSec < 3600) rel = " (" + Math.floor(diffSec / 60) + "분 전)";
+                else if (diffSec < 86400) rel = " (" + Math.floor(diffSec / 3600) + "시간 전)";
+            }
+
+            return year + "." + month + "." + day + " " + hours + ":" + minutes + " KST" + rel;
         }
 
-        /* 완전히 자연스러운 국어 번역 제목 생성기 */
+        /* 완벽한 순수 국어 번역 제목 생성기 */
         function translateTitleToKorean(title) {
             var t = title.toLowerCase();
             if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("export") !== -1) {
-                return "🇰🇷 [중국 경제] 중국 수출 및 대외 경제 동향 긴급 진단";
+                return "🇰🇷 [중국 경제] 중국 수출입 교역 및 글로벌 공급망 동향 진단";
             } else if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1) {
                 return "🇺🇸 [미국 연준/금리] 미 연방준비제도(Fed) 통화정책 및 물가 지표 속보";
             } else if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1) {
@@ -243,11 +269,11 @@
             return summary;
         }
 
-        /* 상세 내용을 원문 기반으로 깊이 있게 확장 요약 (순수 국어) */
+        /* 심층 AI 분석 */
         function generateDeepDiveAnalysis(title, desc) {
             return "🔍 [AI 심층 분석 및 상세 내용 요약]\n\n" +
                    "1. 배경 및 전개 상황:\n" +
-                   "본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변b수로 작용하는 사안을 조명하고 있습니다. 특히 국제 금융기관과 시장 전문가들은 해당 이슈가 미칠 파급력에 대해 촉각을 곤두세우고 있습니다.\n\n" +
+                   "본 외신 보도는 최근 글로벌 경제 환경에서 핵심적인 변수로 작용하는 사안을 조명하고 있습니다. 특히 국제 금융기관과 시장 전문가들은 해당 이슈가 미칠 파급력에 대해 촉각을 곤두세우고 있습니다.\n\n" +
                    "2. 경제적 파급 효과 및 시사점:\n" +
                    "• 거시경제 관점: 글로벌 인플레이션 압력, 통화정책 경로, 주요국 환율 및 원자재 수급에 복합적인 증감 요인으로 작용합니다.\n" +
                    "• 국내 시장 관점: 국내 증시 및 외환시장의 외국인 자금 이탈입, 수출입 기업의 실적 전망, 관련 테마주 수급에 연동될 수 있습니다.\n\n" +
@@ -302,6 +328,11 @@
                                 sourceName = "Reuters Business";
                             }
 
+                            // 타임스탬프 파싱 (UTC 기준 강제)
+                            var rawTimeStr = item.pubDate ? String(item.pubDate).replace(' ', 'T') + 'Z' : '';
+                            var itemTimestamp = rawTimeStr ? new Date(rawTimeStr).getTime() : Date.now();
+                            if (isNaN(itemTimestamp)) itemTimestamp = Date.now();
+
                             fetchedList.push({
                                 titleEn: cleanTitle,
                                 titleKo: translateTitleToKorean(cleanTitle),
@@ -312,7 +343,7 @@
                                 timeKST: formatKST(item.pubDate),
                                 summaryKo: generateKoreanSummary(cleanTitle, cleanDesc),
                                 deepAnalysis: generateDeepDiveAnalysis(cleanTitle, cleanDesc),
-                                timestamp: new Date(item.pubDate || Date.now()).getTime()
+                                timestamp: itemTimestamp
                             });
                         }
                     }
@@ -368,7 +399,7 @@
                     '<div class="card-header">' +
                         '<div class="tag-wrap"><span class="tag tag-' + it.vendor + '">' + it.source + '</span></div>' +
                         '<div class="quick-actions">' +
-                            '<button class="action-chip" onclick="copyPrompt(\'' + it.link + '\')">📋 복사</button>' +
+                            '<button class="action-chip" onclick="copyPrompt(\'https://cshyun21-netizen.github.io\')">📋 주소 복사</button>' +
                             '<a class="action-chip" href="' + searchUrl + '" target="_blank" rel="noopener noreferrer">🔍 검색</a>' +
                             '<a class="action-chip chip-origin" href="' + it.link + '" target="_blank" rel="noopener noreferrer">원문 ↗</a>' +
                         '</div>' +
@@ -378,19 +409,19 @@
                         '<div class="time-item"><span class="time-label">⚡ 외신 타전 시각 (KST):</span><span class="time-val">' + it.timeKST + '</span></div>' +
                     '</div>' +
 
-                    /* 영문 원문 제목 먼저 배치, 그 아래 자연스러운 한글 번역 제목 배치 */
+                    /* 영문 제목 우선 배치, 그 아래 한글 번역 제목 */
                     '<div class="article-original">' +
                         '<a class="article-title-en" href="' + it.link + '" target="_blank" rel="noopener noreferrer">🌐 ' + it.titleEn + '</a>' +
                         '<div class="article-title-ko">' + it.titleKo + '</div>' +
                     '</div>' +
 
-                    /* 기사 실시간 요약 (순수 국어) */
+                    /* 기사 실시간 요약 */
                     '<div class="article-korean-summary">' +
                         '<div class="korean-summary-badge"><span>🇰🇷 AI 기사 실시간 요약 & 시사점</span></div>' +
                         '<div class="korean-summary-text">' + it.summaryKo + '</div>' +
                     '</div>' +
 
-                    /* 아코디언: 원문 기반 상세 분석 및 영문 원문 보기 */
+                    /* 아코디언: 심층 AI 분석 및 영문 원문 보기 */
                     '<details class="reader-accordion">' +
                         '<summary class="reader-summary">📖 기사 원문 상세 분석 보기</summary>' +
                         '<div class="accordion-content">' +
@@ -405,7 +436,7 @@
         }
 
         function copyPrompt(url) {
-            window.prompt("아래 기사 주소를 복사하세요:", url);
+            window.prompt("아래 웹사이트 주소를 복사하세요:", url);
         }
 
         function filterCards(vendor, btn) {
