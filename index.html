@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -267,8 +267,36 @@
                     </div>
                     <button id="btn-gen-briefing" onclick="generateExecutiveBriefing()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
                         <span>⚡</span>
-                        <span>지금 AI 분석</span>
+                        <span>기본 종합 리포트</span>
                     </button>
+                </div>
+
+                <!-- NEW: 사용자 맞춤형 직접 프롬프트 입력창 -->
+                <div class="mt-3 bg-slate-950/80 border border-sky-900/60 rounded-xl p-3 flex flex-col gap-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1">
+                            <span>🎯</span>
+                            <span>내 관점 맞춤 분석 요청 (오늘 수신 외신 기반)</span>
+                        </span>
+                        <span class="text-[10px] text-slate-500">자유 질문 또는 맞춤 지시</span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <input type="text" id="custom-briefing-prompt" 
+                               placeholder="예: 오늘 외신 중 유가·중동 관련만 묶어서 한국 정유·항공주 영향 요약해줘" 
+                               class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-sky-400 placeholder:text-slate-500"
+                               onkeydown="if(event.key==='Enter') generateExecutiveBriefing(this.value)">
+                        <button onclick="generateExecutiveBriefing(document.getElementById('custom-briefing-prompt').value)" 
+                                class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap shadow transition flex items-center gap-1">
+                            <span>🚀</span>
+                            <span>분석</span>
+                        </button>
+                    </div>
+                    <!-- 빠른 질문 추천 칩 -->
+                    <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-[10.5px]">
+                        <button onclick="setAndRunPrompt('오늘 수신된 외신들을 바탕으로 가장 타격이 큰 피해주와 반사이익 수혜주를 명확하게 분류해줘')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🎯 수혜/피해 섹터 분류</button>
+                        <button onclick="setAndRunPrompt('오늘 기사들의 공통적인 거품 붕괴 리스크와 현금 확보 권장 비중을 조언해줘')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🛡️ 현금 비중 및 리스크 조언</button>
+                        <button onclick="setAndRunPrompt('오늘 기사들이 한국 코스피/코스닥 외국인 수급과 원달러 환율에 미칠 충격은?')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🇰🇷 국내 증시·환율 파급</button>
+                    </div>
                 </div>
 
                 <!-- Briefing Output Screen -->
@@ -276,14 +304,14 @@
                     <div class="text-center text-slate-400 py-8">
                         <div class="text-2xl mb-1">🏛️</div>
                         <div class="font-medium">수신된 기사들의 거시경제 파급력을 교차 분석합니다.</div>
-                        <div class="text-[11px] text-slate-500 mt-1">상단의 <b>[지금 AI 분석]</b> 버튼을 누르면 Gemini가 즉시 3대 핵심 쟁점과 종합 방향타를 보고합니다.</div>
+                        <div class="text-[11px] text-slate-500 mt-1">위의 <b>[기본 종합 리포트]</b>를 누르거나, 입력창에 <b>궁금한 질문을 직접 적어서</b> 분석을 요청하세요.</div>
                     </div>
                 </div>
 
                 <!-- Key Market Sentiment Bullet Points automatically populated -->
                 <div id="briefing-meta" class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-400 hidden flex justify-between items-center">
                     <span id="briefing-timestamp">생성 시각: --</span>
-                    <span class="text-sky-400 font-semibold">Gemini 3 Flash Verified</span>
+                    <span class="text-sky-400 font-semibold" id="briefing-badge">Gemini 3 Flash Custom Analysis</span>
                 </div>
             </div>
 
@@ -481,9 +509,7 @@
                 updateDashboard();
                 loadDashboardWidgets();
             } else if (tabId === 'ai') {
-                if (!document.getElementById('briefing-box').dataset.generated && liveArticles.length > 0) {
-                    generateExecutiveBriefing();
-                }
+                // 자동 생성 로직 완전 제거: 사용자가 직접 버튼이나 프롬프트를 누를 때만 실행됨
             } else if (tabId === 'hot') {
                 renderHotTab();
             }
@@ -554,30 +580,49 @@
         }
 
         // 1. Executive Briefing Generation
-        async function generateExecutiveBriefing() {
+        function setAndRunPrompt(text) {
+            var input = document.getElementById('custom-briefing-prompt');
+            if (input) {
+                input.value = text;
+                generateExecutiveBriefing(text);
+            }
+        }
+
+        async function generateExecutiveBriefing(customInstruction) {
             var box = document.getElementById('briefing-box');
             var btn = document.getElementById('btn-gen-briefing');
             var meta = document.getElementById('briefing-meta');
             var ts = document.getElementById('briefing-timestamp');
+            var badge = document.getElementById('briefing-badge');
 
             if (!box || liveArticles.length === 0) return;
 
             btn.disabled = true;
             btn.innerHTML = '<span>⏳</span><span>AI 분석 중...</span>';
-            box.innerHTML = '<div class="py-8 text-center text-sky-400 font-semibold animate-pulse">🤖 최신 외신 속보 전량을 종합하여 Gemini 3 Flash가 매크로 총괄 리포트를 집필 중입니다...</div>';
+            box.innerHTML = '<div class="py-8 text-center text-sky-400 font-semibold animate-pulse">🤖 수신된 외신 전량을 바탕으로 요청하신 맞춤형 매크로 리포트를 집필 중입니다...</div>';
 
             try {
                 var newsContext = liveArticles.slice(0, 10).map(function(item, idx) {
                     return (idx + 1) + ". [" + item.vendor + "] " + item.titleEn + "\n내용: " + item.desc;
                 }).join("\n\n");
 
-                var prompt = "다음은 방금 글로벌 통신사(Bloomberg, Reuters, WSJ, CNBC)에서 타전된 주요 경제·지정학 속보입니다:\n\n" +
+                var prompt = "";
+                if (customInstruction && customInstruction.trim().length > 0) {
+                    prompt = "다음은 방금 글로벌 통신사(Bloomberg, Reuters, WSJ, CNBC)에서 타전된 주요 경제·지정학 속보입니다:\n\n" +
+                             newsContext + "\n\n" +
+                             "당신은 월스트리트 수석 매크로 이코노미스트입니다. 사용자가 다음과 같은 특별 맞춤 분석을 요청했습니다:\n" +
+                             "👉 [사용자 요청 사항]: " + customInstruction + "\n\n" +
+                             "방금 제공한 실제 외신 기사 내용들을 근거로 삼아, 사용자의 요청에 대해 명쾌하고 깊이 있게 한국어로 분석 리포트를 작성하세요.\n" +
+                             "형식은 보기 편하게 불렛포인트와 볼드체를 활용해 전문적이고 날카롭게 작성해 주세요.";
+                } else {
+                    prompt = "다음은 방금 글로벌 통신사(Bloomberg, Reuters, WSJ, CNBC)에서 타전된 주요 경제·지정학 속보입니다:\n\n" +
                              newsContext + "\n\n" +
                              "당신은 월스트리트 수석 매크로 이코노미스트입니다. 한국 투자자들을 위해 다음 3단계로 명확하고 날카로운 일일 모닝 브리핑을 작성하세요:\n" +
                              "1. 🌍 [오늘의 3대 매크로 쟁점]: 각 핵심 사건과 수치 요약\n" +
                              "2. 💥 [자산군 거품 & 유동성 영향]: 미 국채금리, 환율, AI 반도체 및 증시 파급 경로\n" +
                              "3. 🧭 [투자자 행동 가이드]: 현금 비중, 수혜 섹터 및 경계 업종 조언\n" +
                              "간결하고 가독성 좋은 불렛포인트로 작성해주세요.";
+                }
 
                 var apiKey = "";
                 var apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
@@ -600,6 +645,9 @@
                     if (meta && ts) {
                         meta.classList.remove('hidden');
                         ts.textContent = "생성 시각: " + new Date().toLocaleTimeString();
+                        if (badge) {
+                            badge.textContent = customInstruction ? "사용자 맞춤 분석 완료" : "Gemini 3 Flash Verified";
+                        }
                     }
                 } else {
                     box.innerHTML = '<div class="text-amber-400 py-4 text-center">⚠️ 일시적으로 AI 리포트 응답을 가져오지 못했습니다. 다시 시도해 주세요.</div>';
@@ -608,7 +656,7 @@
                 box.innerHTML = '<div class="text-red-400 py-4 text-center">⚠️ 네트워크 통신 장애가 발생했습니다. 잠시 후 새로고침해 주세요.</div>';
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<span>⚡</span><span>지금 AI 분석</span>';
+                btn.innerHTML = '<span>⚡</span><span>기본 종합 리포트</span>';
             }
         }
 
