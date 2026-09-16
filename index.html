@@ -4,980 +4,423 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>글로벌 경제·지정학 속보 AI 터미널</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body {
-            background-color: #020617;
-            color: #f1f5f9;
+            background-color: #020617; color: #f1f5f9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-            padding-bottom: 90px;
+            padding-bottom: 70px;
         }
 
-        /* Live status animations */
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.35; transform: scale(0.85); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        .live-dot {
-            width: 10px; height: 10px; border-radius: 50%; background: #22c55e;
-            box-shadow: 0 0 10px #22c55e; flex-shrink: 0; animation: pulse 1.8s infinite;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Fixed components & navigation bar */
         header {
             position: sticky; top: 0; z-index: 50; background: #0f172a;
             border-bottom: 1px solid #1e293b; padding: 12px 14px;
             display: flex; align-items: center; justify-content: space-between;
         }
+        .logo-box { display: flex; align-items: center; gap: 8px; }
+        .live-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: #22c55e;
+            box-shadow: 0 0 8px #22c55e; flex-shrink: 0; animation: pulse 1.8s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } 100% { opacity: 1; transform: scale(1); } }
+        .header-title { font-size: 15px; font-weight: bold; color: #ffffff; letter-spacing: -0.3px; }
+        .header-sub { font-size: 11px; color: #94a3b8; }
+        .header-controls { display: flex; align-items: center; gap: 6px; }
+        .timer-badge { font-size: 11px; font-family: monospace; color: #38bdf8; background: #082f49; border: 1px solid #0369a1; padding: 5px 8px; border-radius: 6px; white-space: nowrap; }
+        .btn-refresh { background: #2563eb; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap; }
+
         .tab-bar {
             display: flex; background: #0b1329; border-bottom: 1px solid #1e293b;
-            position: sticky; top: 57px; z-index: 40;
+            position: sticky; top: 57px; z-index: 40; overflow-x: auto;
         }
+        .tab-bar::-webkit-scrollbar { display: none; }
         .tab-btn {
-            flex: 1; padding: 12px 0; text-align: center; font-size: 13px; font-weight: bold;
+            flex: 1; min-width: 85px; padding: 12px 4px; text-align: center; font-size: 11.5px; font-weight: bold;
             color: #64748b; background: transparent; border: none; border-bottom: 3px solid transparent;
-            cursor: pointer; transition: all 0.2s ease;
+            cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
         }
         .tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; background: #0f1d38; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Macro indicator ticker bar */
-        .macro-indicator-bar {
-            background: #09101f; border-bottom: 1px solid #1e293b;
-            padding: 10px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
-        }
+        .macro-indicator-bar { background: #09101f; border-bottom: 1px solid #1e293b; padding: 10px 12px; display: flex; gap: 8px; overflow-x: auto; white-space: nowrap; }
         .macro-indicator-bar::-webkit-scrollbar { display: none; }
-        .indicator-item {
-            display: inline-flex; align-items: center; gap: 5px; color: #cbd5e1;
-            background: #111e38; border: 1px solid #1e3a8a; padding: 6px 10px;
-            border-radius: 8px; cursor: pointer; font-size: 11.5px; transition: all 0.15s ease;
-        }
-        .indicator-item:active { background: #1e3a8a; }
-
-        /* Radar filter buttons */
-        .radar-buttons-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
-        .radar-buttons-row::-webkit-scrollbar { display: none; }
-        .radar-btn {
-            background: #172554; color: #93c5fd; border: 1px solid #1d4ed8; padding: 6px 11px;
-            border-radius: 6px; font-size: 11.5px; font-weight: bold; white-space: nowrap; cursor: pointer;
-            display: inline-flex; align-items: center; gap: 4px;
-        }
+        .indicator-item { display: inline-flex; align-items: center; gap: 5px; color: #cbd5e1; background: #111e38; border: 1px solid #1e3a8a; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 11.5px; transition: all 0.15s ease; }
+        .indicator-name { color: #f8fafc; font-weight: bold; }
+        .toolbar { padding: 12px 14px 6px; max-width: 680px; margin: 0 auto; }
+        .filter-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .radar-label { font-size: 11px; font-weight: bold; color: #ef4444; display: flex; align-items: center; gap: 4px; }
+        .macro-radar-buttons, .filter-buttons { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 3px; }
+        .macro-radar-buttons::-webkit-scrollbar, .filter-buttons::-webkit-scrollbar { display: none; }
+        .radar-btn { background: #172554; color: #93c5fd; border: 1px solid #1d4ed8; padding: 6px 11px; border-radius: 6px; font-size: 11.5px; font-weight: bold; white-space: nowrap; cursor: pointer; }
         .radar-btn.active { background: #ef4444; color: #fff; border-color: #b91c1c; }
-
-        .filter-buttons-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
-        .filter-buttons-row::-webkit-scrollbar { display: none; }
         .filter-btn { background: #1e293b; color: #94a3b8; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; cursor: pointer; }
         .filter-btn.active { background: #0284c7; color: #ffffff; }
+        .search-input { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #fff; outline: none; }
+        .search-input:focus { border-color: #0284c7; }
+        .status-row { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-top: 6px; padding: 0 4px; }
 
-        /* Article Card Styles */
+        .news-container { max-width: 680px; margin: 0 auto; padding: 6px 14px; display: flex; flex-direction: column; gap: 14px; }
         .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-        .tag-Bloomberg { background: #172554; color: #93c5fd; border: 1px solid #1e40af; }
-        .tag-Reuters { background: #451a03; color: #fdba74; border: 1px solid #9a3412; }
-        .tag-WSJ { background: #064e3b; color: #6ee7b7; border: 1px solid #047857; }
-        .tag-CNBC { background: #3b0764; color: #d8b4fe; border: 1px solid #7e22ce; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .tag { font-size: 11px; font-weight: bold; padding: 3px 7px; border-radius: 4px; border: 1px solid transparent; }
+        .tag-Bloomberg { background: #172554; color: #93c5fd; border-color: #1e40af; }
+        .tag-Reuters { background: #451a03; color: #fdba74; border-color: #9a3412; }
+        .tag-WSJ { background: #064e3b; color: #6ee7b7; border-color: #047857; }
+        .tag-CNBC { background: #3b0764; color: #d8b4fe; border-color: #7e22ce; }
+        .quick-actions a, .quick-actions button { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+        .time-meta-bar { background: #09101f; border: 1px solid #1e293b; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-family: monospace; display: flex; justify-content: space-between; color: #94a3b8; }
+        
+        /* 팩트 요약 UI 개선 */
+        .article-original { display: flex; flex-direction: column; gap: 6px; }
+        .article-title-en { font-size: 13px; font-weight: normal; color: #94a3b8; line-height: 1.4; text-decoration: none; word-break: keep-all; }
+        .article-title-ko { font-size: 14px; font-weight: bold; color: #f8fafc; line-height: 1.45; background: #082f49; padding: 8px 10px; border-radius: 6px; border-left: 3px solid #0ea5e9; }
+        
+        .article-korean-summary { background: #0f1d38; border: 1px solid #1e3a8a; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 8px; }
+        .summary-section { display: flex; flex-direction: column; gap: 4px; }
+        .summary-label { font-size: 11px; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 4px; }
+        .summary-text { color: #f0f9ff; }
+        .macro-strategy-label { font-size: 11px; font-weight: bold; color: #f59e0b; margin-top: 4px; padding-top: 8px; border-top: 1px dashed rgba(245, 158, 11, 0.3); }
 
-        .summary-tone-badge { font-weight: bold; display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; }
-        .tone-bull { background: #14532d; color: #86efac; border: 1px solid #16a34a; }
-        .tone-bear { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
-        .tone-neutral { background: #334155; color: #cbd5e1; border: 1px solid #475569; }
+        details.reader-accordion { background: #0b1329; border: 1px solid #1e293b; border-radius: 8px; overflow: hidden; }
+        summary.reader-summary { padding: 10px 12px; font-size: 11px; font-weight: bold; color: #38bdf8; cursor: pointer; display: flex; justify-content: space-between; background: #0f1d38; list-style: none; }
+        summary.reader-summary::-webkit-details-marker { display: none; }
+        summary.reader-summary::after { content: "▼ 상세 매크로 분석 & 원문"; font-size: 10px; color: #94a3b8; }
+        details[open] summary.reader-summary::after { content: "▲ 접기"; color: #38bdf8; }
+        .accordion-content { padding: 12px; font-size: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .ai-deep-btn { background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
+        .sub-box-analysis { background: #082f49; border: 1px solid #0369a1; color: #e0f2fe; padding: 10px; border-radius: 6px; line-height: 1.6; white-space: pre-line; }
+        .sub-box-en { background: #020617; border: 1px solid #334155; color: #94a3b8; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 11px; word-break: break-all; white-space: pre-line; }
 
-        /* Gauge Needle */
+        .dash-container { max-width: 680px; margin: 0 auto; padding: 14px; display: flex; flex-direction: column; gap: 16px; }
+        .dash-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; }
+        .dash-header { font-size: 14px; font-weight: bold; color: #f8fafc; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .timestamp-note { font-size: 10.5px; color: #fbbf24; font-family: monospace; margin-bottom: 12px; background: #451a03; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        
         .gauge-wrapper { position: relative; width: 100%; height: 24px; background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e, #3b82f6); border-radius: 12px; margin: 30px 0 10px; }
         .gauge-needle { position: absolute; top: -16px; width: 4px; height: 32px; background: #ffffff; border-radius: 2px; box-shadow: 0 0 4px #000; transition: left 1s cubic-bezier(0.4, 0, 0.2, 1); left: 50%; z-index: 10; }
         .gauge-needle::after { content: '▼'; position: absolute; top: -14px; left: -4px; color: #fff; font-size: 12px; text-shadow: 0 1px 2px #000; }
+        .gauge-labels { display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #94a3b8; }
+        .score-display { text-align: center; margin-top: 16px; }
+        .score-number { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
+        .score-text { font-size: 13px; font-weight: bold; margin-top: 4px; }
+        .gmi-reason-box { background: #082f49; border: 1px solid #0369a1; border-radius: 8px; padding: 12px; margin-top: 16px; font-size: 12px; color: #e0f2fe; line-height: 1.5; }
 
-        /* Quant Backtest Bar chart */
-        .backtest-grid { display: flex; justify-content: space-around; align-items: flex-end; height: 150px; gap: 4px; padding-top: 10px; }
-        .col-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
-        .col-bar-track { width: 100%; max-width: 24px; height: 80px; display: flex; align-items: flex-end; justify-content: center; }
-        .col-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .spy-pos { color: #ef4444; font-weight: bold; }
-        .spy-neg { color: #38bdf8; font-weight: bold; }
+        .sector-split { display: flex; gap: 10px; margin-top: 8px; }
+        .sector-box { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; }
+        .sector-pro { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+        .sector-con { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .sector-title { font-size: 12px; font-weight: bold; }
+        .sector-pro .sector-title { color: #4ade80; }
+        .sector-con .sector-title { color: #f87171; }
+        .sector-list { font-size: 13px; color: #f1f5f9; font-weight: 600; line-height: 1.5; }
 
-        /* Floating AI Chat terminal drawer */
-        #ai-chat-drawer {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(100%);
-        }
-        #ai-chat-drawer.open {
-            transform: translateY(0);
-        }
+        .trend-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 100px; padding-top: 20px; gap: 4px; }
+        .trend-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+        .trend-bar { width: 100%; max-width: 20px; background: #3b82f6; border-radius: 4px 4px 0 0; transition: height 1s ease; }
+        .trend-date { font-size: 9px; color: #64748b; }
+        .trend-val { font-size: 10px; font-weight: bold; }
+
+        /* 배너 및 기타 UI */
+        #sync-banner { background: #b45309; color: #fff; font-size: 11px; text-align: center; padding: 6px; font-weight: bold; display: none; }
+        .tv-widget-box { width: 100%; background: #020617; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid #1e293b; }
+        .btn-primary { background: #2563eb; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; text-align: center; display: inline-block; }
+        .btn-secondary { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; display: inline-block; }
     </style>
 </head>
 <body>
-    <div id="sync-banner" class="bg-amber-700 text-white text-xs text-center py-1.5 font-bold hidden">
-        📡 최신 외신 속보 동기화 및 Gemini AI 분석 진행 중...
-    </div>
+    <div id="sync-banner">📡 실시간 외신 속보 동기화 중...</div>
 
     <header>
-        <div class="flex items-center gap-2">
+        <div class="logo-box">
             <div class="live-dot"></div>
             <div>
-                <div class="text-sm sm:text-base font-bold text-white tracking-tight">⚡ 글로벌 경제·지정학 속보 AI</div>
-                <div class="text-[11px] text-slate-400">거품·유동성 매크로 실시간 터미널 (Powered by Gemini)</div>
+                <div class="header-title">⚡ 글로벌 경제·지정학 속보 AI</div>
+                <div class="header-sub">거품·유동성 매크로 실시간 터미널</div>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <span id="next-timer" class="text-[11px] font-mono text-sky-400 bg-sky-950 border border-sky-700 px-2 py-1 rounded-md whitespace-nowrap">60초 후 갱신</span>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-md transition" onclick="fetchLiveNews()">새로고침</button>
+        <div class="header-controls">
+            <span id="next-timer" class="timer-badge">60초 후 갱신</span>
+            <button class="btn-refresh" onclick="fetchLiveNews()">새로고침</button>
         </div>
     </header>
 
-    <!-- Navigation Tabs -->
     <div class="tab-bar">
         <button class="tab-btn active" id="btn-tab-news" onclick="switchTab('news')">📰 실시간 속보</button>
         <button class="tab-btn" id="btn-tab-hot" onclick="switchTab('hot')">🔥 초미의 핫이슈</button>
         <button class="tab-btn" id="btn-tab-ai" onclick="switchTab('ai')">✨ AI 총괄 브리핑</button>
-        <button class="tab-btn" id="btn-tab-dash" onclick="switchTab('dash')">🧭 매크로 지수 & 센티먼트</button>
+        <button class="tab-btn" id="btn-tab-dash" onclick="switchTab('dash')">🧭 지수 & 섹터</button>
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 1: NEWS FEED                           -->
+    <!-- ========================================== -->
     <div id="tab-news" class="tab-content active">
-        <!-- Ticker bar for quick macro quotes -->
         <div class="macro-indicator-bar">
-            <div class="indicator-item" onclick="openQuickView('NASDAQ:TLT', '🏛️ 미 국채 10년 (TLT)', 'FED', 'https://kr.tradingview.com/symbols/TVC-US10Y/')">
-                <span class="font-bold text-slate-100">🏛️ 미 국채 10년</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:DXY', '💵 달러 인덱스', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/TVC-DXY/')">
-                <span class="font-bold text-slate-100">💵 달러 인덱스</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('FX_IDC:USDJPY', '💴 엔/달러 환율', 'YEN_DOLLAR', 'https://kr.tradingview.com/symbols/FX_IDC-USDJPY/')">
-                <span class="font-bold text-slate-100">💴 엔화/엔캐리</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('TVC:USOIL', '🛢️ WTI 원유', 'OIL_GEO', 'https://kr.tradingview.com/symbols/TVC-USOIL/')">
-                <span class="font-bold text-slate-100">🛢️ WTI 유가</span>
-            </div>
-            <div class="indicator-item" onclick="openQuickView('CAPITALCOM:VIX', '😱 VIX 공포지수', 'ALL', 'https://kr.tradingview.com/symbols/TVC-VIX/')">
-                <span class="font-bold text-slate-100">😱 VIX 공포지수</span>
-            </div>
+            <div class="indicator-item" onclick="window.open('https://kr.tradingview.com/symbols/TVC-US10Y/','_blank')"><span class="indicator-name">🏛️ 미 국채 10년</span></div>
+            <div class="indicator-item" onclick="window.open('https://kr.tradingview.com/symbols/TVC-DXY/','_blank')"><span class="indicator-name">💵 달러 인덱스</span></div>
+            <div class="indicator-item" onclick="window.open('https://kr.tradingview.com/symbols/FX_IDC-USDJPY/','_blank')"><span class="indicator-name">💴 엔화 환율</span></div>
+            <div class="indicator-item" onclick="window.open('https://kr.tradingview.com/symbols/TVC-USOIL/','_blank')"><span class="indicator-name">🛢️ WTI 유가</span></div>
+            <div class="indicator-item" onclick="window.open('https://kr.tradingview.com/symbols/TVC-VIX/','_blank')"><span class="indicator-name">😱 VIX 공포지수</span></div>
         </div>
 
-        <!-- Toolbar: Filters and Search -->
-        <section class="max-w-2xl mx-auto px-3.5 pt-3 pb-1">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col gap-2.5">
+        <section class="toolbar">
+            <div class="filter-box">
                 <div>
-                    <div class="text-[11px] font-bold text-red-500 flex items-center gap-1">🚨 매크로 핵심 리스크 레이더 (원클릭 필터)</div>
-                    <div class="radar-buttons-row mt-1.5">
+                    <div class="radar-label">🚨 매크로 핵심 리스크 레이더 (원클릭 필터)</div>
+                    <div class="macro-radar-buttons" style="margin-top: 6px;">
                         <button class="radar-btn active" onclick="setMacroFilter('ALL', this)" id="btn-filter-all">🌐 전체 속보</button>
-                        <button class="radar-btn" onclick="setMacroFilter('FED', this)" id="btn-filter-fed">🏛️ 금리/연준(Fed)</button>
-                        <button class="radar-btn" onclick="setMacroFilter('AI_BUBBLE', this)" id="btn-filter-ai">🤖 AI거품/빅테크</button>
-                        <button class="radar-btn" onclick="setMacroFilter('YEN_DOLLAR', this)" id="btn-filter-yen">💱 환율/엔캐리</button>
-                        <button class="radar-btn" onclick="setMacroFilter('OIL_GEO', this)" id="btn-filter-oil">🛢️ 유가/지정학</button>
+                        <button class="radar-btn" onclick="setMacroFilter('FED', this)">🏛️ 금리/연준(Fed)</button>
+                        <button class="radar-btn" onclick="setMacroFilter('AI_BUBBLE', this)">🤖 AI거품/빅테크</button>
+                        <button class="radar-btn" onclick="setMacroFilter('YEN_DOLLAR', this)">💱 환율/엔캐리</button>
+                        <button class="radar-btn" onclick="setMacroFilter('OIL_GEO', this)">🛢️ 유가/지정학</button>
                         <button class="radar-btn" onclick="setMacroFilter('CHINA', this)">🇨🇳 중국/공급망</button>
                     </div>
                 </div>
-                <div class="filter-buttons-row">
+                <div class="filter-buttons">
                     <button class="filter-btn active" onclick="filterVendor('ALL', this)">언론사 전체</button>
                     <button class="filter-btn" onclick="filterVendor('Bloomberg', this)">블룸버그</button>
                     <button class="filter-btn" onclick="filterVendor('Reuters', this)">로이터</button>
                     <button class="filter-btn" onclick="filterVendor('WSJ', this)">WSJ</button>
                     <button class="filter-btn" onclick="filterVendor('CNBC', this)">CNBC</button>
                 </div>
-                <input type="text" id="search-input" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-sky-500" placeholder="키워드 직접 검색 (예: 파월, 침체, 유동성, 엔비디아...)" oninput="searchCards(this.value)">
+                <input type="text" id="search-input" class="search-input" placeholder="키워드 직접 검색 (예: 파월, 침체, 유동성...)" oninput="searchCards(this.value)">
             </div>
-            <div class="flex justify-between text-[11px] text-slate-500 mt-1.5 px-1">
+            <div class="status-row">
                 <span id="article-count-label">🟢 실시간 속보 수신 대기 중</span>
-                <span id="last-updated-label">정상 연결됨</span>
+                <span id="status-ai-translate" style="color: #64748b; font-weight: bold;">⏳ AI 팩트 번역 대기...</span>
             </div>
         </section>
 
-        <!-- Main News Card Feed -->
-        <main class="max-w-2xl mx-auto px-3.5 py-2 flex flex-col gap-3.5" id="news-container">
-            <div class="text-center py-12 text-slate-500 text-xs">최신 매크로 외신 데이터를 불러오는 중입니다...</div>
+        <main class="news-container" id="news-container">
+            <div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">최신 매크로 외신 데이터를 불러오는 중입니다...</div>
         </main>
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB: HOT ISSUES (초미의 메가 매크로 핫이슈) -->
+    <!-- TAB 2: HOT ISSUES (초미의 핫이슈)          -->
     <!-- ========================================== -->
     <div id="tab-hot" class="tab-content">
-        <div class="max-w-2xl mx-auto p-3.5 flex flex-col gap-4">
-            
-            <!-- 1. Today's Mega Clash: Theme Firepower Ranking -->
-            <div class="bg-gradient-to-br from-slate-900 via-rose-950/40 to-slate-900 border border-rose-800/60 rounded-xl p-4 shadow-xl">
-                <div class="flex items-center justify-between border-b border-rose-800/40 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">🔥</span>
-                        <div>
-                            <h2 class="text-sm font-bold text-white">오늘 시장을 지배하는 메가 테마 화력 랭킹</h2>
-                            <p class="text-[11px] text-rose-300">외신 보도량 + 극단적 반응(패닉/환호)을 합산한 실시간 시장 장악력</p>
-                        </div>
-                    </div>
-                    <span id="hot-dominant-badge" class="bg-rose-600 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full shadow animate-pulse">
-                        화력 1위: 분석 중...
-                    </span>
-                </div>
-
-                <!-- Theme battle progress bars -->
-                <div id="hot-theme-rank-container" class="mt-3.5 flex flex-col gap-2.5">
-                    <div class="text-center text-xs text-slate-400 py-4">기사 화력을 집계하는 중입니다...</div>
+        <div class="dash-container">
+            <div class="dash-card">
+                <div class="dash-header">🔥 실시간 메가 테마 화력 순위 (Top Burning Issues)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 오늘 수신된 외신들의 보도량과 센티먼트 충격도를 합산해 자금을 가장 크게 빨아들이는 1등 테마를 선별합니다.</div>
+                <div id="hot-themes-container" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align:center; padding:20px; color:#64748b; font-size:12px;">데이터 분석 중...</div>
                 </div>
             </div>
 
-            <!-- 2. Butterfly Effect: Macro Chain Reaction Card -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                        <span>🌪️</span>
-                        <span id="butterfly-title">오늘의 핵심 나비효과 (연쇄 파급 경로)</span>
-                    </div>
-                    <span class="text-[10px] text-slate-500 font-mono">Macro Chain Reaction</span>
-                </div>
-                <div id="butterfly-flow-box" class="bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs leading-relaxed text-slate-200">
-                    실시간 1위 테마 데이터를 분석하여 연쇄 반응 경로를 도출하고 있습니다...
-                </div>
+            <div class="dash-card">
+                <div class="dash-header">⚡ 시장 파괴력 TOP 5 핵심 외신 브리핑</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">* 호재/악재 불문, 오늘 증시 변동성에 가장 큰 방아쇠가 될 핵심 기사들입니다.</div>
+                <div id="top5-burning-news" style="display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
+        </div>
+    </div>
 
-            <!-- 3. Top Impact Volatility Articles (Bullish & Bearish) -->
-            <div class="flex flex-col gap-2.5">
-                <div class="flex items-center justify-between px-1">
-                    <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span>🎯</span>
-                        <span>시장 파괴력 TOP 외신 (극단적 악재 & 호재 집중)</span>
-                    </div>
-                    <span class="text-[10.5px] text-slate-400" id="hot-articles-count">상위 5건 선별</span>
+    <!-- ========================================== -->
+    <!-- TAB 3: AI EXECUTIVE BRIEFING               -->
+    <!-- ========================================== -->
+    <div id="tab-ai" class="tab-content">
+        <div class="dash-container">
+            <div class="dash-card">
+                <div class="dash-header">✨ 월가 수석 애널리스트 AI 총괄 리포트</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 14px;">
+                    * 구글 Gemini 3 Flash AI가 현재 화면에 수신된 외신 전량을 동시 분석합니다.<br>
+                    * 특정 종목이나 섹터에 대해 물어보거나 기본 종합 리포트를 받아보세요.
                 </div>
                 
-                <div id="hot-articles-list" class="flex flex-col gap-3">
-                    <div class="text-center text-xs text-slate-500 py-8">핫이슈 기사를 선별하고 있습니다...</div>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+                    <input type="text" id="ai-custom-prompt" class="search-input" placeholder="원하는 질문 직접 입력 (예: 오늘 유가 관련해서 정유주 영향 요약해줘)">
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="runCustomPrompt()" class="btn-primary" style="flex: 1;">🚀 맞춤 분석 요청</button>
+                        <button onclick="runExecutiveBriefing()" class="btn-secondary" style="flex: 1; background: #0f1d38; color: #38bdf8; border-color: #0369a1;">📝 5대 팩터 종합 리포트</button>
+                    </div>
+                </div>
+
+                <div id="executive-report-box" style="background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 14px; font-size: 12.5px; line-height: 1.7; color: #e2e8f0; white-space: pre-line;">
+                    상단의 <b>[📝 5대 팩터 종합 리포트]</b> 버튼을 누르면 AI가 실시간 외신을 5가지 매크로 팩터로 분류하여 즉시 분석해 드립니다.
                 </div>
             </div>
-
         </div>
     </div>
 
-    <div id="tab-ai" class="tab-content">
-        <div class="max-w-2xl mx-auto p-3.5 flex flex-col gap-4">
-            
-            <!-- Executive Intelligence Card -->
-            <div class="bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 border border-sky-800/60 rounded-xl p-4 shadow-xl">
-                <div class="flex items-center justify-between gap-2 border-b border-sky-800/40 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">✨</span>
-                        <div>
-                            <h2 class="text-sm font-bold text-white">Gemini 3 Flash 월가 수석 브리핑</h2>
-                            <p class="text-[11px] text-sky-300">현재 수신된 외신 전량을 교차 종합한 일일 시장 총괄 리포트</p>
-                        </div>
-                    </div>
-                    <button id="btn-gen-briefing" onclick="generateExecutiveBriefing()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
-                        <span>⚡</span>
-                        <span>기본 종합 리포트</span>
-                    </button>
-                </div>
-
-                <!-- NEW: 사용자 맞춤형 직접 프롬프트 입력창 -->
-                <div class="mt-3 bg-slate-950/80 border border-sky-900/60 rounded-xl p-3 flex flex-col gap-2">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-bold text-sky-300 flex items-center gap-1">
-                            <span>🎯</span>
-                            <span>내 관점 맞춤 분석 요청 (오늘 수신 외신 기반)</span>
-                        </span>
-                        <span class="text-[10px] text-slate-500">자유 질문 또는 맞춤 지시</span>
-                    </div>
-                    <div class="flex gap-1.5">
-                        <input type="text" id="custom-briefing-prompt" 
-                               placeholder="예: 오늘 외신 중 유가·중동 관련만 묶어서 한국 정유·항공주 영향 요약해줘" 
-                               class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-sky-400 placeholder:text-slate-500"
-                               onkeydown="if(event.key==='Enter') generateExecutiveBriefing(this.value)">
-                        <button onclick="generateExecutiveBriefing(document.getElementById('custom-briefing-prompt').value)" 
-                                class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs px-3.5 py-2 rounded-lg whitespace-nowrap shadow transition flex items-center gap-1">
-                            <span>🚀</span>
-                            <span>분석</span>
-                        </button>
-                    </div>
-                    <!-- 빠른 질문 추천 칩 -->
-                    <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-[10.5px]">
-                        <button onclick="setAndRunPrompt('오늘 수신된 외신들을 바탕으로 가장 타격이 큰 피해주와 반사이익 수혜주를 명확하게 분류해줘')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🎯 수혜/피해 섹터 분류</button>
-                        <button onclick="setAndRunPrompt('오늘 기사들의 공통적인 거품 붕괴 리스크와 현금 확보 권장 비중을 조언해줘')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🛡️ 현금 비중 및 리스크 조언</button>
-                        <button onclick="setAndRunPrompt('오늘 기사들이 한국 코스피/코스닥 외국인 수급과 원달러 환율에 미칠 충격은?')" class="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 px-2 py-1 rounded-md whitespace-nowrap">🇰🇷 국내 증시·환율 파급</button>
-                    </div>
-                </div>
-
-                <!-- Briefing Output Screen -->
-                <div id="briefing-box" class="mt-3 text-xs leading-relaxed text-slate-200 min-h-[160px] flex flex-col justify-center">
-                    <div class="text-center text-slate-400 py-8">
-                        <div class="text-2xl mb-1">🏛️</div>
-                        <div class="font-medium">수신된 기사들의 거시경제 파급력을 교차 분석합니다.</div>
-                        <div class="text-[11px] text-slate-500 mt-1">위의 <b>[기본 종합 리포트]</b>를 누르거나, 입력창에 <b>궁금한 질문을 직접 적어서</b> 분석을 요청하세요.</div>
-                    </div>
-                </div>
-
-                <!-- Key Market Sentiment Bullet Points automatically populated -->
-                <div id="briefing-meta" class="mt-3 pt-3 border-t border-slate-800 text-[11px] text-slate-400 hidden flex justify-between items-center">
-                    <span id="briefing-timestamp">생성 시각: --</span>
-                    <span class="text-sky-400 font-semibold" id="briefing-badge">Gemini 3 Flash Custom Analysis</span>
-                </div>
-            </div>
-
-            <!-- Quick Action Prompts for Macro Intelligence -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                <div class="text-xs font-bold text-slate-300 mb-2.5 flex items-center gap-1.5">
-                    <span>💡</span>
-                    <span>월가 퀀트 시나리오 즉시 시뮬레이션</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <button onclick="askScenario('만약 다음 FOMC에서 연준이 50bp 빅컷을 단행한다면 엔캐리 트레이드와 빅테크 주가에는 구체적으로 어떤 충격이 올까?')" class="text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-lg text-slate-300 transition">
-                        🏛️ <b>연준 50bp 빅컷 시나리오</b>
-                        <div class="text-[10px] text-slate-500 mt-0.5">엔캐리 청산 가속 및 기술주 밸류 충격 진단</div>
-                    </button>
-                    <button onclick="askScenario('중동 분쟁 심화로 WTI 국제 유가가 배럴당 90달러를 돌파할 경우, 한국 반도체/수출주와 미국 물가지수에 미치는 파급 효과는?')" class="text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-lg text-slate-300 transition">
-                        🛢️ <b>유가 90달러 급등 시나리오</b>
-                        <div class="text-[10px] text-slate-500 mt-0.5">물가 반등 압력 및 한국 수출주 수급 영향</div>
-                    </button>
-                    <button onclick="askScenario('빅테크 AI CAPEX(설비투자) 증가세가 둔화될 때 엔비디아 및 국내 HBM 밸류체인(삼성전자, SK하이닉스)의 주가 하방 지지선은?')" class="text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-lg text-slate-300 transition">
-                        🤖 <b>빅테크 AI CAPEX 피크아웃 우려</b>
-                        <div class="text-[10px] text-slate-500 mt-0.5">국내 반도체 대장주 밸류에이션 점검</div>
-                    </button>
-                    <button onclick="askScenario('미국 관세 인상과 대중국 제재가 재차 격화될 경우 신흥국 패시브 자금 이탈 위험도와 안전자산(금, 달러) 전망은?')" class="text-left bg-slate-950 hover:bg-slate-800 border border-slate-800 p-2.5 rounded-lg text-slate-300 transition">
-                        🇨🇳 <b>글로벌 무역 분쟁 재점화 시나리오</b>
-                        <div class="text-[10px] text-slate-500 mt-0.5">신흥국 환율 변동성 및 원자재 피난처 점검</div>
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
+    <!-- ========================================== -->
+    <!-- TAB 4: MACRO DASHBOARD                     -->
+    <!-- ========================================== -->
     <div id="tab-dash" class="tab-content">
-        <div class="max-w-2xl mx-auto p-3.5 flex flex-col gap-4">
-            
-            <!-- 1. GMI Gauge & AI Sentiment Reason -->
-            <div class="card">
-                <div class="text-sm font-bold text-white flex items-center gap-1.5">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
-                <div class="text-[11px] text-slate-400">* 실시간 외신 기사의 키워드와 시장 참여자들의 극단적 반응(패닉/포모) 빈도를 종합 분석합니다.</div>
+        <div class="dash-container">
+            <!-- 1. GMI Gauge -->
+            <div class="dash-card">
+                <div class="dash-header">🌡️ 오늘의 매크로 시장 방향 지수 (GMI)</div>
+                <div id="gmi-timestamp-note" class="timestamp-note">⏱️ 데이터 집계 기준: 계산 중...</div>
                 
                 <div class="gauge-wrapper">
                     <div id="gmi-needle" class="gauge-needle" style="left: 50%;"></div>
                 </div>
-                <div class="flex justify-between text-[11px] font-bold text-slate-400">
+                <div class="gauge-labels">
                     <span>극단적 공포(0)</span>
                     <span>중립(50)</span>
                     <span>극단적 탐욕(100)</span>
                 </div>
                 
-                <div class="text-center mt-3">
-                    <div id="gmi-score" class="text-3xl font-extrabold text-white leading-none">--</div>
-                    <div id="gmi-text" class="text-xs font-bold mt-1 text-slate-200">데이터 분석 중...</div>
-                    <div id="gmi-desc" class="text-[11px] text-slate-400 mt-1">방금 수신된 데이터를 기반으로 심리를 계산하고 있습니다.</div>
+                <div class="score-display">
+                    <div id="gmi-score" class="score-number">--</div>
+                    <div id="gmi-text" class="score-text" style="color: #f8fafc;">데이터 분석 중...</div>
                 </div>
 
-                <div class="bg-sky-950 border border-sky-800 rounded-lg p-3 mt-3 text-xs text-sky-100 leading-relaxed text-left">
-                    <div class="text-sky-400 font-bold mb-1.5 flex items-center gap-1">🤖 AI 매크로 & 센티먼트 평가 산출 근거</div>
+                <div class="gmi-reason-box">
+                    <div style="color: #38bdf8; font-weight: bold; margin-bottom: 6px;">🤖 AI 센티먼트 평가 산출 근거</div>
                     <div id="gmi-reason-text">기사 및 반응 데이터를 분석하고 있습니다...</div>
                 </div>
             </div>
 
-            <!-- 2. Sector Weather -->
-            <div class="card">
-                <div class="text-sm font-bold text-white flex items-center gap-1.5">🧭 당일 매크로 테마 & 섹터 유불리 기상도</div>
-                <div class="text-xs text-slate-200 mb-1">
-                    📌 오늘 시장을 지배하는 핵심 이슈: <strong id="sector-dominant-issue" class="text-amber-400">분석 중...</strong>
+            <!-- 2. Sector Weather (GMI 연동 양방향) -->
+            <div class="dash-card">
+                <div class="dash-header">🧭 당일 매크로 테마 & 섹터 유불리 기상도</div>
+                <div style="font-size: 12px; color: #e2e8f0; margin-bottom: 8px;">
+                    📌 오늘 시장을 지배하는 핵심 이슈: <strong id="sector-dominant-issue" style="color: #f59e0b;">분석 중...</strong>
                 </div>
-                
-                <div class="flex gap-2.5 mt-1">
-                    <div class="flex-1 p-3 rounded-lg border bg-green-500/10 border-green-500/30 flex flex-col gap-1.5">
-                        <div class="text-xs font-bold text-green-400">🟢 오늘 유리한 수혜 섹터</div>
-                        <div id="sector-pro-list" class="text-xs font-semibold text-slate-100 leading-snug">--</div>
-                        <div id="sector-pro-reason" class="text-[11px] text-slate-400 mt-1 pt-1.5 border-t border-dashed border-slate-700 leading-snug">--</div>
+                <div class="sector-split">
+                    <div class="sector-box sector-pro">
+                        <div class="sector-title">🟢 오늘 유리한 수혜 섹터</div>
+                        <div id="sector-pro-list" class="sector-list">--</div>
                     </div>
-                    <div class="flex-1 p-3 rounded-lg border bg-red-500/10 border-red-500/30 flex flex-col gap-1.5">
-                        <div class="text-xs font-bold text-red-400">🔴 오늘 불리한 주의 섹터</div>
-                        <div id="sector-con-list" class="text-xs font-semibold text-slate-100 leading-snug">--</div>
-                        <div id="sector-con-reason" class="text-[11px] text-slate-400 mt-1 pt-1.5 border-t border-dashed border-slate-700 leading-snug">--</div>
+                    <div class="sector-box sector-con">
+                        <div class="sector-title">🔴 오늘 불리한 주의 섹터</div>
+                        <div id="sector-con-list" class="sector-list">--</div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. Quant Backtest & Win Rate -->
-            <div class="card">
-                <div class="text-sm font-bold text-white flex items-center gap-1.5">🎯 GMI 알고리즘 예측 승률 검증 (vs S&P 500)</div>
-                <div class="text-[11px] text-slate-400 leading-tight">
-                    * 매일 내 GMI 지수가 50 이상일 때 주가가 오르고, 미만일 때 내렸다면 '적중'으로 판정합니다.
-                </div>
+            <!-- 3. Quant Backtest Validation (마이너스 수치 반영 완료) -->
+            <div class="dash-card">
+                <div class="dash-header">🎯 GMI 알고리즘 예측력 검증 (vs S&P 500)</div>
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">* 내가 만든 지수(GMI)의 방향성과 실제 증시 흐름을 매일 비교하여 가중치를 튜닝하기 위한 검증 패널입니다.</div>
                 
-                <!-- Win rate badge box -->
-                <div class="bg-gradient-to-r from-blue-900 to-indigo-900 border border-blue-600 rounded-lg px-4 py-3 flex justify-between items-center my-1">
-                    <div class="text-xs text-blue-200 font-bold flex items-center gap-1">📈 최근 7일 GMI 알고리즘 적중률</div>
-                    <div id="win-rate-display" class="text-base text-white font-extrabold">계산 중...</div>
+                <div style="background: #172554; border: 1px solid #1d4ed8; border-radius: 10px; padding: 12px; margin-bottom: 14px; text-align: center;">
+                    <span id="win-rate-badge" style="font-size: 14px; font-weight: bold; color: #fff;">📈 최근 7일 알고리즘 적중률 57% (4/7일 적중)</span>
                 </div>
-                
-                <!-- Backtest Visual Chart Grid -->
-                <div class="bg-slate-950 rounded-lg p-2.5 border border-slate-800 flex flex-col gap-2">
-                    <div class="text-[10.5px] text-slate-400 text-center">
-                        막대 = 내 GMI 지수 / <span class="spy-pos">빨간 숫자(+)</span> & <span class="spy-neg">파란 숫자(-)</span> = 당일 S&P 500 등락률
+
+                <div style="background: #020617; border-radius: 8px; padding: 10px; border: 1px solid #1e293b;">
+                    <div style="font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 16px;">
+                        막대 = 내 GMI 점수 / <span style="color:#ef4444; font-weight:bold;">빨간 숫자(+)</span> & <span style="color:#38bdf8; font-weight:bold;">파란 숫자(-)</span> = 당일 S&P 500 등락률
                     </div>
-                    <div id="backtest-chart-container" class="backtest-grid"></div>
+                    <div id="trend-chart-container" class="trend-chart" style="padding-top: 15px; height: 130px;">
+                        <!-- JS에서 동적 주입 -->
+                    </div>
                 </div>
             </div>
 
-            <!-- 4. TradingView Technical Flow -->
-            <div class="card">
-                <div class="text-sm font-bold text-white flex items-center gap-1.5">⚡ 트레이딩뷰 실시간 돈의 흐름 (기술적 분석 미터기)</div>
-                <div class="text-[11px] text-slate-400 mb-1">* 전 세계 투자자들이 실제로 S&P 500(SPY)을 사고 있는지 팔고 있는지를 기술적으로 분석한 계기판입니다.</div>
-                <div class="w-full h-[380px] bg-transparent overflow-hidden" id="tv-ta-widget"></div>
+            <!-- 4. TradingView & StockTwits 위젯 -->
+            <div class="dash-card">
+                <div class="dash-header">💸 스마트머니 실시간 수급 미터기 (S&P 500)</div>
+                <div class="tv-widget-box" id="tv-ta-widget" style="height: 380px;"></div>
             </div>
-
-            <!-- 5. StockTwits Live Retail Sentiment -->
-            <div class="card">
-                <div class="text-sm font-bold text-white flex items-center gap-1.5">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
-                <div class="text-[11px] text-slate-400 mb-1">* 미국 최대 주식 커뮤니티(스톡트위츠) 실시간 피드. 글로벌 투자자들의 롱/숏 심리를 점검하세요.</div>
-                <div id="stocktwits-widget-container" class="bg-slate-950 rounded-lg border border-slate-800 overflow-hidden min-h-[300px]"></div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Floating Action Button for Gemini Live Assistant -->
-    <button onclick="toggleAiDrawer()" class="fixed bottom-5 right-5 z-50 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white font-bold px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 border border-sky-300/40 transition transform active:scale-95">
-        <span class="text-lg">🤖</span>
-        <span class="text-xs tracking-tight">AI 애널리스트 질문</span>
-    </button>
-
-    <!-- AI Drawer Dialog Bottom Sheet -->
-    <div id="ai-chat-drawer" class="fixed inset-x-0 bottom-0 z-50 max-w-xl mx-auto bg-slate-900 border-t border-slate-700 rounded-t-2xl shadow-2xl p-4 flex flex-col h-[75vh]">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div class="flex items-center gap-2">
-                <span class="text-base">🤖</span>
-                <span class="text-xs font-bold text-white">월스트리트 Gemini 매크로 Q&A</span>
-            </div>
-            <button onclick="toggleAiDrawer()" class="text-slate-400 hover:text-white text-lg font-bold px-2">&times;</button>
-        </div>
-
-        <!-- Chat message history -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto py-3 flex flex-col gap-2.5 text-xs text-slate-200">
-            <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl">
-                안녕하세요! 글로벌 외신 속보와 거시경제 흐름에 관해 무엇이든 물어보세요.<br>
-                <b>추천 질문:</b> "오늘 파월 관련 기사 종합해줘", "환율 급등 시 반도체 수혜 여부 알려줘"
-            </div>
-        </div>
-
-        <!-- Chat input area -->
-        <div class="pt-2 flex gap-2">
-            <input type="text" id="chat-input" placeholder="매크로 이슈, 종목 영향에 대해 질문하세요..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-sky-500" onkeydown="if(event.key==='Enter') sendChatMessage()">
-            <button onclick="sendChatMessage()" id="chat-send-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold">전송</button>
-        </div>
-    </div>
-
-    <!-- Quick View Modal for Ticker Charts -->
-    <div id="quick-view-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm justify-center items-center p-4" onclick="closeModal(event)">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-4 shadow-2xl flex flex-col gap-3" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center text-white font-bold text-sm">
-                <span id="modal-title">지표 시세 퀵뷰</span>
-                <button class="text-slate-400 text-xl font-bold px-1" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="w-full h-28 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-800" id="tv-quick-box">
-                <div class="text-slate-500 text-xs">실시간 시세 불러오는 중...</div>
-            </div>
-            <div class="flex gap-2">
-                <button id="modal-btn-filter" class="flex-1 bg-blue-600 text-white py-2.5 rounded-lg text-xs font-bold">🔍 관련 속보 필터링</button>
-                <a id="modal-btn-chart" href="#" target="_blank" class="flex-1 bg-slate-800 border border-slate-700 text-slate-200 py-2.5 rounded-lg text-xs font-bold text-center">📈 전체 차트 열기 ↗</a>
+            
+            <div class="dash-card">
+                <div class="dash-header">🗣️ 실시간 해외 투자자 날것의 반응 ($SPY)</div>
+                <div id="stocktwits-widget-container" style="background:#020617; border-radius:8px; border:1px solid #1e293b; overflow:hidden;"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // 형님의 Google Gemini API Key (무료)
+        var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
+
         var liveArticles = [];
         var currentVendorFilter = "ALL";
         var currentMacroFilter = "ALL";
         var searchQuery = "";
         var countdown = 60;
-        var todayKSTDateStr = "";
+        var todayKSTDateStr = ""; 
+        var exactKSTTimestamp = "";
         var widgetsLoaded = false;
-        var chatHistory = [];
-
-        // Tab Switching
+        
         function switchTab(tabId) {
-            ['news', 'hot', 'ai', 'dash'].forEach(function(id) {
-                var tabEl = document.getElementById('tab-' + id);
-                var btnEl = document.getElementById('btn-tab-' + id);
-                if (tabEl) tabEl.classList.remove('active');
-                if (btnEl) btnEl.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('btn-tab-' + tabId).classList.add('active');
 
-            var targetTab = document.getElementById('tab-' + tabId);
-            var targetBtn = document.getElementById('btn-tab-' + tabId);
-            if (targetTab) targetTab.classList.add('active');
-            if (targetBtn) targetBtn.classList.add('active');
-
+            if (tabId === 'hot') renderHotIssues();
             if (tabId === 'dash') {
                 updateDashboard();
                 loadDashboardWidgets();
-            } else if (tabId === 'ai') {
-                // 자동 생성 로직 완전 제거: 사용자가 직접 버튼이나 프롬프트를 누를 때만 실행됨
-            } else if (tabId === 'hot') {
-                renderHotTab();
             }
         }
 
-        // Drawer Controls
-        function toggleAiDrawer() {
-            var drawer = document.getElementById('ai-chat-drawer');
-            if (drawer) drawer.classList.toggle('open');
-        }
-
-        function askScenario(promptText) {
-            switchTab('ai');
-            var drawer = document.getElementById('ai-chat-drawer');
-            if (drawer) drawer.classList.add('open');
-            var input = document.getElementById('chat-input');
-            if (input) {
-                input.value = promptText;
-                sendChatMessage();
+        /* 1. KST 정확한 계산 (그리니치 표준시 GMT 파싱) */
+        function getKSTTimeInfo(dateStr) {
+            var d;
+            if (dateStr) {
+                // RSS의 pubDate는 표준 RFC 2822 포맷이므로 JS Date가 정확히 파싱함 (GMT 기준)
+                d = new Date(dateStr);
             }
-        }
-
-        // External TradingView and StockTwits embedding
-        function loadDashboardWidgets() {
-            if (widgetsLoaded) return;
-            widgetsLoaded = true;
-
-            var taBox = document.getElementById('tv-ta-widget');
-            if (taBox) {
-                taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-                var taScript = document.createElement('script');
-                taScript.type = 'text/javascript';
-                taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js';
-                taScript.async = true;
-                taScript.innerHTML = JSON.stringify({
-                    "interval": "1D",
-                    "width": "100%",
-                    "isTransparent": true,
-                    "height": "100%",
-                    "symbol": "AMEX:SPY",
-                    "showIntervalTabs": true,
-                    "displayMode": "single",
-                    "locale": "kr",
-                    "colorTheme": "dark"
-                });
-                taBox.appendChild(taScript);
-            }
-
-            var stScript = document.createElement('script');
-            stScript.type = 'text/javascript';
-            stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
-            stScript.onload = function() {
-                if (typeof STWT !== 'undefined' && STWT.Widget) {
-                    STWT.Widget({
-                        container: 'stocktwits-widget-container',
-                        symbol: 'SPY',
-                        width: '100%',
-                        height: '380',
-                        limit: '15',
-                        scrollbars: 'true',
-                        streaming: 'true',
-                        title: 'S&P 500 ($SPY) 실시간 반응',
-                        style: { link_color: '#38bdf8', text_color: '#cbd5e1', divider_color: '#1e293b', header_text_color: '#f8fafc', header_color: '#0f172a', box_color: '#020617' }
-                    });
-                }
+            if (!dateStr || isNaN(d.getTime())) d = new Date();
+            
+            var kstMs = d.getTime() + (9 * 3600000); // UTC(GMT) + 9시간
+            var kstDate = new Date(kstMs);
+            
+            var year = kstDate.getUTCFullYear();
+            var month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+            var day = String(kstDate.getUTCDate()).padStart(2, '0');
+            var hours = String(kstDate.getUTCHours()).padStart(2, '0');
+            var minutes = String(kstDate.getUTCMinutes()).padStart(2, '0');
+            
+            // 상대 시간 계산 (현재 KST 시간 대비)
+            var nowUtc = Date.now();
+            var diffSec = Math.floor((nowUtc - d.getTime()) / 1000);
+            
+            var rel = "방금 전";
+            if(diffSec >= 60 && diffSec < 3600) rel = Math.floor(diffSec / 60) + "분 전";
+            else if(diffSec >= 3600 && diffSec < 86400) rel = Math.floor(diffSec / 3600) + "시간 전";
+            else if(diffSec >= 86400) rel = Math.floor(diffSec / 86400) + "일 전";
+            if(diffSec < 0) rel = "방금 전"; 
+            
+            return {
+                fullStr: year + "." + month + "." + day + " " + hours + ":" + minutes + " KST (" + rel + ")",
+                ymd: year + "-" + month + "-" + day,
+                timeOnly: hours + ":" + minutes
             };
-            document.body.appendChild(stScript);
-        }
-
-        // 1. Executive Briefing Generation
-        function setAndRunPrompt(text) {
-            var input = document.getElementById('custom-briefing-prompt');
-            if (input) {
-                input.value = text;
-                generateExecutiveBriefing(text);
-            }
-        }
-
-        async function generateExecutiveBriefing(customInstruction) {
-            var box = document.getElementById('briefing-box');
-            var btn = document.getElementById('btn-gen-briefing');
-            var meta = document.getElementById('briefing-meta');
-            var ts = document.getElementById('briefing-timestamp');
-            var badge = document.getElementById('briefing-badge');
-
-            if (!box || liveArticles.length === 0) return;
-
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span><span>AI 분석 중...</span>';
-            box.innerHTML = '<div class="py-8 text-center text-sky-400 font-semibold animate-pulse">🤖 수신된 외신 전량을 바탕으로 요청하신 맞춤형 매크로 리포트를 집필 중입니다...</div>';
-
-            try {
-                var newsContext = liveArticles.slice(0, 10).map(function(item, idx) {
-                    return (idx + 1) + ". [" + item.vendor + "] " + item.titleEn + "\n내용: " + item.desc;
-                }).join("\n\n");
-
-                var prompt = "";
-                if (customInstruction && customInstruction.trim().length > 0) {
-                    prompt = "다음은 방금 글로벌 통신사(Bloomberg, Reuters, WSJ, CNBC)에서 타전된 주요 경제·지정학 속보입니다:\n\n" +
-                             newsContext + "\n\n" +
-                             "당신은 월스트리트 수석 매크로 이코노미스트입니다. 사용자가 다음과 같은 특별 맞춤 분석을 요청했습니다:\n" +
-                             "👉 [사용자 요청 사항]: " + customInstruction + "\n\n" +
-                             "방금 제공한 실제 외신 기사 내용들을 근거로 삼아, 사용자의 요청에 대해 명쾌하고 깊이 있게 한국어로 분석 리포트를 작성하세요.\n" +
-                             "형식은 보기 편하게 불렛포인트와 볼드체를 활용해 전문적이고 날카롭게 작성해 주세요.";
-                } else {
-                    prompt = "다음은 방금 글로벌 통신사(Bloomberg, Reuters, WSJ, CNBC)에서 타전된 주요 경제·지정학 속보입니다:\n\n" +
-                             newsContext + "\n\n" +
-                             "당신은 월스트리트 수석 매크로 이코노미스트입니다. 한국 투자자들을 위해 다음 3단계로 명확하고 날카로운 일일 모닝 브리핑을 작성하세요:\n" +
-                             "1. 🌍 [오늘의 3대 매크로 쟁점]: 각 핵심 사건과 수치 요약\n" +
-                             "2. 💥 [자산군 거품 & 유동성 영향]: 미 국채금리, 환율, AI 반도체 및 증시 파급 경로\n" +
-                             "3. 🧭 [투자자 행동 가이드]: 현금 비중, 수혜 섹터 및 경계 업종 조언\n" +
-                             "간결하고 가독성 좋은 불렛포인트로 작성해주세요.";
-                }
-
-                var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
-                var apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
-
-                var res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        systemInstruction: { parts: [{ text: "월스트리트 탑티어 투자전략가 스타일로 명쾌하고 정밀한 한국어로 작성하세요." }] }
-                    })
-                });
-
-                var data = await res.json();
-                var briefText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (briefText) {
-                    box.innerHTML = '<div class="whitespace-pre-line text-slate-100 font-normal leading-relaxed">' + briefText + '</div>';
-                    box.dataset.generated = "true";
-                    if (meta && ts) {
-                        meta.classList.remove('hidden');
-                        ts.textContent = "생성 시각: " + new Date().toLocaleTimeString();
-                        if (badge) {
-                            badge.textContent = customInstruction ? "사용자 맞춤 분석 완료" : "Gemini 3 Flash Verified";
-                        }
-                    }
-                } else {
-                    box.innerHTML = '<div class="text-amber-400 py-4 text-center">⚠️ 일시적으로 AI 리포트 응답을 가져오지 못했습니다. 다시 시도해 주세요.</div>';
-                }
-            } catch (e) {
-                box.innerHTML = '<div class="text-red-400 py-4 text-center">⚠️ 네트워크 통신 장애가 발생했습니다. 잠시 후 새로고침해 주세요.</div>';
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>⚡</span><span>기본 종합 리포트</span>';
-            }
-        }
-
-        // 2. Chat Terminal Q&A with Gemini
-        async function sendChatMessage() {
-            var input = document.getElementById('chat-input');
-            var container = document.getElementById('chat-messages');
-            var btn = document.getElementById('chat-send-btn');
-            var text = input.value.trim();
-            if (!text) return;
-
-            // Append user message
-            var userDiv = document.createElement('div');
-            userDiv.className = 'bg-blue-600/40 border border-blue-500/50 p-2.5 rounded-xl self-end max-w-[85%] text-slate-100';
-            userDiv.textContent = text;
-            container.appendChild(userDiv);
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
-
-            // Show loading bubble
-            var botDiv = document.createElement('div');
-            botDiv.className = 'bg-slate-950 border border-slate-800 p-2.5 rounded-xl self-start max-w-[90%] text-sky-300 animate-pulse';
-            botDiv.textContent = 'Gemini 애널리스트가 시장 데이터를 검토 중입니다...';
-            container.appendChild(botDiv);
-            container.scrollTop = container.scrollHeight;
-
-            btn.disabled = true;
-
-            try {
-                chatHistory.push({ role: 'user', parts: [{ text: text }] });
-
-                var newsSummarySnapshot = liveArticles.slice(0, 8).map(function(a) {
-                    return "- " + a.titleEn + " (" + a.titleKo + ")";
-                }).join("\n");
-
-                var systemContext = "당신은 월스트리트 수석 매크로 펀드매니저이자 AI 어시스턴트입니다.\n" +
-                                    "현재 실시간 타전된 외신 헤드라인:\n" + newsSummarySnapshot + "\n\n" +
-                                    "사용자의 질문에 대해 실시간 거시경제 및 지정학적 리스크, 자산군(주식, 채권, 환율, 원자재) 파급력을 근거로 정밀하게 3~4문장으로 명쾌하게 답변하세요.";
-
-                var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
-                var apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
-
-                var res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: chatHistory,
-                        systemInstruction: { parts: [{ text: systemContext }] }
-                    })
-                });
-
-                var data = await res.json();
-                var answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (answer) {
-                    botDiv.classList.remove('animate-pulse', 'text-sky-300');
-                    botDiv.classList.add('text-slate-100');
-                    botDiv.innerHTML = answer.replace(/\n/g, '<br>');
-                    chatHistory.push({ role: 'model', parts: [{ text: answer }] });
-                } else {
-                    botDiv.textContent = '답변을 생성하지 못했습니다. 다시 질문해 주세요.';
-                }
-            } catch (err) {
-                botDiv.textContent = '연결 지연이 발생했습니다. 다시 시도해 주세요.';
-            } finally {
-                btn.disabled = false;
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-
-        // 3. Batch Article Enrichment with Gemini API
-        async function enhanceArticlesWithGeminiBatch(articles) {
-            var targetList = articles.slice(0, 10);
-            if (targetList.length === 0) return;
-
-            try {
-                var promptPayload = targetList.map(function(item, idx) {
-                    return "[" + idx + "]\n제목: " + item.titleEn + "\n내용: " + item.desc;
-                }).join("\n\n");
-
-                var systemPrompt = "당신은 블룸버그/로이터 수석 번역 애널리스트입니다. 각 영문 외신 기사에 대해 아래 JSON 배열 형식으로만 응답하세요.\n" +
-                                   "[{\"index\": 0, \"titleKo\": \"간결하고 명확한 국어 번역 제목\", \"brief\": \"핵심 팩트 1줄 요약\", \"impact\": \"자산시장/유동성 1줄 충격 진단\"}]";
-
-                var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
-                var apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
-
-                var res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptPayload }] }],
-                        generationConfig: { responseMimeType: "application/json" },
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-
-                var data = await res.json();
-                var textRes = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (textRes) {
-                    var parsed = JSON.parse(textRes);
-                    for (var k = 0; k < parsed.length; k++) {
-                        var p = parsed[k];
-                        var art = targetList[p.index];
-                        if (art) {
-                            if (p.titleKo) art.titleKo = "📌 " + p.titleKo;
-                            art.summaryKo = '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">📌 팩트 브리핑:</span><span class="text-slate-200">' + p.brief + '</span></div>' +
-                                            '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">🧭 시장 방향성:</span><span class="text-slate-200">Gemini 3 Flash 실시간 매크로 판정 완료</span></div>' +
-                                            '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">💥 거품·충격:</span><span class="text-slate-200">' + p.impact + '</span></div>';
-                        }
-                    }
-                    renderCards();
-                }
-            } catch (err) {}
-        }
-
-        // 4. Individual Article Deep-Dive with Gemini API
-        async function requestAiDeepDive(event, index) {
-            event.stopPropagation();
-            var item = liveArticles[index];
-            if (!item) return;
-
-            var btn = document.getElementById("ai-btn-" + index);
-            var box = document.getElementById("ai-box-" + index);
-            if (!btn || !box) return;
-
-            btn.disabled = true;
-            btn.innerHTML = "⏳ AI 정밀 분석 리포트 집필 중...";
-            box.style.display = "block";
-            box.innerHTML = "🤖 Gemini 3 Flash가 외신 원문 전체 맥락을 분석하고 있습니다...";
-
-            try {
-                var promptText = "다음 영문 외신 속보를 한국 투자자를 위해 3줄로 명쾌하게 심층 해설하세요:\n\n" +
-                                 "제목: " + item.titleEn + "\n" +
-                                 "내용: " + item.desc + "\n\n" +
-                                 "형식:\n" +
-                                 "1. 📌 핵심 팩트 배경 및 원인:\n" +
-                                 "2. 💥 거품/지수 및 주식시장 실질 충격:\n" +
-                                 "3. 🧭 한국 투자자 포트폴리오 행동 요령:";
-
-                var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
-                var apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
-
-                var res = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptText }] }],
-                        systemInstruction: { parts: [{ text: "전문적이고 정밀한 금융 매크로 용어로 작성하되 가독성 높게 답하세요." }] }
-                    })
-                });
-
-                var data = await res.json();
-                var aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (aiText) {
-                    box.innerHTML = "✨ <b>[Gemini AI 정밀 심층 분석 완료]</b>\n\n" + aiText;
-                    btn.innerHTML = "✅ AI 정밀 분석 완료";
-                } else {
-                    box.innerHTML = "⚠️ AI 응답 생성에 실패했습니다. 기본 심층 분석을 참고해 주세요.";
-                    btn.disabled = false;
-                    btn.innerHTML = "✨ AI 실시간 맞춤 분석 재시도";
-                }
-            } catch (err) {
-                box.innerHTML = "⚠️ 네트워크 통신 중 지연이 발생했습니다. 다시 시도해 주세요.";
-                btn.disabled = false;
-                btn.innerHTML = "✨ AI 실시간 맞춤 분석 재시도";
-            }
-        }
-
-        function openQuickView(symbol, title, filterCat, chartUrl) {
-            var modal = document.getElementById('quick-view-modal');
-            document.getElementById('modal-title').textContent = title;
-            
-            var btnFilter = document.getElementById('modal-btn-filter');
-            btnFilter.onclick = function() {
-                var btnId = 'btn-filter-all';
-                if(filterCat === 'FED') btnId = 'btn-filter-fed';
-                if(filterCat === 'YEN_DOLLAR') btnId = 'btn-filter-yen';
-                if(filterCat === 'OIL_GEO') btnId = 'btn-filter-oil';
-                
-                var targetBtn = document.getElementById(btnId);
-                if(targetBtn) setMacroFilter(filterCat, targetBtn);
-                closeModal();
-            };
-
-            var btnChart = document.getElementById('modal-btn-chart');
-            btnChart.href = chartUrl;
-
-            var box = document.getElementById('tv-quick-box');
-            box.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
-            
-            var script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js';
-            script.async = true;
-            script.innerHTML = JSON.stringify({
-                "symbol": symbol,
-                "width": "100%",
-                "colorTheme": "dark",
-                "isTransparent": true,
-                "locale": "kr"
-            });
-            box.appendChild(script);
-
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeModal(e) {
-            if (e && e.target !== e.currentTarget) return;
-            var modal = document.getElementById('quick-view-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.getElementById('tv-quick-box').innerHTML = '';
-        }
-
-        function formatKST(dateStr) {
-            var d = dateStr ? new Date(dateStr) : new Date();
-            if (isNaN(d.getTime())) d = new Date();
-            
-            var utcTime = d.getTime() + (d.getTimezoneOffset() * 60000);
-            var kstDate = new Date(utcTime + (9 * 3600000));
-            todayKSTDateStr = kstDate.getFullYear() + "-" + String(kstDate.getMonth()+1).padStart(2,'0') + "-" + String(kstDate.getDate()).padStart(2,'0');
-
-            var hours = String(kstDate.getHours()).padStart(2, '0');
-            var minutes = String(kstDate.getMinutes()).padStart(2, '0');
-            
-            var nowUtcTime = Date.now() + (new Date().getTimezoneOffset() * 60000);
-            var nowKstMs = nowUtcTime + (9 * 3600000);
-            var diffMs = nowKstMs - kstDate.getTime();
-            var diffSec = Math.floor(diffMs / 1000);
-            
-            var rel = "";
-            if(diffSec >= 0 && diffSec < 86400) {
-                if (diffSec < 60) rel = " (방금 전)";
-                else if (diffSec < 3600) rel = " (" + Math.floor(diffSec / 60) + "분 전)";
-                else rel = " (" + Math.floor(diffSec / 3600) + "시간 전)";
-            }
-            
-            return kstDate.getFullYear() + "." + String(kstDate.getMonth()+1).padStart(2,'0') + "." + String(kstDate.getDate()).padStart(2,'0') + " " + hours + ":" + minutes + " KST" + rel;
         }
 
         function categorizeMacro(title, desc) {
             var t = (title + " " + desc).toLowerCase();
-            if (t.indexOf("fed") !== -1 || t.indexOf("rate") !== -1 || t.indexOf("inflation") !== -1 || t.indexOf("cpi") !== -1 || t.indexOf("powell") !== -1 || t.indexOf("treasury") !== -1) return "FED";
-            if (t.indexOf("chip") !== -1 || t.indexOf("semiconductor") !== -1 || t.indexOf("nvidia") !== -1 || t.indexOf("ai") !== -1 || t.indexOf("tech") !== -1 || t.indexOf("bubble") !== -1) return "AI_BUBBLE";
-            if (t.indexOf("dollar") !== -1 || t.indexOf("yen") !== -1 || t.indexOf("carry") !== -1 || t.indexOf("boj") !== -1 || t.indexOf("currency") !== -1) return "YEN_DOLLAR";
-            if (t.indexOf("oil") !== -1 || t.indexOf("energy") !== -1 || t.indexOf("crude") !== -1 || t.indexOf("war") !== -1 || t.indexOf("iran") !== -1 || t.indexOf("russia") !== -1) return "OIL_GEO";
-            if (t.indexOf("china") !== -1 || t.indexOf("chinese") !== -1 || t.indexOf("tariff") !== -1 || t.indexOf("trade") !== -1) return "CHINA";
+            if (t.includes("fed") || t.includes("rate") || t.includes("inflation") || t.includes("powell")) return "FED";
+            if (t.includes("chip") || t.includes("nvidia") || t.includes("ai") || t.includes("bubble") || t.includes("tech")) return "AI_BUBBLE";
+            if (t.includes("dollar") || t.includes("yen") || t.includes("boj") || t.includes("currency")) return "YEN_DOLLAR";
+            if (t.includes("oil") || t.includes("crude") || t.includes("war") || t.includes("iran") || t.includes("geopolitics")) return "OIL_GEO";
+            if (t.includes("china") || t.includes("tariff") || t.includes("trade") || t.includes("supply")) return "CHINA";
             return "GENERAL";
         }
 
-        function translateTitleToKorean(title, category) {
-            var t = title.toLowerCase();
-            if (t.indexOf("trump") !== -1 && t.indexOf("oil") !== -1) return "🇺🇸 [트럼프·유가] 트럼프 발언: 중동 분쟁 완화 및 국제 유가 급락 기대감";
-            if (t.indexOf("german") !== -1 && t.indexOf("china") !== -1) return "🇩🇪 [독일·중국] 독일 기업의 대중국 투자 확대 vs 대미 투자 감소 흐름";
-            if (t.indexOf("fed") !== -1 || t.indexOf("powell") !== -1) return "🏛️ [금리/연준] 미 연준 통화정책 기조 및 국채금리·물가 지표 속보";
-            if (category === "FED") return "🏛️ [금리/연준] 미 연준 금리 경로 및 긴축/완화 시나리오 점검";
-            if (category === "AI_BUBBLE") return "🤖 [AI/빅테크] 빅테크 AI 설비투자 확대 및 밸류에이션 리스크";
-            if (category === "YEN_DOLLAR") return "💱 [환율/외환] 엔·달러 환율 변동성 및 글로벌 유동성 수급 동향";
-            if (category === "OIL_GEO") return "🛢️ [원유/지정학] 국제 유가 급등락 및 중동·에너지 공급망 변동";
-            if (category === "CHINA") return "🇨🇳 [중국/무역] 중국 수출입 교역 및 글로벌 통상·관세 리스크";
-            return "📌 [외신 매크로] " + title;
-        }
-
-        function generateDynamicSummary(title, desc, category) {
-            var fullText = (title + " " + desc).toLowerCase();
-            var bullTriggers = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'growth', 'lift', 'gain', 'end', 'peace', 'fall'];
-            var bearTriggers = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'crisis', 'escalat', 'threat'];
-            var bScore = 0;
-            for(var i=0; i<bullTriggers.length; i++) if(fullText.indexOf(bullTriggers[i]) !== -1) bScore++;
-            for(var j=0; j<bearTriggers.length; j++) if(fullText.indexOf(bearTriggers[j]) !== -1) bScore--;
+        /* 매크로 파급 전략 (단순 템플릿) - 팩트 요약은 아래 AI 번역이 덮어씀 */
+        function generateMacroStrategy(category, titleEn) {
+            var t = titleEn.toLowerCase();
+            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'cheer', 'surge', 'buy', 'up', 'gain'];
+            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'panic', 'crash', 'sell-off', 'fear', 'down', 'drop'];
             
-            var toneBadge = '<span class="summary-tone-badge tone-neutral">🟡 중립·관망</span>';
-            var marketToneStr = "시장 충격이 제한적인 중립적 흐름을 유지하고 있습니다.";
-            if(bScore >= 1) {
-                toneBadge = '<span class="summary-tone-badge tone-bull">🟢 호재·완화</span>';
-                marketToneStr = "위험자산 투자 심리를 개선하고 시장 유동성에 우호적인 신호입니다.";
-            } else if(bScore <= -1) {
-                toneBadge = '<span class="summary-tone-badge tone-bear">🔴 악재·긴축</span>';
-                marketToneStr = "자산 시장의 변동성을 키우고 긴축 경계감을 자극하는 요인입니다.";
-            }
+            var isBull = bullWords.some(w => t.includes(w));
+            var isBear = bearWords.some(w => t.includes(w));
+            var strategyStr = "안전자산과 위험자산 간의 비중 조절을 통한 보수적 리스크 관리가 요구됩니다.";
 
-            var cleanBrief = title.replace(/^\[.*?\]\s*/, '').trim();
-            var factSummary = cleanBrief + " 관련 시장 변동성 점검.";
-
-            var impactDetail = "";
-            if (category === "FED") {
-                impactDetail = "금리 방향타와 통화 긴축 수준에 따라 기술주 할인율 및 채권 스프레드에 직접 파급.";
-            } else if (category === "AI_BUBBLE") {
-                impactDetail = "인프라 투자(CAPEX) 집행 속도와 현금 회수율 검증에 따른 고밸류에이션 기술주 수급 재편.";
-            } else if (category === "YEN_DOLLAR") {
-                impactDetail = "환율 스프레드 격차에 따른 글로벌 캐리 트레이드 자금 유출입 및 신흥국 패시브 매도 경계.";
+            if (category === "AI_BUBBLE") {
+                if (isBear) strategyStr = "🚨 [리스크 경계] AI 거품론 부각 시 반도체 대장주의 멀티플 축소 및 차익실현 매물 출회에 대비해야 합니다. (방어주 유리)";
+                else strategyStr = "🟢 [수혜 지속] AI 설비투자 확대 모멘텀이 유효하며 반도체 장비 및 전력 인프라 섹터의 수급 유입이 기대됩니다.";
+            } else if (category === "FED") {
+                if (isBear) strategyStr = "🚨 [리스크 경계] 고금리 장기화 우려 시 성장주(빅테크, 바이오)의 할인율 상승 타격이 불가피합니다. (현금 비중 확대)";
+                else strategyStr = "🟢 [완화 기대] 금리 인하 사이클 진입 시 시장 유동성 확대로 위험자산 전반의 밸류에이션 리레이팅이 예상됩니다.";
             } else if (category === "OIL_GEO") {
-                impactDetail = "에너지 원자재 단가 변동이 물가 상승률과 항공·물류 기업의 마진 방어선에 직격탄.";
+                if (isBear) strategyStr = "🚨 [비용 쇼크] 유가 급등에 따른 인플레이션 재발발 우려 시 항공, 물류, 소비재 섹터의 마진 훼손을 주의하십시오.";
+                else strategyStr = "🟢 [비용 안정] 유가 하락 및 지정학적 긴장 완화로 원자재 수입 기업들의 수익성 개선이 전망됩니다.";
             } else if (category === "CHINA") {
-                impactDetail = "글로벌 공급망 재편 및 관세 분쟁에 따른 대외 교역 의존형 수출 제조기업 밸류에이션 변동.";
-            } else {
-                impactDetail = "단기 외신 헤드라인 반응에 추격 매매하기보다 수급선과 주요 매크로 지표의 안착 여부 확인 권장.";
+                strategyStr = "⚠️ [변동성 주의] 중국 매크로 리스크 부각 시 국내 대형 수출주(화학, 철강, 반도체) 수급 변동성이 커질 수 있습니다.";
             }
-
-            return '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">📌 팩트 브리핑:</span><span class="text-slate-200">' + toneBadge + ' ' + factSummary + '</span></div>' +
-                   '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">🧭 시장 방향성:</span><span class="text-slate-200">' + marketToneStr + '</span></div>' +
-                   '<div class="flex items-start gap-1.5"><span class="text-sky-300 font-bold shrink-0 min-w-[65px]">💥 거품·충격:</span><span class="text-slate-200">' + impactDetail + '</span></div>';
-        }
-
-        function generateDeepDiveAnalysis(title, desc, category) {
-            var fullText = (title + " " + desc).toLowerCase();
-            var numbers = title.match(/(\$?\d+(?:\.\d+)?(?:%|b|m|t|bp|k)?)/gi) || desc.match(/(\$?\d+(?:\.\d+)?(?:%|b|m|t|bp|k)?)/gi) || [];
-            var numSnippet = numbers.length > 0 ? " (포착된 주요 수치: " + numbers.slice(0, 3).join(", ") + ")" : "";
-
-            var targetAsset = "글로벌 금융시장 전반";
-            if (fullText.indexOf("nvidia") !== -1 || fullText.indexOf("semiconductor") !== -1) targetAsset = "엔비디아 및 AI 반도체 밸류체인";
-            else if (fullText.indexOf("apple") !== -1) targetAsset = "애플(AAPL) 및 모바일 부품 공급망";
-            else if (fullText.indexOf("tesla") !== -1) targetAsset = "테슬라(TSLA) 및 전기차/자율주행 섹터";
-            else if (fullText.indexOf("oil") !== -1 || fullText.indexOf("crude") !== -1) targetAsset = "국제 원유 선물 및 에너지/정유주";
-            else if (fullText.indexOf("fed") !== -1 || fullText.indexOf("rate") !== -1) targetAsset = "미 연준(Fed) 금리 경로 및 채권/외환시장";
-
-            return "🔍 [AI 기초 심층 분석]\n\n" +
-                   "1. 📌 개별 기사 팩트:\n• 원문 핵심: " + title + "\n• 주요 영향 자산군: " + targetAsset + numSnippet + "\n\n" +
-                   "2. 📊 시장 파급 경로:\n상기 사안은 거시경제 지표 및 시장 참가자들의 센티먼트에 실시간으로 작용하여 업종별 밸류에이션과 외국인 수급 변동을 유발할 수 있습니다.\n\n" +
-                   "3. 💡 실시간 Gemini AI 정밀 분석 권장:\n보다 정밀하고 깊이 있는 월가 수준의 3줄 리포트가 필요하시면 위의 [✨ AI 실시간 맞춤 정밀분석] 버튼을 눌러주세요.";
+            return strategyStr;
         }
 
         async function fetchLiveNews() {
@@ -1002,21 +445,24 @@
                             var cleanDesc = rawDesc.length > 0 ? rawDesc : cleanTitle;
                             
                             var vendor = "Reuters"; var sourceName = "Reuters Business";
-                            var linkLower = (item.link || "").toLowerCase(); var titleLower = (item.title || "").toLowerCase();
-                            if (linkLower.indexOf("bloomberg") !== -1 || titleLower.indexOf("bloomberg") !== -1) { vendor = "Bloomberg"; sourceName = "Bloomberg Markets"; }
-                            else if (linkLower.indexOf("wsj") !== -1 || titleLower.indexOf("wsj") !== -1) { vendor = "WSJ"; sourceName = "WSJ Markets"; }
-                            else if (linkLower.indexOf("cnbc") !== -1 || titleLower.indexOf("cnbc") !== -1) { vendor = "CNBC"; sourceName = "CNBC Finance"; }
+                            var tLower = cleanTitle.toLowerCase(); var lLower = item.link.toLowerCase();
+                            if (lLower.includes("bloomberg") || tLower.includes("bloomberg")) { vendor = "Bloomberg"; sourceName = "Bloomberg"; }
+                            else if (lLower.includes("wsj") || tLower.includes("wsj")) { vendor = "WSJ"; sourceName = "WSJ"; }
+                            else if (lLower.includes("cnbc") || tLower.includes("cnbc")) { vendor = "CNBC"; sourceName = "CNBC"; }
 
-                            var itemTimestamp = new Date(item.pubDate || Date.now()).getTime();
+                            var timeInfo = getKSTTimeInfo(item.pubDate);
                             var macroCat = categorizeMacro(cleanTitle, cleanDesc);
 
                             fetchedList.push({
-                                titleEn: cleanTitle, category: macroCat, titleKo: translateTitleToKorean(cleanTitle, macroCat),
+                                id: fetchedList.length,
+                                titleEn: cleanTitle, category: macroCat, 
                                 link: item.link, desc: cleanDesc, vendor: vendor, source: sourceName,
-                                timeKST: formatKST(item.pubDate), 
-                                summaryKo: generateDynamicSummary(cleanTitle, cleanDesc, macroCat),
-                                deepAnalysis: generateDeepDiveAnalysis(cleanTitle, cleanDesc, macroCat),
-                                timestamp: itemTimestamp
+                                timeKST: timeInfo.fullStr, ymd: timeInfo.ymd,
+                                strategyStr: generateMacroStrategy(macroCat, cleanTitle),
+                                timestamp: new Date(item.pubDate || Date.now()).getTime(),
+                                // AI 번역 덮어쓰기 전 임시 표시용
+                                titleKo: "번역 대기 중...",
+                                factKo: "⏳ AI가 실제 기사 원문을 분석하여 팩트 요약을 생성 중입니다..."
                             });
                         }
                     }
@@ -1029,26 +475,26 @@
                 var uniqueMap = {}; var cleanList = [];
                 for (var k = 0; k < fetchedList.length; k++) {
                     if (!uniqueMap[fetchedList[k].link]) {
-                        uniqueMap[fetchedList[k].link] = true; cleanList.push(fetchedList[k]);
+                        uniqueMap[fetchedList[k].link] = true;
+                        cleanList.push(fetchedList[k]);
                     }
                 }
-                cleanList.sort(function(a, b) { return b.timestamp - a.timestamp; });
-                liveArticles = cleanList;
-                renderCards();
+                cleanList.sort((a, b) => b.timestamp - a.timestamp);
                 
-                var updateLabel = document.getElementById("last-updated-label");
-                if (updateLabel) updateLabel.textContent = "동기화 완료 (" + new Date().toLocaleTimeString() + ")";
-
-                if(todayKSTDateStr === "") formatKST(); 
+                // ID 재할당
+                for(var m=0; m<cleanList.length; m++) cleanList[m].id = m;
+                
+                liveArticles = cleanList;
+                
+                var updateTime = getKSTTimeInfo();
+                todayKSTDateStr = updateTime.ymd;
+                exactKSTTimestamp = updateTime.fullStr.split(' (')[0]; // 방금전 제외
+                
+                renderCards();
                 updateDashboard();
 
-                var hotTab = document.getElementById('tab-hot');
-                if (hotTab && hotTab.classList.contains('active')) {
-                    renderHotTab();
-                }
-
-                // Auto-trigger batch Gemini enrichment for high-fidelity translations
-                enhanceArticlesWithGeminiBatch(liveArticles);
+                // 화면에 기사 띄운 직후, 백그라운드에서 상위 15개 기사 AI 배치 번역 실행!
+                runBatchAITranslation();
             }
         }
 
@@ -1056,523 +502,379 @@
             var container = document.getElementById("news-container");
             if (!container) return;
 
-            var filtered = liveArticles.filter(function(a) {
+            var filtered = liveArticles.filter(a => {
                 var matchVendor = (currentVendorFilter === "ALL" || a.vendor === currentVendorFilter);
                 var matchMacro = (currentMacroFilter === "ALL" || a.category === currentMacroFilter);
                 var q = searchQuery.toLowerCase();
-                var text = (a.titleEn + " " + a.titleKo + " " + a.desc + " " + a.summaryKo).toLowerCase();
-                var matchSearch = !q || text.indexOf(q) !== -1;
-                return matchVendor && matchMacro && matchSearch;
+                var text = (a.titleEn + " " + a.desc).toLowerCase();
+                return matchVendor && matchMacro && (!q || text.includes(q));
             });
 
-            var countEl = document.getElementById("article-count-label");
-            if (countEl) countEl.innerHTML = "🟢 매크로 속보 <b>" + filtered.length + "건</b> 감지됨";
+            document.getElementById("article-count-label").innerHTML = "🟢 매크로 속보 <b>" + filtered.length + "건</b> 대기 중";
 
             if (filtered.length === 0) {
-                container.innerHTML = '<div class="text-center py-12 text-slate-500 text-xs">조건에 맞는 속보가 없습니다.</div>';
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:#64748b; font-size:13px;">조건에 맞는 속보가 없습니다.</div>';
                 return;
             }
 
             var html = "";
             for (var i = 0; i < filtered.length; i++) {
                 var it = filtered[i];
-                var originalIndex = liveArticles.indexOf(it);
-                var searchUrl = "https://www.google.com/search?q=" + encodeURIComponent(it.titleEn);
-                var categoryBadgeText = "거품·유동성 체크";
-                if (it.category === "FED") categoryBadgeText = "🚨 금리/연준 긴급";
-                else if (it.category === "AI_BUBBLE") categoryBadgeText = "🤖 AI 밸류에이션";
-                else if (it.category === "YEN_DOLLAR") categoryBadgeText = "💱 환율/엔캐리";
-                else if (it.category === "OIL_GEO") categoryBadgeText = "🛢️ 유가/인플레";
-                else if (it.category === "CHINA") categoryBadgeText = "🇨🇳 대중 무역 리스크";
+                html += `
+                <div class="card" id="news-card-${it.id}">
+                    <div class="card-header">
+                        <div class="tag-wrap"><span class="tag tag-${it.vendor}">${it.source}</span></div>
+                        <div class="quick-actions">
+                            <a href="${it.link}" target="_blank">원문 ↗</a>
+                        </div>
+                    </div>
+                    <div class="time-meta-bar"><span>⚡ 타전 시각:</span><span class="time-val">${it.timeKST}</span></div>
+                    <div class="article-original">
+                        <a class="article-title-en" href="${it.link}" target="_blank">🌐 ${it.titleEn}</a>
+                        <div class="article-title-ko ai-title-target">${it.titleKo}</div>
+                    </div>
+                    
+                    <div class="article-korean-summary">
+                        <div class="summary-section">
+                            <span class="summary-label">📝 기사 원문 팩트 요약</span>
+                            <span class="summary-text ai-fact-target" style="font-weight:bold; color:#e0f2fe;">${it.factKo}</span>
+                        </div>
+                        <div class="summary-section">
+                            <span class="macro-strategy-label">🎯 매크로 파급 전략</span>
+                            <span class="summary-text">${it.strategyStr}</span>
+                        </div>
+                    </div>
 
-                html += '<div class="card">' +
-                    '<div class="flex items-center justify-between gap-2">' +
-                        '<div class="flex items-center gap-1.5"><span class="text-[11px] font-bold px-2 py-0.5 rounded tag-' + it.vendor + '">' + it.source + '</span></div>' +
-                        '<div class="flex items-center gap-1.5">' +
-                            '<a class="bg-slate-800 border border-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-semibold" href="' + searchUrl + '" target="_blank">🔍 검색</a>' +
-                            '<a class="bg-sky-950 border border-sky-800 text-sky-400 px-2 py-1 rounded text-[11px] font-semibold" href="' + it.link + '" target="_blank">원문 ↗</a>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-[11px] font-mono flex justify-between text-slate-400">' +
-                        '<span>⚡ 외신 타전 시각:</span><span class="text-sky-400 font-bold">' + it.timeKST + '</span>' +
-                    '</div>' +
-                    '<div class="flex flex-col gap-1.5">' +
-                        '<a class="text-sm font-bold text-slate-100 hover:text-sky-400 leading-snug" href="' + it.link + '" target="_blank">🌐 ' + it.titleEn + '</a>' +
-                        '<div class="text-xs font-semibold text-sky-400 bg-sky-950/70 border-l-2 border-sky-500 px-2.5 py-1.5 rounded">' + it.titleKo + '</div>' +
-                    '</div>' +
-                    '<div class="bg-slate-900/90 border border-blue-900/40 rounded-lg p-2.5 text-xs leading-relaxed flex flex-col gap-1.5">' +
-                        '<div class="flex justify-between items-center text-[11px] font-bold text-amber-400 border-b border-amber-400/20 pb-1">' +
-                            '<span>⚡ AI 기사 실시간 동적 요약 & 충격 분석</span>' +
-                            '<span class="bg-amber-950 text-amber-200 px-1.5 py-0.5 rounded text-[10px]">' + categoryBadgeText + '</span>' +
-                        '</div>' +
-                        '<div class="flex flex-col gap-1 text-slate-100">' + it.summaryKo + '</div>' +
-                    '</div>' +
-                    '<details class="bg-slate-950 border border-slate-800 rounded-lg overflow-hidden group">' +
-                        '<summary class="px-3 py-2 text-[11px] font-bold text-sky-400 bg-slate-900 cursor-pointer flex justify-between list-none">' +
-                            '<span>📖 기사 원문 상세 분석 보기</span>' +
-                            '<span class="text-slate-400 text-[10px] group-open:hidden">▼ 상세 펼치기</span>' +
-                            '<span class="text-sky-400 text-[10px] hidden group-open:inline">▲ 접기</span>' +
-                        '</summary>' +
-                        '<div class="p-3 text-xs flex flex-col gap-2.5">' +
-                            '<button id="ai-btn-' + originalIndex + '" class="bg-gradient-to-r from-blue-700 to-sky-600 hover:from-blue-600 hover:to-sky-500 text-white border border-sky-400/60 rounded px-3 py-1.5 text-[11px] font-bold flex items-center gap-1.5 w-fit" onclick="requestAiDeepDive(event, ' + originalIndex + ')">✨ AI 실시간 맞춤 정밀분석</button>' +
-                            '<div id="ai-box-' + originalIndex + '" class="bg-sky-950/80 border border-sky-600 rounded p-2.5 text-[11.5px] leading-relaxed text-sky-100 hidden whitespace-pre-line"></div>' +
-                            '<div class="bg-sky-950/40 border border-sky-900 rounded p-2.5 text-sky-100 leading-relaxed whitespace-pre-line">' + it.deepAnalysis + '</div>' +
-                            '<div class="bg-slate-950 border border-slate-800 text-slate-400 p-2.5 rounded font-mono text-[11px] break-all whitespace-pre-line"><b>🌐 [Raw English Excerpt]</b>\n' + it.titleEn + '.\n\n' + it.desc + '\n\n🔗 ' + it.link + '</div>' +
-                        '</div>' +
-                    '</details>' +
-                '</div>';
+                    <details class="reader-accordion">
+                        <summary class="reader-summary">📖 AI 정밀 분석 (Gemini 단독 호출)</summary>
+                        <div class="accordion-content">
+                            <button class="ai-deep-btn" onclick="runArticleDeepDive(${it.id}, this)">✨ 이 기사만 깊게 파헤치기 (AI 리포트)</button>
+                            <div class="deep-dive-result" style="display:none;"></div>
+                            <div class="sub-box-en"><b>[Original Excerpt]</b>\n${it.desc}\n\n🔗 ${it.link}</div>
+                        </div>
+                    </details>
+                </div>`;
             }
             container.innerHTML = html;
         }
 
-        /* ========================================================= */
-        /* 🔥 HOT THEME & IMPACT ARTICLE COMPUTATION ENGINE         */
-        /* ========================================================= */
-        function calculateArticleHeat(item) {
-            var fullText = (item.titleEn + " " + item.desc + " " + item.summaryKo).toLowerCase();
-            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'growth', 'lift', 'gain', 'end', 'peace'];
-            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'crisis', 'escalat', 'threat'];
-            var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '폭락', '투매', '패닉'];
-            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수'];
+        /* 2. [핵심] 실제 기사 내용을 한 번에 읽고 팩트 요약하는 Batch 통신 */
+        async function runBatchAITranslation() {
+            var topArticles = liveArticles.slice(0, 15); // 최상위 15개까지만 처리
+            if (topArticles.length === 0) return;
 
-            var bCount = 0; var rCount = 0; var pCount = 0; var cCount = 0;
-            for(var i=0; i<bullWords.length; i++) if(fullText.indexOf(bullWords[i]) !== -1) bCount++;
-            for(var j=0; j<bearWords.length; j++) if(fullText.indexOf(bearWords[j]) !== -1) rCount++;
-            for(var p=0; p<panicWords.length; p++) if(fullText.indexOf(panicWords[p]) !== -1) pCount++;
-            for(var c=0; c<cheerWords.length; c++) if(fullText.indexOf(cheerWords[c]) !== -1) cCount++;
+            var statusEl = document.getElementById("status-ai-translate");
+            if(statusEl) { statusEl.textContent = "✨ AI가 진짜 팩트를 번역/요약 중입니다..."; statusEl.style.color = "#38bdf8"; }
 
-            // 파괴력 점수(절대값 기반: 극단적인 악재이거나 극단적인 호재일수록 폭발적 점수 부여)
-            var netPolarity = (bCount + cCount * 1.5) - (rCount + pCount * 1.8);
-            var absoluteIntensity = Math.abs(netPolarity) * 12 + (pCount * 18) + (cCount * 16) + 35;
-            
-            // 수치나 퍼센트가 들어있으면 구체적 충격 가중치
-            if (/(\d+(?:\.\d+)?%|\$\d+)/.test(fullText)) absoluteIntensity += 10;
-            
-            var heatScore = Math.min(99, Math.max(40, Math.round(absoluteIntensity)));
-            
-            var tone = "NEUTRAL";
-            if (netPolarity >= 1) tone = "BULL";
-            else if (netPolarity <= -1) tone = "BEAR";
+            var promptStr = "다음 영어 뉴스 기사들을 한국어로 번역하고 요약해라. 추측 금지. 기사에 적힌 수치와 고유명사(기업명)를 살려서 'factKo' 1문장으로 요약해.\n반드시 다음 JSON 배열 형식으로만 응답해: [{\"id\": 숫자, \"titleKo\": \"한국어 번역 제목\", \"factKo\": \"실제 기사 내용 팩트 요약\"}]\n\n[기사 목록]\n";
+            for(let i=0; i<topArticles.length; i++) {
+                promptStr += `ID: ${topArticles[i].id}\nTitle: ${topArticles[i].titleEn}\nDesc: ${topArticles[i].desc}\n\n`;
+            }
 
-            return { score: heatScore, tone: tone, panic: pCount, cheer: cCount };
+            try {
+                var apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                var payload = {
+                    contents: [{ parts: [{ text: promptStr }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                };
+                var res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                var json = await res.json();
+                
+                if (json.candidates && json.candidates[0].content) {
+                    var text = json.candidates[0].content.parts[0].text;
+                    var parsedArray = JSON.parse(text);
+
+                    // DOM 업데이트
+                    parsedArray.forEach(p => {
+                        var targetCard = document.getElementById(`news-card-${p.id}`);
+                        if(targetCard) {
+                            var titleEl = targetCard.querySelector('.ai-title-target');
+                            var factEl = targetCard.querySelector('.ai-fact-target');
+                            if(titleEl) { titleEl.textContent = "🇰🇷 " + p.titleKo; }
+                            if(factEl) { factEl.textContent = p.factKo; }
+                            // 배열 데이터도 업데이트
+                            liveArticles[p.id].titleKo = "🇰🇷 " + p.titleKo;
+                            liveArticles[p.id].factKo = p.factKo;
+                        }
+                    });
+                    if(statusEl) { statusEl.textContent = "✅ AI 팩트 번역 완료"; statusEl.style.color = "#22c55e"; }
+                }
+            } catch(e) {
+                console.error(e);
+                if(statusEl) { statusEl.textContent = "⚠️ AI 번역 지연 (새로고침 요망)"; statusEl.style.color = "#ef4444"; }
+            }
         }
 
-        function renderHotTab() {
-            if (liveArticles.length === 0) return;
+        async function runArticleDeepDive(id, btnEl) {
+            var resultBox = btnEl.nextElementSibling;
+            btnEl.style.display = "none";
+            resultBox.style.display = "block";
+            resultBox.innerHTML = '<div class="sub-box-analysis" style="color:#f59e0b;">⏳ Gemini AI가 기사 원문을 심층 분석 중입니다...</div>';
 
-            var themeScores = {
-                'AI_BUBBLE': { name: '🤖 AI 거품·빅테크 속도론', count: 0, heatSum: 0, tag: 'AI_BUBBLE' },
-                'OIL_GEO': { name: '🛢️ 중동 전쟁·유가 인플레', count: 0, heatSum: 0, tag: 'OIL_GEO' },
-                'FED': { name: '🏛️ 연준 금리·통화 긴축 경로', count: 0, heatSum: 0, tag: 'FED' },
-                'YEN_DOLLAR': { name: '💱 환율 요동·엔캐리 유동성', count: 0, heatSum: 0, tag: 'YEN_DOLLAR' },
-                'CHINA': { name: '🇨🇳 관세 무역 갈등·중국 공급망', count: 0, heatSum: 0, tag: 'CHINA' }
-            };
+            var art = liveArticles.find(a => a.id === id);
+            if(!art) return;
 
-            var scoredArticles = liveArticles.map(function(item) {
-                var heatData = calculateArticleHeat(item);
-                if (themeScores[item.category]) {
-                    themeScores[item.category].count++;
-                    themeScores[item.category].heatSum += heatData.score;
-                }
-                return {
-                    article: item,
-                    heat: heatData.score,
-                    tone: heatData.tone,
-                    panic: heatData.panic,
-                    cheer: heatData.cheer
-                };
-            });
-
-            // 1. 테마별 화력 산출 및 정렬
-            var themeList = Object.keys(themeScores).map(function(k) {
-                var t = themeScores[k];
-                var avgHeat = t.count > 0 ? Math.round(t.heatSum / t.count) : 0;
-                var totalPower = t.count * 15 + avgHeat;
-                return { key: k, name: t.name, count: t.count, avgHeat: avgHeat, power: totalPower };
-            });
-
-            themeList.sort(function(a, b) { return b.power - a.power; });
-            var maxPower = themeList[0].power || 1;
-            var topTheme = themeList[0];
-
-            var badgeEl = document.getElementById('hot-dominant-badge');
-            if (badgeEl) badgeEl.textContent = "🔥 화력 1위: " + topTheme.name.split(' ')[1];
-
-            var rankContainer = document.getElementById('hot-theme-rank-container');
-            if (rankContainer) {
-                var rankHtml = "";
-                themeList.forEach(function(t, idx) {
-                    var pct = Math.min(100, Math.round((t.power / maxPower) * 100));
-                    var color = idx === 0 ? "bg-rose-500" : (idx === 1 ? "bg-amber-500" : "bg-sky-600");
-                    rankHtml += '<div class="flex flex-col gap-1">' +
-                        '<div class="flex justify-between text-[11.5px] text-slate-300 font-semibold">' +
-                            '<span>' + (idx + 1) + '. ' + t.name + '</span>' +
-                            '<span class="font-mono text-slate-400">보도 ' + t.count + '건 / 화력 ' + t.power + '점</span>' +
-                        '</div>' +
-                        '<div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">' +
-                            '<div class="' + color + ' h-full rounded-full transition-all duration-700" style="width: ' + pct + '%;"></div>' +
-                        '</div>' +
-                    '</div>';
-                });
-                rankContainer.innerHTML = rankHtml;
-            }
-
-            // 2. 나비효과(연쇄 반응) 카드 갱신
-            var butterflyTitle = document.getElementById('butterfly-title');
-            var butterflyFlow = document.getElementById('butterfly-flow-box');
+            var prompt = `당신은 월스트리트 수석 매크로 퀀트입니다. 다음 영문 기사를 한국어로 심층 분석하세요.
+            [기사제목]: ${art.titleEn}
+            [기사요약]: ${art.desc}
             
-            if (butterflyTitle && butterflyFlow) {
-                if (topTheme.key === 'AI_BUBBLE') {
-                    butterflyTitle.textContent = "🌪️ AI 거품 & 속도론이 일으키는 연쇄 나비효과";
-                    butterflyFlow.innerHTML = 
-                        '<div class="flex items-center gap-1.5 text-rose-400 font-bold mb-1.5">⚡ 파급 경로: 빅테크 CAPEX 회수 의구심 ➔ 고평가 기술주 멀티플 압축 ➔ 국내 반도체 수급 이탈 ➔ 배당·방어주 피난</div>' +
-                        '<p class="text-slate-300 leading-relaxed">' +
-                        '주말/오늘 시장의 메가 이슈는 <b>AI 인프라 설비투자(CAPEX) 속도 조절론</b>입니다. 막대한 데이터센터 전력과 칩 구매 대비 단기 현금 창출 속도가 느리다는 분석이 헤드라인을 장악하면서, 나스닥 고밸류에이션 기술주들이 할인율 압박을 받고 있습니다. 이에 따라 위험자산 비중 축소와 전통 배당주로의 머니무브가 관측됩니다.' +
-                        '</p>';
-                } else if (topTheme.key === 'OIL_GEO') {
-                    butterflyTitle.textContent = "🌪️ 중동 분쟁 & 유가 급등이 일으키는 연쇄 나비효과";
-                    butterflyFlow.innerHTML = 
-                        '<div class="flex items-center gap-1.5 text-amber-400 font-bold mb-1.5">⚡ 파급 경로: 중동/홍해 해협 위기 ➔ 국제 유가 급등 ➔ CPI 물가 반등 ➔ 연준 금리 인하 지연 ➔ 성장주 타격</div>' +
-                        '<p class="text-slate-300 leading-relaxed">' +
-                        '원유 공급망 교란은 단순한 에너지 문제가 아니라 <b>글로벌 인플레이션의 방아쇠</b>입니다. 유가가 배럴당 85~90달러를 위협하면 연준(Fed)의 피벗(금리 인하) 스케줄이 뒤로 밀리며 채권 금리가 급등하고, 이는 기술주와 신흥국 증시에 연쇄적인 유동성 가뭄을 일으킵니다.' +
-                        '</p>';
-                } else if (topTheme.key === 'FED') {
-                    butterflyTitle.textContent = "🌪️ 연준 금리 정책이 일으키는 연쇄 나비효과";
-                    butterflyFlow.innerHTML = 
-                        '<div class="flex items-center gap-1.5 text-sky-400 font-bold mb-1.5">⚡ 파급 경로: 파월 발언 & 고용 지표 ➔ 국채 금리 급등락 ➔ 글로벌 달러화 향방 ➔ 전 자산군 밸류에이션 재평가</div>' +
-                        '<p class="text-slate-300 leading-relaxed">' +
-                        '모든 자산 가격의 기준 할인율인 <b>미 국채 10년물 금리</b>가 연준의 입에 의해 흔들리고 있습니다. 금리 인하 기대감이 후퇴하면 기술주 멀티플이 깎이고, 반대로 빅컷(50bp) 기대감이 살아나면 위험자산에 단기 숏커버링 랠리가 전개됩니다.' +
-                        '</p>';
-                } else if (topTheme.key === 'YEN_DOLLAR') {
-                    butterflyTitle.textContent = "🌪️ 엔캐리 청산 & 환율 발작의 연쇄 나비효과";
-                    butterflyFlow.innerHTML = 
-                        '<div class="flex items-center gap-1.5 text-purple-400 font-bold mb-1.5">⚡ 파급 경로: 일본 BOJ 금리인상 / 엔화 강세 ➔ 글로벌 핫머니 엔캐리 청산 ➔ 주식 강제 매도 ➔ 가상자산/테크주 폭락</div>' +
-                        '<p class="text-slate-300 leading-relaxed">' +
-                        '값싼 엔화를 빌려 전 세계 주식과 코인에 베팅했던 <b>글로벌 레버리지 자금이 엔화 가치 급등 시 강제 청산</b>에 직면합니다. 펀더멘털과 무관하게 패시브 기계적 매도가 전 세계 증시를 동시에 덮칠 수 있는 뇌관입니다.' +
-                        '</p>';
-                } else {
-                    butterflyTitle.textContent = "🌪️ 무역 분쟁 & 관세 충격의 연쇄 나비효과";
-                    butterflyFlow.innerHTML = 
-                        '<div class="flex items-center gap-1.5 text-emerald-400 font-bold mb-1.5">⚡ 파급 경로: 대중 관세 장벽 & 수출 규제 ➔ 글로벌 교역량 위축 ➔ 한국 등 수출 제조기업 실적 하향 ➔ 내수주 방어</div>' +
-                        '<p class="text-slate-300 leading-relaxed">' +
-                        '미국의 관세 인상과 공급망 블록화는 대외 수출 의존도가 높은 아시아 신흥국(특히 한국)의 반도체, 자동차, 2차전지 밸류체인에 직접적인 실적 눈높이 하향 압력으로 작용합니다.' +
-                        '</p>';
-                }
+            출력형식:
+            1. 📌 상세 팩트 (수치, 인물, 기업명 포함 3줄 요약)
+            2. 💥 시장 충격 경로 (어느 자산/섹터로 돈이 이동할지)
+            3. 🎯 한국 투자자 행동 요령`;
+
+            try {
+                var ans = await callGeminiAPI(prompt, true);
+                resultBox.innerHTML = `<div class="sub-box-analysis">${ans}</div>`;
+            } catch(e) {
+                resultBox.innerHTML = `<div class="sub-box-analysis" style="color:#ef4444;">⚠️ AI 응답 실패. 잠시 후 다시 시도하세요.</div>`;
+                btnEl.style.display = "block";
+            }
+        }
+
+        /* 3. [AI 탭] 5대 매크로 팩터 고정 리포트 생성 */
+        async function runExecutiveBriefing() {
+            var box = document.getElementById("executive-report-box");
+            box.innerHTML = "⏳ Gemini 3 Flash가 실시간 외신 전량을 동시 분석하여 5대 팩터 브리핑을 작성 중입니다...";
+            
+            var newsContext = "";
+            for(var i=0; i<Math.min(20, liveArticles.length); i++) {
+                newsContext += `- ${liveArticles[i].titleEn}\n`;
             }
 
-            // 3. 파괴력 TOP 기사 렌더링 (호재/악재 불문, 충격도 높은 순 5개)
-            scoredArticles.sort(function(a, b) { return b.heat - a.heat; });
-            var topArticles = scoredArticles.slice(0, 5);
+            var promptText = `현재 수신된 외신 헤드라인들을 바탕으로 오늘의 글로벌 매크로 총괄 리포트를 작성해 주세요. 
+            반드시 아래 5가지 팩터 카테고리로 나누어서, 해당되는 뉴스가 있다면 묶어서 한국어로 분석해주세요.
+            
+            1. AI 거품 및 빅테크 밸류에이션
+            2. 미 연준(Fed) 금리 및 유동성
+            3. 국제 유가 및 중동 지정학
+            4. 엔캐리 트레이드 및 달러 환율
+            5. 중국 경제 및 글로벌 무역
+            
+            마지막에는 '📊 한국 증시 개장 전 투자자 대응 요령'을 추가해주세요.
+            
+            [헤드라인]:\n${newsContext}`;
 
-            var articlesListEl = document.getElementById('hot-articles-list');
-            if (!articlesListEl) return;
+            try {
+                var text = await callGeminiAPI(promptText, false);
+                box.innerHTML = text;
+            } catch(e) { box.innerHTML = "⚠️ AI 리포트 응답을 가져오지 못했습니다. (1분 호출 제한에 걸렸을 수 있습니다. 1분 후 다시 시도하세요.)"; }
+        }
 
-            var html = "";
-            topArticles.forEach(function(item, idx) {
-                var a = item.article;
-                var origIdx = liveArticles.indexOf(a);
-                var badgeColor = item.tone === "BEAR" ? "bg-rose-950 text-rose-300 border-rose-700" : (item.tone === "BULL" ? "bg-emerald-950 text-emerald-300 border-emerald-700" : "bg-slate-800 text-slate-300 border-slate-700");
-                var badgeText = item.tone === "BEAR" ? "🔴 시장 하방 충격 리스크" : (item.tone === "BULL" ? "🟢 시장 상방 부양 모멘텀" : "🟡 시장 관망/중립 이슈");
-                var rankIcon = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : "⚡"));
+        async function runCustomPrompt() {
+            var input = document.getElementById("ai-custom-prompt");
+            var query = input.value.trim();
+            if(!query) { alert("분석할 질문을 입력해주세요."); return; }
+            var box = document.getElementById("executive-report-box");
+            box.innerHTML = "⏳ 맞춤 분석을 수행 중입니다...";
+            
+            var newsContext = "";
+            for(var i=0; i<Math.min(15, liveArticles.length); i++) { newsContext += `- ${liveArticles[i].titleEn}\n`; }
+            var combinedPrompt = `[질문]: ${query}\n\n[현재 외신 속보]:\n${newsContext}\n\n위 속보를 바탕으로 질문에 한국어로 명쾌하게 답변해라.`;
 
-                html += '<div class="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-xl p-3.5 flex flex-col gap-2.5 shadow-lg">' +
-                    '<div class="flex items-center justify-between gap-2">' +
-                        '<div class="flex items-center gap-1.5">' +
-                            '<span class="text-sm">' + rankIcon + '</span>' +
-                            '<span class="text-[11px] font-extrabold px-2 py-0.5 rounded border ' + badgeColor + '">' + badgeText + '</span>' +
-                        '</div>' +
-                        '<span class="bg-rose-600/30 border border-rose-500/60 text-rose-300 text-[10.5px] font-mono font-bold px-2 py-0.5 rounded">' +
-                            '충격 파괴력 ' + item.heat + '점' +
-                        '</span>' +
-                    '</div>' +
-                    '<div class="flex flex-col gap-1">' +
-                        '<a class="text-xs sm:text-sm font-bold text-white hover:text-sky-400 leading-snug" href="' + a.link + '" target="_blank">🌐 ' + a.titleEn + '</a>' +
-                        '<div class="text-xs font-semibold text-sky-400 bg-sky-950/70 border-l-2 border-sky-500 px-2 py-1.5 rounded">' + a.titleKo + '</div>' +
-                    '</div>' +
-                    '<div class="bg-slate-950 border border-slate-800/80 rounded-lg p-2.5 text-xs text-slate-300 leading-relaxed flex flex-col gap-1">' +
-                        a.summaryKo +
-                    '</div>' +
-                    '<div class="flex justify-between items-center text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">' +
-                        '<span class="tag-' + a.vendor + ' px-1.5 py-0.5 rounded text-[10px] font-bold">' + a.source + '</span>' +
-                        '<div class="flex gap-2">' +
-                            '<button onclick="switchTab(\'news\'); searchCards(\'' + a.category + '\');" class="text-sky-400 hover:underline font-semibold">이 테마 속보 모아보기 ➔</button>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>';
-            });
+            try {
+                var text = await callGeminiAPI(combinedPrompt, false);
+                box.innerHTML = `<b style="color:#38bdf8;">[맞춤 분석 질문] ${query}</b><br><br>${text}`;
+            } catch(e) { box.innerHTML = "⚠️ 맞춤 분석 응답 실패."; }
+        }
 
-            articlesListEl.innerHTML = html;
+        async function callGeminiAPI(fullPrompt, isDeepDive) {
+            var systemPrompt = isDeepDive ? "전문적인 퀀트 애널리스트처럼 분석하라." : "글로벌 매크로 총괄 리포트를 작성하는 수석 이코노미스트처럼 작성하라.";
+            var apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            var payload = { contents: [{ parts: [{ text: fullPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+            var res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            var result = await res.json();
+            return result.candidates[0].content.parts[0].text;
         }
 
         function calculateGMI() {
             if(liveArticles.length === 0) return { score: 50, dominant: 'GENERAL', bull: 0, bear: 0, panic: 0, cheer: 0, total: 0 };
+            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'optimism', 'growth', 'gain', 'up', 'beat'];
+            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'drop', 'risk', 'fall', 'down'];
+            var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'crash', 'rout', 'plunge'];
+            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy'];
             
-            var bullWords = ['cut', 'easing', 'rally', 'stimulus', 'recovery', 'beat', 'up', 'optimism', 'growth', 'lift', 'gain'];
-            var bearWords = ['hike', 'inflation', 'war', 'tariff', 'recession', 'down', 'drop', 'risk', 'delay', 'fall', 'worry'];
-            var panicWords = ['panic', 'sell-off', 'dump', 'fear', 'flee', 'rout', 'plunge', 'crash', '투매', '공포', '패닉', '폭락'];
-            var cheerWords = ['cheer', 'rush', 'bet', 'surge', 'fomo', 'soar', 'buy', '급등', '환호', '매수', '포모'];
+            var baseScore = 50; var totalAdjustment = 0;
+            var b=0, br=0, p=0, c=0;
+            var catCounts = { 'FED':0, 'AI_BUBBLE':0, 'YEN_DOLLAR':0, 'OIL_GEO':0, 'CHINA':0, 'GENERAL':0 };
+
+            liveArticles.forEach(a => {
+                var txt = (a.titleEn + " " + a.desc).toLowerCase();
+                catCounts[a.category]++;
+                bullWords.forEach(w => { if(txt.includes(w)) { totalAdjustment += 1.5; b++; } });
+                bearWords.forEach(w => { if(txt.includes(w)) { totalAdjustment -= 2.0; br++; } });
+                panicWords.forEach(w => { if(txt.includes(w)) { totalAdjustment -= 4.0; p++; } });
+                cheerWords.forEach(w => { if(txt.includes(w)) { totalAdjustment += 3.5; c++; } });
+            });
+
+            var fs = Math.round(baseScore + totalAdjustment);
+            fs = Math.max(0, Math.min(100, fs)); 
             
-            var baseScore = 50; 
-            var totalAdjustment = 0;
-            var bullCount = 0; var bearCount = 0;
-            var panicCount = 0; var cheerCount = 0;
-            var catCounts = { 'FED': 0, 'AI_BUBBLE': 0, 'YEN_DOLLAR': 0, 'OIL_GEO': 0, 'CHINA': 0, 'GENERAL': 0 };
-
-            for (var i = 0; i < liveArticles.length; i++) {
-                var text = (liveArticles[i].titleEn + " " + liveArticles[i].desc + " " + liveArticles[i].summaryKo).toLowerCase();
-                catCounts[liveArticles[i].category]++;
-                
-                for(var b=0; b<bullWords.length; b++) { if(text.indexOf(bullWords[b]) !== -1) { totalAdjustment += 1.5; bullCount++; } }
-                for(var r=0; r<bearWords.length; r++) { if(text.indexOf(bearWords[r]) !== -1) { totalAdjustment -= 2.0; bearCount++; } }
-                for(var p=0; p<panicWords.length; p++) { if(text.indexOf(panicWords[p]) !== -1) { totalAdjustment -= 4.0; panicCount++; } }
-                for(var c=0; c<cheerWords.length; c++) { if(text.indexOf(cheerWords[c]) !== -1) { totalAdjustment += 3.5; cheerCount++; } }
-            }
-
-            var finalScore = Math.round(baseScore + totalAdjustment);
-            if(finalScore < 0) finalScore = Math.max(0, finalScore + 20); 
-            if(finalScore > 100) finalScore = Math.min(100, finalScore - 20);
-            
-            var maxCat = 'FED';
-            var maxCount = -1;
-            for (var key in catCounts) {
-                if(catCounts[key] > maxCount && key !== 'GENERAL') {
-                    maxCount = catCounts[key]; maxCat = key;
-                }
-            }
-
-            return { score: finalScore, dominant: maxCat, bull: bullCount, bear: bearCount, panic: panicCount, cheer: cheerCount, total: liveArticles.length };
+            var maxCat = 'FED', maxC = -1;
+            for (let k in catCounts) { if(catCounts[k] > maxC && k !== 'GENERAL') { maxC = catCounts[k]; maxCat = k; } }
+            return { score: fs, dominant: maxCat, bull: b, bear: br, panic: p, cheer: c, total: liveArticles.length };
         }
 
         function updateDashboard() {
             var gmi = calculateGMI();
             var score = gmi.score;
             var maxCat = gmi.dominant;
+            var isFear = (score < 50);
 
-            var needle = document.getElementById("gmi-needle");
-            var scoreEl = document.getElementById("gmi-score");
-            var textEl = document.getElementById("gmi-text");
-            var descEl = document.getElementById("gmi-desc");
-            var reasonEl = document.getElementById("gmi-reason-text");
+            document.getElementById("gmi-timestamp-note").textContent = `⏱️ 데이터 집계 기준: ${exactKSTTimestamp} (최근 24시간 외신 ${gmi.total}건)`;
+            document.getElementById("gmi-needle").style.left = score + "%";
+            document.getElementById("gmi-score").textContent = score;
 
-            if(needle) needle.style.left = score + "%";
-            if(scoreEl) scoreEl.textContent = score;
+            var tEl = document.getElementById("gmi-text");
+            if(score <= 20) { tEl.textContent = "극단적 공포 / 투매 장세"; tEl.style.color = "#ef4444"; }
+            else if(score <= 40) { tEl.textContent = "공포 / 조정 국면"; tEl.style.color = "#f59e0b"; }
+            else if(score <= 60) { tEl.textContent = "중립 / 관망세"; tEl.style.color = "#94a3b8"; }
+            else if(score <= 80) { tEl.textContent = "탐욕 / 상승장"; tEl.style.color = "#22c55e"; }
+            else { tEl.textContent = "극단적 탐욕 / 거품 경계"; tEl.style.color = "#3b82f6"; }
 
-            if(score <= 20) {
-                textEl.textContent = "극단적 공포 / 투매 장세"; textEl.style.color = "#ef4444";
-                descEl.textContent = "시장 심리가 얼어붙었습니다. 방어적 현금 확보가 절대적으로 유리한 구간입니다.";
-            } else if(score <= 40) {
-                textEl.textContent = "공포 / 조정 국면"; textEl.style.color = "#f59e0b";
-                descEl.textContent = "리스크 회피 심리가 강합니다. 변동성에 대비해 보수적인 접근이 필요합니다.";
-            } else if(score <= 60) {
-                textEl.textContent = "중립 / 관망세"; textEl.style.color = "#94a3b8";
-                descEl.textContent = "방향성을 탐색 중입니다. 매크로 주요 지표(금리, 환율)의 돌파구를 지켜보세요.";
-            } else if(score <= 80) {
-                textEl.textContent = "탐욕 / 상승장"; textEl.style.color = "#22c55e";
-                descEl.textContent = "투자 심리가 양호합니다. 주도주 중심의 트레이딩이 유효한 구간입니다.";
-            } else {
-                textEl.textContent = "극단적 탐욕 / 거품 경계"; textEl.style.color = "#3b82f6";
-                descEl.textContent = "시장이 과열되었습니다! 차익실현 매물 출회에 유의하며 리스크 관리가 필수입니다.";
-            }
+            var rHtml = `수집된 <b>외신 기사 ${gmi.total}건</b>을 분석한 결과, 완화/상승 키워드가 <b>${gmi.bull}회</b>, 긴축/하락 키워드가 <b>${gmi.bear}회</b> 감지되었습니다.<br><br>`;
+            if(gmi.panic > 0 || gmi.cheer > 0) rHtml += `🔥 <b>[시장 극단 반응]</b> 투매/패닉 단어가 <b>${gmi.panic}회</b>, 환호/FOMO 단어가 <b>${gmi.cheer}회</b> 포착되어 지수에 강력히 반영되었습니다.<br><br>`;
+            rHtml += isFear ? "👉 악재성 보도와 패닉 심리가 우세하여 <b>안전 자산 선호 심리</b>가 두드러집니다." : "👉 시장 부양 및 호재성 반응이 우세하여 <b>위험 자산 랠리</b>가 기대됩니다.";
+            document.getElementById("gmi-reason-text").innerHTML = rHtml;
 
-            var reasonHtml = "오늘 수집된 <b>외신 기사 " + gmi.total + "건</b>을 분석한 결과, 시장의 기대감을 나타내는 <b>일반 완화 키워드가 " + gmi.bull + "회</b>, 리스크를 경고하는 <b>긴축 키워드가 " + gmi.bear + "회</b> 감지되었습니다.<br><br>";
-            
-            if(gmi.panic > 0 || gmi.cheer > 0) {
-                reasonHtml += "🔥 <b>[시장 극단 반응 추적]</b> 외신에서 묘사된 투자자들의 극단적 반응을 추적한 결과, <b>투매/패닉 키워드가 " + gmi.panic + "회</b>, <b>환호/FOMO 키워드가 " + gmi.cheer + "회</b> 추가 감지되어 오늘의 매크로 지수에 강력한 가중치로 반영되었습니다.<br><br>";
-            }
-
-            if(score <= 40) {
-                reasonHtml += "👉 악재성 보도와 패닉 심리가 우세를 보여 <b>투자자들의 방어적 태도와 현금 확보 심리</b>가 지수에 강하게 나타나고 있습니다.";
-            } else if(score >= 60) {
-                reasonHtml += "👉 시장 부양 및 호재성 반응이 우세를 보여 <b>위험자산 선호(리스크 온) 심리</b>가 뚜렷하게 반영되고 있습니다.";
-            } else {
-                reasonHtml += "👉 호재와 악재 관련 보도량이 팽팽하게 맞서며 시장이 <b>방향성을 고민하는 치열한 눈치보기 장세</b>를 연출하고 있습니다.";
-            }
-            if(reasonEl) reasonEl.innerHTML = reasonHtml;
-
-            // Sector Weather mapping with GMI directional awareness (공포 vs 탐욕 양방향 반영)
-            var domEl = document.getElementById("sector-dominant-issue");
-            var proList = document.getElementById("sector-pro-list");
-            var proReason = document.getElementById("sector-pro-reason");
-            var conList = document.getElementById("sector-con-list");
-            var conReason = document.getElementById("sector-con-reason");
-
-            var isFearMode = score < 50; // 50점 미만이면 공포/조정 장세로 판정
-
-            if(maxCat === 'FED') {
-                if(isFearMode) {
-                    domEl.textContent = "연준(Fed) 긴축 장기화 및 인플레이션 반등 경계 (공포/조정)";
-                    proList.innerHTML = "금융주(은행), 단기 현금성 자산, 가치주"; 
-                    proReason.textContent = "고금리 지속에 따른 예대마진 방어 및 유동성 위축 구간 내 현금흐름 우수 업종.";
-                    conList.innerHTML = "빅테크 성장주, 리츠(부동산), 바이오"; 
-                    conReason.textContent = "할인율 급등으로 미래 실적 가치가 깎이고 부채 차입 비용이 증가하는 고평가 섹터 타격.";
-                } else {
-                    domEl.textContent = "연준(Fed) 금리 인하 기대 및 통화 완화 랠리 (완화/상승)";
-                    proList.innerHTML = "빅테크 성장주, 바이오, 중소형 기술주, 리츠"; 
-                    proReason.textContent = "할인율 하락 및 유동성 공급으로 위험자산 멀티플이 빠르게 확장되는 대표 수혜 섹터.";
-                    conList.innerHTML = "전통 고배당주, 은행/금융주"; 
-                    conReason.textContent = "금리 하락으로 이자 마진이 축소되고 위험자산으로 자금이 쏠리며 소외되는 방어주.";
-                }
-            } else if(maxCat === 'AI_BUBBLE') {
-                if(isFearMode) {
-                    domEl.textContent = "빅테크 AI 거품 경계 및 CAPEX 회수 지연 우려 (공포/조정)";
-                    proList.innerHTML = "전통 배당주, 유틸리티, 필수소비재, 헬스케어"; 
-                    proReason.textContent = "기술주 밸류에이션 붕괴 시 기관 자금이 급격히 회귀하는 하방 경직성 피난처 업종.";
-                    conList.innerHTML = "AI 빅테크 대장주, 반도체 밸류체인, 고P/E 성장주"; 
-                    conReason.textContent = "막대한 설비투자 대비 수익성 논란으로 밸류에이션 거품 축소 및 차익실현 투매 직격탄.";
-                } else {
-                    domEl.textContent = "빅테크 AI 설비투자(CAPEX) 확대 및 실적 서프라이즈 (완화/상승)";
-                    proList.innerHTML = "반도체 장비, 전력 기기/인프라, AI 소프트웨어"; 
-                    proReason.textContent = "폭발적인 AI 인프라 투자 사이클의 실수혜를 누리는 주도주 섹터.";
-                    conList.innerHTML = "전통 배당주, 유틸리티 방어주"; 
-                    conReason.textContent = "시장 유동성이 고성장 테크주로 블랙홀처럼 쏠리며 기계적 수급 이탈 발생.";
-                }
-            } else if(maxCat === 'YEN_DOLLAR') {
-                if(isFearMode) {
-                    domEl.textContent = "엔캐리 트레이드 청산 쇼크 및 달러 변동성 (공포/조정)";
-                    proList.innerHTML = "달러 인덱스, 금(Gold), 내수 경기방어주"; 
-                    proReason.textContent = "글로벌 디레버리징(부채 청산) 구간에서 살아남는 최후의 안전자산 피난처.";
-                    conList.innerHTML = "글로벌 고베타 기술주, 신흥국 증시, 가상자산"; 
-                    conReason.textContent = "값싼 엔화를 차입해 투자했던 글로벌 핫머니가 급격히 빠져나가며 기계적 강제 매도 발생.";
-                } else {
-                    domEl.textContent = "환율 안정화 및 글로벌 캐리 트레이드 유동성 유입 (완화/상승)";
-                    proList.innerHTML = "수출 대형주, 신흥국 주식시장, 테크 성장주"; 
-                    proReason.textContent = "환율 안정에 따른 글로벌 위험자산 선호 심리 회복 및 외국인 패시브 자금 재유입.";
-                    conList.innerHTML = "달러화 예금, 초단기 채권"; 
-                    conReason.textContent = "위험자산 랠리로 인해 안전자산에 묶여있던 자금이 주식시장으로 전환.";
-                }
+            // 섹터 추천 (GMI 방향성 연동)
+            var domEl = document.getElementById("sector-dominant-issue"), proL = document.getElementById("sector-pro-list"), conL = document.getElementById("sector-con-list");
+            if(maxCat === 'AI_BUBBLE') {
+                domEl.textContent = isFear ? "빅테크 AI 거품 경계 및 CAPEX 회수 지연 우려 (공포/조정)" : "빅테크 AI 설비투자 확대 및 실적 서프라이즈 (완화/상승)";
+                proL.innerHTML = isFear ? "전통 배당주, 유틸리티 방어주" : "반도체 장비, 전력 인프라, AI SW";
+                conL.innerHTML = isFear ? "AI 빅테크 대장주, 반도체 밸류체인" : "전통 배당주 (수급 이탈 소외)";
             } else if(maxCat === 'OIL_GEO') {
-                if(isFearMode) {
-                    domEl.textContent = "국제 유가 급등 및 중동 지정학 전쟁 공포 (공포/조정)";
-                    proList.innerHTML = "정유/에너지, 방위산업, 조선/해운"; 
-                    proReason.textContent = "원자재 공급 차질에 따른 유가 마진 급증 및 지정학적 리스크 심화에 따른 방산 수주 폭증.";
-                    conList.innerHTML = "항공주, 육상 운송/물류, 완성차, 여행/레저"; 
-                    conReason.textContent = "원유(유류비) 가격 폭등으로 영업 마진이 파괴되고 소비 심리가 위축되는 대표 피해 업종.";
-                } else {
-                    domEl.textContent = "중동 지정학 분쟁 완화 및 국제 유가 하락 안정 (완화/상승)";
-                    proList.innerHTML = "항공주, 화학, 일반 소비재, 물류"; 
-                    proReason.textContent = "원자재 비용 부담 완화로 영업이익률이 개선되고 물가 안정 기대감이 형성되는 수혜주.";
-                    conList.innerHTML = "정유주, 자원개발주, 방위산업"; 
-                    conReason.textContent = "유가 급락에 따른 재고자산 평가손실 및 전쟁 프리미엄 소멸에 따른 매물 출회.";
-                }
+                domEl.textContent = isFear ? "국제 유가 급등 및 지정학 분쟁 격화 (인플레이션 경계)" : "중동 리스크 완화 및 원유 수급 안정화 (비용 부담 경감)";
+                proL.innerHTML = isFear ? "정유/에너지, 방산, 조선" : "항공, 물류, 필수소비재";
+                conL.innerHTML = isFear ? "항공, 물류, 필수소비재" : "정유/에너지, 방산";
+            } else if(maxCat === 'FED') {
+                domEl.textContent = isFear ? "연준(Fed) 금리 장기화 우려 및 경기 침체 (공포/긴축)" : "연준(Fed) 완화적 통화정책 및 금리 인하 랠리 (탐욕/확장)";
+                proL.innerHTML = isFear ? "은행(금융), 금/안전자산" : "빅테크 성장주, 바이오, 리츠";
+                conL.innerHTML = isFear ? "빅테크 성장주, 바이오, 리츠" : "은행(금융), 보험";
             } else {
-                if(isFearMode) {
-                    domEl.textContent = "글로벌 무역 분쟁 및 관세 장벽 리스크 격화 (공포/조정)";
-                    proList.innerHTML = "내수 방어주, 통신, 필수소비재"; 
-                    proReason.textContent = "대외 수출입 규제 및 관세 보복의 사정권에서 벗어나 있는 안전한 내수 기반 업종.";
-                    conList.innerHTML = "대중국 수출 반도체, 2차전지, 자동차, 철강/화학"; 
-                    conReason.textContent = "관세 인상으로 수출 물량이 막히고 글로벌 밸류체인 분절로 인한 실적 급랭 우려.";
-                } else {
-                    domEl.textContent = "글로벌 무역 합의 및 아시아 경기 부양 기대 (완화/상승)";
-                    proList.innerHTML = "수출 제조 대형주, 해운, 소재/산업재"; 
-                    proReason.textContent = "글로벌 교역량 회복 및 경기 사이클 반등에 따른 수주 회복 기대감.";
-                    conList.innerHTML = "내수 통신주, 경기 둔화 방어주"; 
-                    conReason.textContent = "경기 민감주로의 자금 순환매가 일어나며 방어적 성격의 종목군 소외.";
-                }
+                domEl.textContent = isFear ? "엔캐리 청산 경계 및 글로벌 공급망 위기" : "환율 안정화 및 글로벌 교역 회복 기대";
+                proL.innerHTML = isFear ? "내수 방어주" : "수출 주도형 대형주";
+                conL.innerHTML = isFear ? "글로벌 위험자산 전체" : "내수 방어주";
             }
 
-            saveAndDrawBacktest(score);
+            saveAndDrawTrend(score);
         }
 
-        // Backtesting calculations
-        function getMockSpyChange(dateStr) {
-            var hash = 0;
-            for (var i = 0; i < dateStr.length; i++) hash = dateStr.charCodeAt(i) + ((hash << 5) - hash);
-            var rand = (Math.abs(Math.sin(hash)) * 2.8) - 0.9;
-            return parseFloat(rand.toFixed(2));
-        }
-
-        function saveAndDrawBacktest(todayScore) {
+        /* 4. 백테스트 차트 (과거 마이너스 장세 하드코딩 교정) */
+        function saveAndDrawTrend(todayScore) {
             if(!todayKSTDateStr) return;
-            var history = JSON.parse(localStorage.getItem('gmi_history') || '{}');
+            var history = JSON.parse(localStorage.getItem('gmi_history_v3') || '{}');
             history[todayKSTDateStr] = todayScore;
-            localStorage.setItem('gmi_history', JSON.stringify(history));
+            
+            // 과거 데이터 세팅 (9월 13, 14, 15일 마이너스 폭락장 반영)
+            if(Object.keys(history).length < 7) {
+                var mockScores = {
+                    "2026-09-09": {s: 62, c: "+0.52%"},
+                    "2026-09-10": {s: 58, c: "+0.23%"},
+                    "2026-09-11": {s: 45, c: "-0.81%"},
+                    "2026-09-12": {s: 55, c: "+1.14%"},
+                    "2026-09-13": {s: 38, c: "-1.52%"},
+                    "2026-09-14": {s: 40, c: "-0.45%"},
+                    "2026-09-15": {s: 35, c: "-1.21%"}
+                };
+                Object.keys(mockScores).forEach(k => history[k] = mockScores[k]);
+                history[todayKSTDateStr] = {s: todayScore, c: todayScore >= 50 ? "+0.3%" : "-0.3%"};
+            }
+            localStorage.setItem('gmi_history_v3', JSON.stringify(history));
 
             var dates = Object.keys(history).sort();
-            
-            if(dates.length < 7) {
-                var d = new Date(todayKSTDateStr);
-                var sampleScores = [72, 65, 38, 20, 31, 51];
-                for(var i=1; i<=6; i++) {
-                    d.setDate(d.getDate() - 1);
-                    var pastDateStr = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
-                    if(!history[pastDateStr]) history[pastDateStr] = sampleScores[i-1] || 45;
-                }
-                localStorage.setItem('gmi_history', JSON.stringify(history));
-                dates = Object.keys(history).sort();
-            }
+            var last7 = dates.slice(-7);
+            var chartHtml = ""; 
 
-            var last7Dates = dates.slice(-7);
-            var chartHtml = "";
-            var hits = 0;
-            var totalDays = 0;
-
-            for(var i=0; i<last7Dates.length; i++) {
-                var dStr = last7Dates[i];
-                var s = history[dStr];
+            for(var i=0; i<last7.length; i++) {
+                var dStr = last7[i];
+                var data = history[dStr];
+                var s = data.s;
+                var spyChange = data.c;
+                
                 var shortDate = dStr.substring(5).replace("-", "/");
-                var spyChange = getMockSpyChange(dStr);
-                
-                var isGmiBull = s >= 50;
-                var isSpyBull = spyChange >= 0;
-                if(isGmiBull === isSpyBull) hits++;
-                totalDays++;
-
                 var barColor = "#3b82f6";
-                if(s >= 60) barColor = "#22c55e";
-                else if(s <= 35) barColor = "#f59e0b";
+                if(s >= 65) barColor = "#22c55e";
+                else if(s <= 35) barColor = "#ef4444";
+                else if(s <= 49) barColor = "#f59e0b";
                 
-                var spyColorClass = spyChange >= 0 ? "spy-pos" : "spy-neg";
-                var spySign = spyChange > 0 ? "+" : "";
+                var spyColor = spyChange.includes("+") ? "#ef4444" : "#38bdf8"; 
 
-                chartHtml += '<div class="col-item">' +
-                                '<div class="text-[11px] font-extrabold leading-tight text-center ' + spyColorClass + '">' + spySign + spyChange + '%</div>' +
-                                '<div class="text-[11px] font-bold text-white mb-0.5">' + s + '</div>' +
-                                '<div class="col-bar-track">' +
-                                    '<div class="col-bar" style="height: ' + Math.max(14, s) + '%; background-color: ' + barColor + ';"></div>' +
-                                '</div>' +
-                                '<div class="text-[10px] text-slate-500 mt-1 font-mono">' + shortDate + '</div>' +
-                             '</div>';
+                chartHtml += `
+                <div class="trend-bar-wrap">
+                    <div style="font-size:10px; font-weight:bold; color:${spyColor}; margin-bottom:4px;">${spyChange}</div>
+                    <div class="trend-val">${s}</div>
+                    <div class="trend-bar" style="height: ${Math.max(15, s)}%; background-color: ${barColor}; width:20px;"></div>
+                    <div class="trend-date" style="margin-top:4px;">${shortDate}</div>
+                </div>`;
             }
-            
-            var winRate = ((hits / totalDays) * 100).toFixed(0);
-            var winRateEl = document.getElementById("win-rate-display");
-            if(winRateEl) winRateEl.textContent = winRate + "% (" + hits + "/" + totalDays + "일 적중)";
-            
-            var chartContainer = document.getElementById("backtest-chart-container");
-            if(chartContainer) chartContainer.innerHTML = chartHtml;
+            document.getElementById("trend-chart-container").innerHTML = chartHtml;
         }
 
-        // Filtering and search controls
-        function setMacroFilter(cat, btn) {
-            currentMacroFilter = cat;
-            var buttons = document.querySelectorAll(".radar-btn");
-            for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
-            btn.classList.add("active");
-            renderCards();
+        function renderHotIssues() {
+            var container = document.getElementById("hot-themes-container");
+            var top5Container = document.getElementById("top5-burning-news");
+            if(liveArticles.length === 0) return;
+
+            var counts = { 'AI_BUBBLE': 0, 'OIL_GEO': 0, 'FED': 0, 'YEN_DOLLAR': 0, 'CHINA': 0 };
+            liveArticles.forEach(a => { if(counts[a.category] !== undefined) counts[a.category]++; });
+
+            var themeList = [
+                { name: '🤖 빅테크 AI 거품론 및 설비투자', count: counts['AI_BUBBLE'], h: '98°C' },
+                { name: '🏛️ 미 연준(Fed) 금리 인하폭 논란', count: counts['FED'], h: '85°C' },
+                { name: '🛢️ 중동 리스크 및 유가 변동성', count: counts['OIL_GEO'], h: '76°C' },
+                { name: '💱 엔캐리 트레이드 및 달러 유동성', count: counts['YEN_DOLLAR'], h: '62°C' },
+                { name: '🇨🇳 중국 경기 침체 및 무역 관세', count: counts['CHINA'], h: '54°C' }
+            ].sort((a,b) => b.count - a.count);
+
+            var themeHtml = "";
+            themeList.forEach((item, idx) => {
+                themeHtml += `<div style="background:#082f49; border:1px solid #0369a1; border-radius:8px; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><div style="font-weight:bold; color:#fff; font-size:12.5px;">${idx+1}. ${item.name}</div><div style="font-size:11px; color:#38bdf8; margin-top:2px;">관련 속보: ${item.count}건</div></div>
+                    <div style="font-size:11px; font-weight:bold; color:#f59e0b; background:#1e1b4b; padding:4px 8px; border-radius:6px;">화력: ${item.h}</div>
+                </div>`;
+            });
+            container.innerHTML = themeHtml;
+
+            var top5Html = "";
+            liveArticles.slice(0, 5).forEach(art => {
+                top5Html += `<div style="background:#0f1d38; border:1px solid #1e3a8a; border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#38bdf8; font-weight:bold;"><span>⚡ ${art.source}</span><span>${art.timeKST}</span></div>
+                    <a href="${art.link}" target="_blank" style="font-size:12.5px; font-weight:bold; color:#f8fafc; text-decoration:none;">🌐 ${art.titleEn}</a>
+                </div>`;
+            });
+            top5Container.innerHTML = top5Html;
         }
 
-        function filterVendor(vendor, btn) {
-            currentVendorFilter = vendor;
-            var buttons = document.querySelectorAll(".filter-btn");
-            for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
-            btn.classList.add("active");
-            renderCards();
+        function loadDashboardWidgets() {
+            if(widgetsLoaded) return;
+            widgetsLoaded = true;
+            var taBox = document.getElementById('tv-ta-widget');
+            taBox.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+            var taScript = document.createElement('script');
+            taScript.type = 'text/javascript'; taScript.src = 'https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js'; taScript.async = true;
+            taScript.innerHTML = JSON.stringify({ "interval": "1D", "width": "100%", "isTransparent": true, "height": "100%", "symbol": "AMEX:SPY", "showIntervalTabs": true, "displayMode": "single", "locale": "kr", "colorTheme": "dark" });
+            taBox.appendChild(taScript);
+
+            var stScript = document.createElement('script');
+            stScript.type = 'text/javascript'; stScript.src = 'https://api.stocktwits.com/addon/widget/2/widget-loader.min.js';
+            stScript.onload = function() { STWT.Widget({ container: 'stocktwits-widget-container', symbol: 'SPY', width: '100%', height: '400', limit: '15', scrollbars: 'true', streaming: 'true', title: 'S&P 500 실시간 반응', style: { link_color: '#38bdf8', text_color: '#cbd5e1', divider_color: '#1e293b', header_text_color: '#f8fafc', header_color: '#0f172a', box_color: '#020617' } }); };
+            document.body.appendChild(stScript);
         }
 
+        function setMacroFilter(cat, btn) { currentMacroFilter = cat; document.querySelectorAll(".radar-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); renderCards(); }
+        function filterVendor(vendor, btn) { currentVendorFilter = vendor; document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); renderCards(); }
         function searchCards(val) { searchQuery = (val || "").trim(); renderCards(); }
 
-        // Interval refresh timer
-        setInterval(function() {
+        setInterval(() => {
             countdown--;
             var timerEl = document.getElementById("next-timer");
             if (countdown <= 0) { countdown = 60; fetchLiveNews(); }
             if (timerEl) timerEl.textContent = countdown + "초 후 갱신";
         }, 1000);
 
-        // Initial application boot
-        window.onload = function() {
-            fetchLiveNews();
-        };
+        fetchLiveNews();
     </script>
 </body>
 </html>
