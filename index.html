@@ -328,7 +328,7 @@
 
     <script>
         // 형님의 Google Gemini API Key (무료)
-        var apiKey = "AQ.Ab8RN6JYjd7b1Von9rWZe3BbKT8-IKZzIbh9u5alC4fayKxKsg";
+        var apiKey = "AQ.Ab8RN6IrGdmfTsn6Uuk1CzZcftY8aAmV2cnz7UR5ao9h1COB6Q";
 
         var liveArticles = [];
         var currentVendorFilter = "ALL";
@@ -536,7 +536,7 @@
                     
                     <div class="article-korean-summary">
                         <div class="summary-section">
-                            <span class="summary-label">📝 기사 원문 팩트 요약</span>
+                            <span class="summary-label">📝 기사 원문 요약</span>
                             <span class="summary-text ai-fact-target" style="font-weight:bold; color:#e0f2fe;">${it.factKo}</span>
                         </div>
                         <div class="summary-section">
@@ -566,7 +566,7 @@
             var statusEl = document.getElementById("status-ai-translate");
             if(statusEl) { statusEl.textContent = "✨ AI가 진짜 팩트를 번역/요약 중입니다..."; statusEl.style.color = "#38bdf8"; }
 
-            var promptStr = "다음 영어 뉴스 기사들을 한국어로 번역하고 요약해라. 추측 금지. 기사에 적힌 수치와 고유명사(기업명)를 살려서 'factKo' 1문장으로 요약해.\n반드시 다음 JSON 배열 형식으로만 응답해: [{\"id\": 숫자, \"titleKo\": \"한국어 번역 제목\", \"factKo\": \"실제 기사 내용 팩트 요약\"}]\n\n[기사 목록]\n";
+            var promptStr = "다음 영어 뉴스 기사들의 제목을 한국어로 번역하고, 본문 내용을 요약해라. '시장 영향'이나 '매크로 전략'은 절대 쓰지 말고, 오직 기사 원문 내용(누가, 무엇을, 언제, 어떤 일이 있었는지)만 1~2문장 사실 위주로 정확하게 요약해.\n반드시 다음 JSON 배열 형식으로만 응답해: [{\"id\": 숫자, \"titleKo\": \"한국어 번역 제목\", \"factKo\": \"기사 원문 요약 내용\"}]\n\n[기사 목록]\n";
             for(let i=0; i<topArticles.length; i++) {
                 promptStr += `ID: ${topArticles[i].id}\nTitle: ${topArticles[i].titleEn}\nDesc: ${topArticles[i].desc}\n\n`;
             }
@@ -578,31 +578,61 @@
                     generationConfig: { responseMimeType: "application/json" }
                 };
                 var res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                
+                // 구글 서버가 키 오류 등으로 거절하면 바로 에러를 발생시켜 플랜 B로 넘김
+                if (!res.ok) throw new Error("API Key Auth Failed or Server Error");
+                
                 var json = await res.json();
                 
                 if (json.candidates && json.candidates[0].content) {
                     var text = json.candidates[0].content.parts[0].text;
+                    // 가끔 AI가 코드블록(```json)을 붙여서 응답하는 것을 방어
+                    text = text.replace(/```json/g, '').replace(/```/g, '').trim();
                     var parsedArray = JSON.parse(text);
 
-                    // DOM 업데이트
+                    // 배열 데이터 업데이트
                     parsedArray.forEach(p => {
-                        var targetCard = document.getElementById(`news-card-${p.id}`);
-                        if(targetCard) {
-                            var titleEl = targetCard.querySelector('.ai-title-target');
-                            var factEl = targetCard.querySelector('.ai-fact-target');
-                            if(titleEl) { titleEl.textContent = "🇰🇷 " + p.titleKo; }
-                            if(factEl) { factEl.textContent = p.factKo; }
-                            // 배열 데이터도 업데이트
+                        if(liveArticles[p.id]) {
                             liveArticles[p.id].titleKo = "🇰🇷 " + p.titleKo;
                             liveArticles[p.id].factKo = p.factKo;
                         }
                     });
                     if(statusEl) { statusEl.textContent = "✅ AI 팩트 번역 완료"; statusEl.style.color = "#22c55e"; }
+                    renderCards(); // 강제 새로고침으로 UI 갱신 100% 보장
                 }
             } catch(e) {
-                console.error(e);
-                if(statusEl) { statusEl.textContent = "⚠️ AI 번역 지연 (새로고침 요망)"; statusEl.style.color = "#ef4444"; }
+                console.error("AI 요약 실패, 자체 번역 엔진으로 우회합니다: ", e);
+                if(statusEl) { statusEl.textContent = "⚠️ AI 연결 지연 (자체 요약 엔진 우회 가동)"; statusEl.style.color = "#f59e0b"; }
+                executeFallbackTranslation(topArticles); // 👉 플랜 B 비상 엔진 가동!
             }
+        }
+
+        /* [플랜 B] 자체 내장 비상 번역/요약 엔진 (API 실패 시 즉시 작동) */
+        function executeFallbackTranslation(articles) {
+            articles.forEach(a => {
+                var tLower = a.titleEn.toLowerCase();
+                var fallbackTitle = "📌 [번역 불가] " + a.titleEn;
+                var fallbackFact = "⚠️ 현재 입력된 API 키가 구글 서버에서 거절되어 AI 번역이 중단되었습니다. (AI 대신 임시 텍스트가 표시됩니다) 실제 기사 내용은 상단의 [원문 ↗] 링크를 확인해주세요.";
+                
+                if (tLower.includes("fed") || tLower.includes("rate") || tLower.includes("inflation") || tLower.includes("powell")) {
+                    fallbackTitle = "🇺🇸 [번역 불가] " + a.titleEn;
+                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 미국 연준(Fed), 금리, 인플레이션 지표와 관련된 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
+                } else if (tLower.includes("chip") || tLower.includes("nvidia") || tLower.includes("ai") || tLower.includes("tech")) {
+                    fallbackTitle = "🤖 [번역 불가] " + a.titleEn;
+                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 AI, 반도체, 빅테크 기업 관련 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
+                } else if (tLower.includes("oil") || tLower.includes("energy") || tLower.includes("crude")) {
+                    fallbackTitle = "🛢️ [번역 불가] " + a.titleEn;
+                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 국제 유가 또는 에너지 시장 관련 소식입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
+                } else if (tLower.includes("china") || tLower.includes("tariff") || tLower.includes("trade")) {
+                    fallbackTitle = "🇨🇳 [번역 불가] " + a.titleEn;
+                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 중국 경제 지표 및 글로벌 관세/무역 관련 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
+                }
+                
+                // 데이터 완벽 업데이트
+                liveArticles[a.id].titleKo = fallbackTitle;
+                liveArticles[a.id].factKo = fallbackFact;
+            });
+            renderCards(); // DOM 직접 조작 대신 렌더링 함수를 다시 호출하여 무조건 화면이 바뀌게 강제함
         }
 
         async function runArticleDeepDive(id, btnEl) {
@@ -683,9 +713,15 @@
             var apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
             var payload = { contents: [{ parts: [{ text: fullPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
 
-            var res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            var result = await res.json();
-            return result.candidates[0].content.parts[0].text;
+            try {
+                var res = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if(!res.ok) return "⚠️ [서버 연결 거부] API 키 형식이 맞지 않거나 네트워크 오류입니다. (우회 알고리즘이 대신 작동 중입니다.)";
+                
+                var result = await res.json();
+                return result.candidates[0].content.parts[0].text;
+            } catch (e) {
+                return "⚠️ [통신 에러] 데이터를 가져오지 못했습니다. 잠시 후 다시 시도해주세요.";
+            }
         }
 
         function calculateGMI() {
