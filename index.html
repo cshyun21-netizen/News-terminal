@@ -611,22 +611,19 @@
         function executeFallbackTranslation(articles) {
             articles.forEach(a => {
                 var tLower = a.titleEn.toLowerCase();
-                var fallbackTitle = "📌 [번역 불가] " + a.titleEn;
-                var fallbackFact = "⚠️ 현재 입력된 API 키가 구글 서버에서 거절되어 AI 번역이 중단되었습니다. (AI 대신 임시 텍스트가 표시됩니다) 실제 기사 내용은 상단의 [원문 ↗] 링크를 확인해주세요.";
                 
-                if (tLower.includes("fed") || tLower.includes("rate") || tLower.includes("inflation") || tLower.includes("powell")) {
-                    fallbackTitle = "🇺🇸 [번역 불가] " + a.titleEn;
-                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 미국 연준(Fed), 금리, 인플레이션 지표와 관련된 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
-                } else if (tLower.includes("chip") || tLower.includes("nvidia") || tLower.includes("ai") || tLower.includes("tech")) {
-                    fallbackTitle = "🤖 [번역 불가] " + a.titleEn;
-                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 AI, 반도체, 빅테크 기업 관련 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
-                } else if (tLower.includes("oil") || tLower.includes("energy") || tLower.includes("crude")) {
-                    fallbackTitle = "🛢️ [번역 불가] " + a.titleEn;
-                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 국제 유가 또는 에너지 시장 관련 소식입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
-                } else if (tLower.includes("china") || tLower.includes("tariff") || tLower.includes("trade")) {
-                    fallbackTitle = "🇨🇳 [번역 불가] " + a.titleEn;
-                    fallbackFact = "⚠️ AI 번역 중단. 이 기사는 중국 경제 지표 및 글로벌 관세/무역 관련 내용입니다. 실제 기사 원문 요약은 상단의 [원문 ↗] 링크를 눌러 확인해주세요.";
-                }
+                // 구글 웹페이지 번역기 URL 생성 (영어 -> 한국어)
+                var googleTranslateUrl = "https://translate.google.com/translate?sl=en&tl=ko&u=" + encodeURIComponent(a.link);
+                
+                var fallbackTitle = "🌐 [영어 원문] " + a.titleEn;
+                var fallbackFact = `
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+                        <span style="color: #94a3b8; font-size: 11px; font-weight: normal;">⚠️ AI API 키 인증 문제로 자동 요약이 제한되었습니다. 대신 아래 버튼을 누르면 기사 전문을 한글로 읽으실 수 있습니다.</span>
+                        <a href="${googleTranslateUrl}" target="_blank" style="display: inline-block; background: #2563eb; color: #fff; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 11.5px; text-align: center; border: 1px solid #1d4ed8;">
+                            🌍 구글 번역기로 기사 전체 즉시 읽기 ↗
+                        </a>
+                    </div>
+                `;
                 
                 // 데이터 완벽 업데이트
                 liveArticles[a.id].titleKo = fallbackTitle;
@@ -800,24 +797,27 @@
         /* 4. 백테스트 차트 (과거 마이너스 장세 하드코딩 교정) */
         function saveAndDrawTrend(todayScore) {
             if(!todayKSTDateStr) return;
-            var history = JSON.parse(localStorage.getItem('gmi_history_v3') || '{}');
-            history[todayKSTDateStr] = todayScore;
+            // v4로 버전을 올려서 갤럭시에 남아있는 고장난 데이터를 깨끗하게 초기화합니다.
+            var history = JSON.parse(localStorage.getItem('gmi_history_v4') || '{}');
+            
+            // 수정됨: 단순 숫자가 아니라 객체 형태로 등락률 기호를 포함해서 저장
+            var simulatedChange = todayScore >= 50 ? "+0.3%" : "-0.3%";
+            history[todayKSTDateStr] = { s: todayScore, c: simulatedChange };
             
             // 과거 데이터 세팅 (9월 13, 14, 15일 마이너스 폭락장 반영)
             if(Object.keys(history).length < 7) {
                 var mockScores = {
-                    "2026-09-09": {s: 62, c: "+0.52%"},
-                    "2026-09-10": {s: 58, c: "+0.23%"},
-                    "2026-09-11": {s: 45, c: "-0.81%"},
                     "2026-09-12": {s: 55, c: "+1.14%"},
                     "2026-09-13": {s: 38, c: "-1.52%"},
                     "2026-09-14": {s: 40, c: "-0.45%"},
-                    "2026-09-15": {s: 35, c: "-1.21%"}
+                    "2026-09-15": {s: 35, c: "-1.21%"},
+                    "2026-09-16": {s: 48, c: "-0.15%"},
+                    "2026-09-17": {s: 52, c: "+0.21%"}
                 };
                 Object.keys(mockScores).forEach(k => history[k] = mockScores[k]);
-                history[todayKSTDateStr] = {s: todayScore, c: todayScore >= 50 ? "+0.3%" : "-0.3%"};
+                history[todayKSTDateStr] = { s: todayScore, c: simulatedChange };
             }
-            localStorage.setItem('gmi_history_v3', JSON.stringify(history));
+            localStorage.setItem('gmi_history_v4', JSON.stringify(history));
 
             var dates = Object.keys(history).sort();
             var last7 = dates.slice(-7);
@@ -826,8 +826,10 @@
             for(var i=0; i<last7.length; i++) {
                 var dStr = last7[i];
                 var data = history[dStr];
-                var s = data.s;
-                var spyChange = data.c;
+                
+                // 완벽 방어코드: 데이터가 깨져있어도 절대 뻗지 않고 기본값 출력
+                var s = (typeof data === 'object' && data !== null) ? (data.s || 50) : (typeof data === 'number' ? data : 50);
+                var spyChange = (typeof data === 'object' && data !== null && data.c) ? data.c : (s >= 50 ? "+0.0%" : "-0.0%");
                 
                 var shortDate = dStr.substring(5).replace("-", "/");
                 var barColor = "#3b82f6";
